@@ -46,7 +46,7 @@
     "universal-cookie": "^4.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "SET PORT=3100 && react-scripts start",
     "build": "set GENERATE_SOURCEMAP=false && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
