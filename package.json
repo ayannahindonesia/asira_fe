@@ -11,7 +11,7 @@
     "axios": "^0.19.0",
     "base-64": "^0.1.0",
     "cors": "^2.8.5",
-    "cross-env": "^6.0.3",
+    "crypto": "^1.0.1",
     "date-and-time": "^0.8.1",
     "date-fns": "^2.0.0-beta.5",
     "es6-promise": "^4.2.8",
@@ -49,8 +49,8 @@
     "utf8": "^3.0.0"
   },
   "scripts": {
-    "start": "cross-env HTTPS=true react-scripts start",
-    "build": "react-scripts build",
+    "start": "set PORT=3001 && react-scripts start",
+    "build": "set GENERATE_SOURCEMAP=false && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -64,13 +64,14 @@
       "not op_mini all"
     ],
     "development": [
-      "ie 11",
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
     ]
   },
   "devDependencies": {
-    "react-csv-downloader": "^1.5.0"
+    "cross-env": "^5.2.0",
+    "install": "^0.13.0",
+    "npm": "^6.12.1"
   }
 }
