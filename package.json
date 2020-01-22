@@ -46,8 +46,8 @@
     "universal-cookie": "^4.0.0"
   },
   "scripts": {
-    "start": "./node_modules/react-scripts/bin/react-scripts.js start",
-    "build": "react-scripts build",
+    "start": "react-scripts start",
+    "build": "cross-env NODE_ENV=production && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -67,7 +67,7 @@
     ]
   },
   "devDependencies": {
-    "cross-env": "^5.2.0",
+    "cross-env": "^5.2.1",
     "install": "^0.13.0",
     "npm": "^6.12.1"
   }
