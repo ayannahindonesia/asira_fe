@@ -1,17 +1,55 @@
 {
-  "name": "fe_testing",
+  "name": "asira_fe",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.4.0",
-    "@testing-library/user-event": "^7.2.1",
+    "@date-io/date-fns": "^1.3.13",
+    "@material-ui/core": "^4.8.0",
+    "@material-ui/icons": "^4.5.1",
+    "@material-ui/pickers": "^3.2.8",
+    "@material-ui/styles": "^4.4.3",
+    "axios": "^0.19.0",
+    "base-64": "^0.1.0",
+    "cors": "^2.8.5",
+    "cross-env": "^6.0.3",
+    "date-and-time": "^0.8.1",
+    "date-fns": "^2.0.0-beta.5",
+    "es6-promise": "^4.2.8",
+    "isomorphic-fetch": "^2.2.1",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.15",
+    "material-ui": "^0.20.2",
+    "md5": "^2.2.1",
+    "mdbreact": "^4.23.1",
+    "moment": "^2.24.0",
+    "query-string": "^6.9.0",
+    "querystring": "^0.2.0",
+    "rc-pagination": "^1.20.11",
     "react": "^16.12.0",
+    "react-burger-menu": "^2.6.13",
+    "react-csv": "^1.1.2",
+    "react-currency-format": "^1.0.0",
+    "react-date-picker": "^7.9.0",
+    "react-datepicker": "^2.10.1",
+    "react-day-picker": "^7.4.0",
     "react-dom": "^16.12.0",
-    "react-scripts": "3.3.0"
+    "react-hot-loader": "^4.12.18",
+    "react-loader-spinner": "^2.3.0",
+    "react-moment": "^0.9.7",
+    "react-redux": "^7.1.3",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "^3.3.0",
+    "reactstrap": "^8.2.0",
+    "redux": "^4.0.4",
+    "redux-thunk": "^2.3.0",
+    "reselect": "^4.0.0",
+    "secure-ls": "^1.2.6",
+    "sweetalert": "^2.1.2",
+    "universal-cookie": "^4.0.2",
+    "utf8": "^3.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "cross-env HTTPS=true react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -26,9 +64,13 @@
       "not op_mini all"
     ],
     "development": [
+      "ie 11",
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "react-csv-downloader": "^1.5.0"
   }
 }
