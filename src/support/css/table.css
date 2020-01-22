@@ -1,0 +1,10 @@
+.theadCustom{
+    background-color:#d8e6FF;
+    color: #2076b8;
+    border-bottom: 3px solid #2076b859;
+    /* border-top: 3px solid #2076b859; */
+}
+
+.tBodycustom {
+    border-bottom: 2px solid #d8e6FF;
+}

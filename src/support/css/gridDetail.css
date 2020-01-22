@@ -1,0 +1,12 @@
+h4 {
+    text-align: left;
+}
+h4 span {
+    padding-right: 15px;
+}
+h4::after {
+    display: block;
+    content: '';
+    border-top: 1px solid rgba(32,118,184,1);
+    margin-top: -0.5em;
+}
