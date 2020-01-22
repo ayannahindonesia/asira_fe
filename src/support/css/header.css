@@ -1,0 +1,71 @@
+.sideBar{
+    background-color: #f7f7f7;
+    height: 100vmax;
+    width: 80%;
+    border-right: 1px solid black;
+    font-size: 16px;
+    
+}
+
+.sideBar label{
+    border: 0.5pt solid black;
+    width: 95%;
+    color: black;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 10px 0 10px 10px;
+
+}
+.sideBar label:hover{
+    background-color:grey; 
+    color: #f7f7f7;
+    
+}
+ /* Medium devices (landscape tablets, 768px and up) */
+ @media only screen and (max-width: 700px) {
+    .sideBar{
+        background-color: #f7f7f7;
+        height: 100vh;
+
+        border-right: 1px solid black;
+        font-size: 60%;
+
+    }
+    img{
+        
+        width: 200px;
+    }
+    .sideBar .menuDropDown{
+        width: 80%;
+        font-size: 100%;
+    }
+ }  
+ @media only screen and (max-width: 907px) {
+    .sideBar{
+        background-color: #f7f7f7;
+        height: 100vh;
+        width: 220px;
+        border-right: 1px solid black;
+        font-size: 60%;
+
+    }
+    img{
+        width: 200px;
+    }
+    .sideBar .menuDropDown{
+        width: 80%;
+        font-size: 100%;
+    }
+ }  
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+/* @media only screen and (min-width: 600px) {...}  */
+
+/* Medium devices (landscape tablets, 768px and up) */
+/* @media only screen and (min-width: 768px) {...}  */
+
+/* Large devices (laptops/desktops, 992px and up) */
+/* @media only screen and (min-width: 992px) {...}  */
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+/* @media only screen and (min-width: 1200px) {...} */
