@@ -47,7 +47,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "cross-env NODE_ENV=production && react-scripts build",
+    "build": "cross-env NODE_ENV=production webpack --config build/webpack.config.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
