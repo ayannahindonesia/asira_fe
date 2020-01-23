@@ -12,7 +12,7 @@ COPY . /opt/app-root/src
 
 # add `/usr/src/app/node_modules/.bin` to $PATH
 ENV PATH /opt/app-root/src/node_modules/.bin:$PATH
-RUN chown -R 1001:0 /opt/app-root/src/node_modules/ &&  chmod -R ug+rwx /opt/app-root/src/node_modules/
+RUN chown -R 1001:0 /opt/app-root/src/ &&  chmod -R ug+rwx /opt/app-root/src/
 
 USER 1001
 
