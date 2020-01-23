@@ -17,7 +17,6 @@ ENV PATH /opt/app-root/src/node_modules/.bin:$PATH
 #RUN yarn
 
 # start app
-CMD npm install\
-&& npm start
+CMD npm start
 
 EXPOSE 3001
