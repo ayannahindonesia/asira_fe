@@ -46,8 +46,8 @@
     "universal-cookie": "^4.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "cross-env NODE_ENV=production webpack --config build/webpack.config.js",
+    "start": "set PORT=3001 && react-scripts start",
+    "build": "set GENERATE_SOURCEMAP=false && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
