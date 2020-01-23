@@ -8,11 +8,11 @@
 //  export const serverUrlBorrower="https://cors-anywhere.herokuapp.com/http://asira.ayannah.com/api-borrower/"
 
 export const serverUrl=window.location.origin.includes('asira') ? 
-"https://asira.ayannah.co.id/api-lender/" :
-"https://cors-anywhere.herokuapp.com/http://asira.ayannah.co.id/api-lender/";
+"https://staging.ayannah.co.id/api-lender/" :
+"https://cors-anywhere.herokuapp.com/http://staging.ayannah.co.id/api-lender/";
 
 export const serverUrlBorrower=window.location.origin.includes('asira') ? 
-"https://asira.ayannah.co.id/api-borrower/" :
-"https://cors-anywhere.herokuapp.com/https://asira.ayannah.co.id/api-borrower/";
+"https://staging.ayannah.co.id/api-borrower/" :
+"https://cors-anywhere.herokuapp.com/https://staging.ayannah.co.id/api-borrower/";
 
 
