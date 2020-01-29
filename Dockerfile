@@ -5,7 +5,7 @@ FROM node
 WORKDIR /opt/app-root/src
 #RUN mkdir /usr/src/app
 RUN chmod 777 /opt/app-root/src
-#copy all files from current directory to docker
+##copy all files from current directory to docker
 COPY . /opt/app-root/src
 
 
