@@ -105,7 +105,7 @@ class BankDetail extends React.Component{
         if(getToken()){
             return(
                 <div className="container">
-                   <h2>Bank - Detail</h2>
+                   <h2>Mitra - Detail</h2>
                    <hr/>
                    <form>
                         <div className="form-group row">

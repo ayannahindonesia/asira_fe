@@ -227,7 +227,7 @@ class Main extends React.Component{
             this.setState({errorMessage:"Gambar belum terisi -  Harap Cek Ulang"})
         }
         else if (name.trim() ===""){
-            this.setState({errorMessage:"Nama Bank belum terisi - Harap Cek Ulang"}) 
+            this.setState({errorMessage:"Nama Mitra belum terisi - Harap Cek Ulang"}) 
         }else if(pic.trim()===""){
             this.setState({errorMessage:"Nama PIC belum terisi - Harap Cek Ulang"}) 
         }else if(address.trim()===""){
@@ -265,7 +265,7 @@ class Main extends React.Component{
         const data = await addBankFunction(params)
         if(data){
             if(!data.error){
-                swal("Berhasil","Bank berhasil bertambah","success")
+                swal("Berhasil","Mitra berhasil bertambah","success")
                 this.setState({errorMessage:null,diKlik:true,submit:false})
             }else{
                 this.setState({errorMessage:data.error,submit:false})
@@ -302,7 +302,7 @@ class Main extends React.Component{
         if(getToken()){
             return(
                 <div className="container mt-2">
-                     <h3>Bank - Tambah</h3>
+                     <h3>Mitra - Tambah</h3>
                  
                      <hr/>
                      <div className="form-group row">
@@ -324,7 +324,7 @@ class Main extends React.Component{
                         <label className="col-sm-2 col-form-label">Tipe Bank</label>
                         <div className="col-sm-10" >
                             <select ref="tipeBank" className="form-control">
-                                <option value={0}>====== Pilih Tipe Bank =====</option>
+                                <option value={0}>====== Pilih Tipe Mitra =====</option>
                                {this.renderTypeBankJsx()}
                             </select>
                         </div>

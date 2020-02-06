@@ -70,7 +70,7 @@ class TambahBankList extends React.Component{
         if(getToken()){
             return(
                 <div className="container">
-                   <h2 className="mt-3">Tipe Bank - List</h2>
+                   <h2 className="mt-3">Tipe Mitra - List</h2>
                    <hr/>
                    < TableComponent
                         id={"id"}

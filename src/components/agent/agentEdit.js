@@ -251,7 +251,7 @@ class AgentEdit extends React.Component{
         errorMessage = 'Mohon input instansi dengan benar'
       }else if (!isRoleAccountExecutive(this.state.kategori) && (!this.state.bank || this.state.bank.length === 0)) {
         flag = false;
-        errorMessage = 'Mohon input bank dengan benar'
+        errorMessage = 'Mohon input Mitra dengan benar'
       } else {
         errorMessage = ''
       }
@@ -413,7 +413,7 @@ class AgentEdit extends React.Component{
                     !isRoleAccountExecutive(this.state.kategori) &&
                     <div className="form-group row" style={{marginBottom:15}}>                   
                       <label className="col-sm-2 col-form-label" style={{lineHeight:3.5}}>
-                        Bank Pelayanan
+                        Mitra Pelayanan
                       </label>
                       <label className="col-sm-1 col-form-label" style={{lineHeight:3.5}}>
                         :

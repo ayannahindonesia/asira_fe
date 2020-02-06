@@ -119,7 +119,7 @@ class Report extends React.Component{
              flag=false
          } 
          else if(namaBank === "0" || namaBank === null){
-             this.setState({errorMessageBank:"Bank Kosong - Harap cek ulang",errorMessage:'',errorMessagePencairan:''}) 
+             this.setState({errorMessageBank:"Mitra Kosong - Harap cek ulang",errorMessage:'',errorMessagePencairan:''}) 
              flag=false
          }
 
@@ -241,7 +241,7 @@ class Report extends React.Component{
                             <label className="col-sm-2 col-form-label">Nama Bank</label>
                             <div className="col-sm-10">
                             <select ref="bankName" id="bankName" onChange={this.handleBank} className="form-control">
-                                <option value={0}>======== Pilih Bank ========</option>
+                                <option value={0}>======== Pilih Mitra ========</option>
                                 {this.renderBankList()}
                             </select>
                             </div>

@@ -193,7 +193,7 @@ class CalonNasabahArsipDetail extends React.Component{
                   gridLabel={[4,3,5]}
                   background
                   label={[
-                    ['Id Nasabah','Bank Nasabah'],
+                    ['Id Nasabah','Mitra Nasabah'],
                     ['Kategori','Agen / AE'],
                     ['Tanggal Register'],
                   ]}
