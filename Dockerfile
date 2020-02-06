@@ -15,8 +15,9 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 #RUN yarn
 
 # start app
-CMD npm install\
-&& npm start
+#CMD npm install\
+#&& npm start
+CMD npm start
 
 EXPOSE 3000
 EXPOSE 35729
