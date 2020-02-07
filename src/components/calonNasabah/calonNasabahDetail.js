@@ -276,7 +276,7 @@ class CalonNasabahDetail extends React.Component{
                       background
                       noTitleLine
                       label={[
-                        ['Id Nasabah','Bank Nasabah'],
+                        ['Id Nasabah','Mitra Nasabah'],
                         ['Kategori','Agen / AE'],
                         ['Tanggal Register'],
                       ]}

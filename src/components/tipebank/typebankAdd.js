@@ -23,7 +23,7 @@ class TypeBank extends React.Component{
         var description = this.refs.deskripsi.value
   
         if (name ===""||name.trim()===""){
-            this.setState({errorMessage:"Nama Tipe Bank Kosong - Harap cek ulang"})
+            this.setState({errorMessage:"Nama Tipe Mitra Kosong - Harap cek ulang"})
         }else{
             this.setState({submit:true})
             var newData={name,description}
@@ -36,7 +36,7 @@ class TypeBank extends React.Component{
         if(data){
             if(!data.error){
                 this.setState({submit:false,diKlik:true,errorMessage:""})
-                swal("Success","Tipe Bank Berhasil di Tambah","success")
+                swal("Success","Tipe Mitra Berhasil di Tambah","success")
             }else{
                 this.setState({errorMessage:data.error,submit:false})
             }
@@ -60,7 +60,7 @@ class TypeBank extends React.Component{
         if(getToken()){
             return(
                 <div className="container mt-3">
-                  <h2>Tipe Bank -  Tambah</h2>
+                  <h2>Tipe Mitra -  Tambah</h2>
                 <hr></hr>
                 <div className="form-group row">
                  <div className="col-12" style={{color:"red",fontSize:"15px",textAlign:'center'}}>

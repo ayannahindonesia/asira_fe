@@ -217,7 +217,7 @@ class AgentDetail extends React.Component{
                   !isRoleAccountExecutive(this.state.kategori) &&
                   <div className="form-group row" style={{marginBottom:40}}>                   
                     <label className="col-sm-2 col-form-label" style={{height:3.5}}>
-                      Bank Pelayanan
+                      Mitra Pelayanan
                     </label>
                     <label className="col-sm-1 col-form-label" style={{height:3.5}}>
                       :

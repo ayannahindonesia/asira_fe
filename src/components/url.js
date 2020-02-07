@@ -16,3 +16,4 @@ export const serverUrlBorrower=window.location.origin.includes('staging') ?
 "https://cors-anywhere.herokuapp.com/https://staging.ayannah.co.id/api-borrower/";
 
 
+

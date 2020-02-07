@@ -374,7 +374,7 @@ class BankEdit extends React.Component{
         if(getToken()){
             return(
                 <div className="container">
-                   <h2>Bank - Edit</h2>
+                   <h2>Mitra - Edit</h2>
                    <hr/>
                    <div className="form-group row">
                             <div className="col-12" style={{color:"red",fontSize:"15px",textAlign:'center'}}>

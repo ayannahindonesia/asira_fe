@@ -134,7 +134,7 @@ class profileNasabahDetail extends React.Component{
                                 background
                                 noTitleLine
                                 label={[
-                                    ['Id Nasabah','Bank Nasabah','Kategori Pinjaman'],
+                                    ['Id Nasabah','Mitra Nasabah','Kategori Pinjaman'],
                                     ['Rekening Pinjaman','Pinjaman Ke','Agen / AE'],
                                     ['Status Nasabah','Tanggal Register'],
                                 ]}

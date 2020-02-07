@@ -13,12 +13,12 @@ const columnDataUser = [
   {
       id: 'id',
       numeric: false,
-      label: 'Bank ID',
+      label: 'Mitra ID',
   },
   {
       id: 'name',
       numeric: false,
-      label: 'Nama Bank',
+      label: 'Nama Mitra',
   },
   {
       id: 'pic',

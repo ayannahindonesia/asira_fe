@@ -32,7 +32,7 @@ class Main extends React.Component{
                     <Grid item sm={12} xs={12} style={{maxHeight:50}}>
                         
                         <TitleBar
-                            title={'Bank Dashboard'}
+                            title={'Mitra Dashboard'}
                         />
 
                     </Grid>

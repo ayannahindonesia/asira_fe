@@ -226,7 +226,7 @@ class userAdd extends React.Component{
         errorMessage = 'Mohon input kontak pic dengan benar'
       } else if (this.isRoleBank(this.state.role) && (!this.state.bank || this.state.bank === 0)) {
         flag = false;
-        errorMessage = 'Mohon input bank dengan benar'
+        errorMessage = 'Mohon input mitra dengan benar'
       } else {
         errorMessage = ''
       }
