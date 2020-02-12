@@ -19,7 +19,6 @@ import PageNotFound from './../404'
 import Login from './../index/login'
 import Home from './../index/main'
 import Nasabah from './../profileNasabah/profileNasabah'
-import Testing from './../testing'
 import profileNasabahDetail from './../profileNasabah/profileNasabahDetail'
 import PermintaanPinjaman from './../permintaanPinjaman/permintaanPinjaman'
 import PermintaanPinjamanDetail from './../permintaanPinjaman/permintaanPinjamanDetail'
@@ -288,7 +287,6 @@ function ResponsiveDrawer(props) {
               { checkPermission('lender_borrower_list_detail') && <Route path="/profileNasabahDetail/:id" component={profileNasabahDetail}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path="/permintaanpinjaman" component={PermintaanPinjaman}></Route>}
               { checkPermission('lender_loan_request_detail') && <Route path="/permintaanpinjamanDetail/:idLoan" component={PermintaanPinjamanDetail}></Route>}
-              { checkPermission('lender_loan_request_list') && <Route path='/tester' component={Testing}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path='/pinjamansetuju' component={PinjamanSetuju}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path='/pinjamanrejected' component={PinjamanRejected}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path='/pencairanList' component={PencairanList}></Route>}
