@@ -169,7 +169,7 @@ class Login extends React.Component{
                         <Grid item xs={12} sm={12}  className='loginBox'>
                             <Grid container>
                                 <Grid item xs={12} sm={12} style={{marginTop:20}}>
-                                    <h5>Bank Dashboard</h5> 
+                                    <h5>Mitra Dashboard</h5> 
                                 </Grid>
                                 <Grid item xs={12} sm={12} style={{marginTop:20}}>
                                     <TextField
