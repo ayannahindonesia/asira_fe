@@ -109,7 +109,7 @@ class TableComponent extends React.Component {
                   />
                 </th>
               }
-              <th className="text-center" scope="col" key={'#'}>#</th>
+              
               {
                 this.props.columnData.map((data,index) => {
                   return (
@@ -159,7 +159,6 @@ class TableComponent extends React.Component {
                         </td>
                       }
                     
-                      <td align="center">{this.props.paging ? (index+1 + this.props.rowsPerPage*(this.props.page-1)) : index+1}</td>
                       {
                         this.props.columnData.map((dataRow, indexRow) => {                         
                           return(
