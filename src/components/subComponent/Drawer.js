@@ -35,6 +35,12 @@ import { getTokenClient, getProfileUser } from './../index/token';
 import { Grid, Typography } from '@material-ui/core';
 import {Link} from 'react-router-dom'
 
+import ProductList from './../product/product'
+import ProductDetail from './../product/productDetail'
+
+import ServiceList from './../layanan/layanan'
+import ServiceDetail from './../layanan/layananDetail'
+
 const drawerWidth = 200;
 
 const useStyles = makeStyles(theme => ({
@@ -295,6 +301,12 @@ function ResponsiveDrawer(props) {
               { checkPermission('lender_borrower_list_detail') && <Route path='/detailCalonNasabah/:id' component={calonNasabahDetail}></Route>}
 
               { getTokenClient() && getProfileUser() ?  <Route path="/login" component={Home}></Route>:  <Route path="/login" component={Login}></Route>} 
+              <Route path='/product' component={ProductList} />
+              <Route path='/productDetail/:id' component={ProductDetail} />
+
+              { checkPermission('lender_service_list') && <Route path='/layanan' component={ServiceList}></Route>}
+              { checkPermission('lender_service_list_detail') && <Route path='/layananDetail/:id' component={ServiceDetail}></Route>}
+
 
               <Route path='*' component={PageNotFound} />
           </Switch>

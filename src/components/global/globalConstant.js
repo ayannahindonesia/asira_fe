@@ -58,19 +58,19 @@ exports.dataMenu = [
     },
     {
         permission:'lender_borrower_list',
-        label: 'Product & Services',
+        label: 'Produk & Layanan',
         logo:'nasabah.svg',
         child: [
             {
-                permission: 'lender_borrower_list',
-                label: 'Product List',
-                link: '/product',
+                permission: 'lender_product_list',
+                label: 'Produk',
+                link: '/produk',
                 logo:'nasabahList.svg',
             },
             {
-                permission: 'lender_borrower_list',
-                label: 'Service List',
-                link: '/service',
+                permission: 'lender_service_list',
+                label: 'Layanan',
+                link: '/layanan',
                 logo:'calonNasabah.svg',
             }
         ]
