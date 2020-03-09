@@ -57,6 +57,25 @@ exports.dataMenu = [
         ]
     },
     {
+        permission:'lender_borrower_list',
+        label: 'Product & Services',
+        logo:'nasabah.svg',
+        child: [
+            {
+                permission: 'lender_borrower_list',
+                label: 'Product List',
+                link: '/product',
+                logo:'nasabahList.svg',
+            },
+            {
+                permission: 'lender_borrower_list',
+                label: 'Service List',
+                link: '/service',
+                logo:'calonNasabah.svg',
+            }
+        ]
+    },
+    {
         permission:'keluar',
         label: 'Keluar',
         logo:'keluar.svg',
