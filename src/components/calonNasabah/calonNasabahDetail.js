@@ -312,7 +312,7 @@ class CalonNasabahDetail extends React.Component{
                           this.state.dataUser.email
                         ],
                         [
-                          this.state.dataUser.birthday && handleFormatDate(this.state.dataUser.birthday),
+                          this.state.dataUser.birthday && new Date(this.state.dataUser.birthday).getFullYear() !== 1 ? handleFormatDate(this.state.dataUser.birthday) : '-',
                           this.state.dataUser.birthplace,
                           this.state.dataUser.last_education,
                           this.state.dataUser.mother_name,
