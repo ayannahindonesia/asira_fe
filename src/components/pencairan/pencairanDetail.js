@@ -99,7 +99,6 @@ class PencairanDetail extends React.Component{
             </div>
           )
         } else if(getTokenClient()){
-          console.log(this.state.dataDetail)
             return(
               <Grid container className="containerDetail">
 
