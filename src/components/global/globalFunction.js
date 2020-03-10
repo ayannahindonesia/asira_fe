@@ -181,3 +181,35 @@ export function findAmount (dataFees, stringFee, amountPinjamanPokok, charPersen
 
   return feeNew;
 }
+
+export function destructErrorMessage(objError) {
+  let errorMessage = 'Error : ';
+  let integerError = 0;
+
+  if(objError && objError.details) {
+    const errDetail = objError.details
+
+    for(const key in errDetail) {
+
+      if(errDetail[key] && errDetail[key].toString() && errDetail[key].toString().trim().length !== 0) {
+        if(integerError !== 0) {
+          errorMessage += ', ';
+        } 
+
+        errorMessage += `${key} ${errDetail[key]}`;
+
+        integerError += 1
+      }
+
+    }
+
+    if(integerError < 1) {
+      errorMessage += ` ${objError.message}`
+    }
+
+  } else if (objError && !objError.details && objError.message) {
+    errorMessage += ` ${objError.message}`
+  }
+
+  return errorMessage
+}

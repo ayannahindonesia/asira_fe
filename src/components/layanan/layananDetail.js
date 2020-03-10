@@ -1,11 +1,12 @@
 import React from 'react'
 import { Redirect } from 'react-router-dom'
 import { getTokenAuth, getTokenClient } from '../index/token';
-import { Grid, Button } from '@material-ui/core';
+import { Grid, Tooltip, IconButton } from '@material-ui/core';
 import TitleBar from '../subComponent/TitleBar';
 import { getAllLayananDetailFunction } from './saga';
 import BrokenLink from './../../support/img/default.png'
 import Loader from 'react-loader-spinner';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 class LayananDetail extends React.Component{
     _isMounted = false
@@ -79,6 +80,13 @@ class LayananDetail extends React.Component{
                         style={{padding:'20px', marginBottom:20, boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)', borderRadius:'15px'}}                  
                     >
                     <Grid item sm={12} xs={12} style={{fontSize:'20px', marginBottom:'10px'}}>
+                    <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                        <Tooltip title="Back" style={{outline:'none'}}>
+                            <IconButton aria-label="cancel" onClick={this.btnCancel}>
+                                <CancelIcon style={{width:'35px',height:'35px'}}/>
+                            </IconButton>
+                        </Tooltip>       
+                    </Grid> 
                         <Grid container>
 
                             <Grid item sm={4} xs={4} style={{padding:'10px'}}>
@@ -127,17 +135,8 @@ class LayananDetail extends React.Component{
 
                         <Grid container style={{marginBottom:'10px', marginTop:'10px', paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
                         <Grid item xs={12} sm={12}>
-                       
-                            
-                            <Button disableElevation
-                                variant='contained'
-                                style={{padding: '2px', width:'100px',backgroundColor:'#2076B8', color:'white'}}
-                                onClick={this.btnCancel}
-                            >
-                                <b>Kembali</b>
-                            </Button>
-                            
-                            
+                    
+
                         </Grid>
 
                         
