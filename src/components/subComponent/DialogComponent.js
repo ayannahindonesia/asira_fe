@@ -12,6 +12,7 @@ import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardMedia from '@material-ui/core/CardMedia';
+import BrokenLink from './../../support/img/default.png'
 
 const styles = theme => ({
   root: {
@@ -76,7 +77,9 @@ class DialogComponent extends React.Component {
           <CardActionArea>
             {
               base64Boolean && 
-              <img alt={title} className={classes.media} src={`data:image/PNG;base64,${dataImage}`}/>
+              <img alt={title} className={classes.media} 
+              onError={(e)=>{e.target.attributes.getNamedItem("src").value = BrokenLink}}
+              src={`data:image/PNG;base64,${dataImage}`}/>
             }
 
             {
