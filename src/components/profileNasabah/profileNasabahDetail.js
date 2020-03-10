@@ -119,13 +119,13 @@ class profileNasabahDetail extends React.Component{
                                 </Grid> 
                                 <Grid container spacing={2}>
                                     <Grid item sm={2} xs={12} style={{marginBottom:'10px'}}>
-                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="KTP Detail" onClick={this.handleDialog}></input>                               
+                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto KTP" onClick={this.handleDialog}></input>                               
                                     </Grid>
                                     <Grid item sm={2} xs={12} style={{marginBottom:'10px'}}>
-                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="NPWP Detail" onClick={this.handleDialog}></input>
+                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto NPWP" onClick={this.handleDialog}></input>
                                     </Grid>
                                     <Grid item sm={2} xs={12} >
-                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto Profile Detail" onClick={this.handleDialog}></input>
+                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto Profile" onClick={this.handleDialog}></input>
                                     </Grid>
                                    
                                 </Grid> 
