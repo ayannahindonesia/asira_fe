@@ -42,7 +42,6 @@ class profileNasabahDetail extends React.Component{
                 let flag = false
                 data.detailProfileNasabah.idcard_image = decryptImage(data.detailProfileNasabah.idcard_image);
                 data.detailProfileNasabah.taxid_image = decryptImage(data.detailProfileNasabah.taxid_image)
-                data.detailProfileNasabah.image = decryptImage(data.detailProfileNasabah.image)
 
 
                 this._isMounted && this.setState({rows:data.detailProfileNasabah,diKlik:flag})
@@ -67,8 +66,8 @@ class profileNasabahDetail extends React.Component{
           message = this.state.rows && this.state.rows.taxid_image
   
         }
-        else if(label.toLowerCase().includes('profile')) {
-          title = 'Foto Profile'
+        else if(label.toLowerCase().includes('nasabah')) {
+          title = 'Foto Nasabah'
           message = this.state.rows && this.state.rows.image
         }
   
@@ -125,7 +124,7 @@ class profileNasabahDetail extends React.Component{
                                         <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto NPWP" onClick={this.handleDialog}></input>
                                     </Grid>
                                     <Grid item sm={2} xs={12} >
-                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto Profile" onClick={this.handleDialog}></input>
+                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto Nasabah" onClick={this.handleDialog}></input>
                                     </Grid>
                                    
                                 </Grid> 
@@ -281,6 +280,7 @@ class profileNasabahDetail extends React.Component{
                                     message={this.state.message}
                                     type='image'
                                     onClose={this.handleClose}
+                                    base64Boolean={this.state.title ==='Foto Nasabah' ? true : false }
                                 />
                             </div>
 

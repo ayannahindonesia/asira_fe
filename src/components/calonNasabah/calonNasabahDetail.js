@@ -84,7 +84,6 @@ class CalonNasabahDetail extends React.Component{
             dataUser.category = this.isCategoryExist(dataUser.category) ;
             dataUser.idcard_image = decryptImage(dataUser.idcard_image);
             dataUser.taxid_image = decryptImage(dataUser.taxid_image)
-            dataUser.image = decryptImage(dataUser.image)
 
 
             if(dataUser && dataUser.bank_accountnumber && dataUser.bank_accountnumber.trim().length !== 0) {
@@ -125,8 +124,8 @@ class CalonNasabahDetail extends React.Component{
       } else if(label.toLowerCase().includes('npwp')) {
         title = 'NPWP'
         message = this.state.dataUser && this.state.dataUser.taxid_image
-      } else if(label.toLowerCase().includes('profile')) {
-        title = 'Foto Profile'
+      } else if(label.toLowerCase().includes('nasabah')) {
+        title = 'Foto Nasabah'
         message = this.state.dataUser && this.state.dataUser.image
       }
 
@@ -281,7 +280,7 @@ class CalonNasabahDetail extends React.Component{
                               <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto NPWP" onClick={this.handleDialog}></input>
                           </Grid>
                           <Grid item sm={2} xs={12} >
-                            <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto Profile" onClick={this.handleDialog}></input>
+                            <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto Nasabah" onClick={this.handleDialog}></input>
                         </Grid>
                       </Grid>                        
                     </Grid>
@@ -444,6 +443,7 @@ class CalonNasabahDetail extends React.Component{
                         message={this.state.message}
                         type='image'
                         onClose={this.handleClose}
+                        base64Boolean={this.state.title ==='Foto Nasabah' ? true : false}
                       />
                     </div>
 
