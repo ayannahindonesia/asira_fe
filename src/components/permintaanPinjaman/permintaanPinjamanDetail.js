@@ -7,10 +7,11 @@ import Loader from 'react-loader-spinner'
 import { checkPermission, handleFormatDate,formatNumber, findAmount } from './../global/globalFunction'
 import { getTokenAuth, getTokenClient } from '../index/token';
 import GridDetail from './../subComponent/GridDetail'
-import Grid from '@material-ui/core/Grid'
 import TitleBar from '../subComponent/TitleBar';
 import { Button } from '@material-ui/core';
 import DatePicker from './../subComponent/DateTimePicker'
+import { Grid, Tooltip, IconButton } from '@material-ui/core';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 class Main extends React.Component{
     _isMounted=false
@@ -199,6 +200,14 @@ class Main extends React.Component{
                     sm={12} xs={12}
                     style={{padding:10, marginBottom:20, boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)', borderRadius:'15px'}}                  
                 >
+                    
+                <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                    <Tooltip title="Back" style={{outline:'none'}}>
+                        <IconButton aria-label="cancel" onClick={this.btnBack}>
+                            <CancelIcon style={{width:'35px',height:'35px'}}/>
+                        </IconButton>
+                    </Tooltip>       
+                </Grid> 
                    <Grid container>
                     <Grid item sm={12} xs={12} style={{color:'red'}}>
                         {this.state.errorMessage}
@@ -406,17 +415,7 @@ class Main extends React.Component{
                                 >
                                     <b>Tolak</b>
                                 </Button>
-                            }
-
-                            
-                            <Button disableElevation
-                                variant='contained'
-                                style={{padding: '2px', width:'100px',backgroundColor:'#2076B8', color:'white'}}
-                                onClick={this.btnBack}
-                            >
-                               <b>Kembali</b> 
-                            </Button>
-                            
+                            }  
                             
                         </Grid>
 

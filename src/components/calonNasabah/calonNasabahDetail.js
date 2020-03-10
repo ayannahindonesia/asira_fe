@@ -11,11 +11,12 @@ import { getTokenClient } from '../index/token';
 import GridDetail from '../subComponent/GridDetail';
 import { formatNumber, handleFormatDate, checkPermission, decryptImage } from '../global/globalFunction';
 import DialogComponent from './../subComponent/DialogComponent'
-import { TextField, Grid, Button } from '@material-ui/core';
+import { TextField, Grid, Button,IconButton, Tooltip } from '@material-ui/core';
 import swal from 'sweetalert';
 import TitleBar from '../subComponent/TitleBar';
 import './../../support/css/profilenasabahdetail.css'
 
+import CancelIcon from '@material-ui/icons/Cancel';
 
 const styles = (theme) => ({
     container: {
@@ -83,6 +84,8 @@ class CalonNasabahDetail extends React.Component{
             dataUser.category = this.isCategoryExist(dataUser.category) ;
             dataUser.idcard_image = decryptImage(dataUser.idcard_image);
             dataUser.taxid_image = decryptImage(dataUser.taxid_image)
+            dataUser.image = decryptImage(dataUser.image)
+
 
             if(dataUser && dataUser.bank_accountnumber && dataUser.bank_accountnumber.trim().length !== 0) {
               flag = true
@@ -122,6 +125,9 @@ class CalonNasabahDetail extends React.Component{
       } else if(label.toLowerCase().includes('npwp')) {
         title = 'NPWP'
         message = this.state.dataUser && this.state.dataUser.taxid_image
+      } else if(label.toLowerCase().includes('profile')) {
+        title = 'Foto Profile'
+        message = this.state.dataUser && this.state.dataUser.image
       }
 
       this.setState({
@@ -260,6 +266,13 @@ class CalonNasabahDetail extends React.Component{
                     </Grid>
 
                     <Grid item sm={12} xs={12} style={{marginBottom:"10px"}}>
+                    <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                        <Tooltip title="Back" style={{outline:'none'}}>
+                            <IconButton aria-label="cancel" onClick={this.btnCancel}>
+                                <CancelIcon style={{width:'35px',height:'35px'}}/>
+                            </IconButton>
+                        </Tooltip>       
+                    </Grid> 
                       <Grid container spacing={2}>
                           <Grid item sm={2} xs={12} style={{marginBottom:'10px'}}>
                               <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="KTP Detail" onClick={this.handleDialog}></input>                               
@@ -267,6 +280,9 @@ class CalonNasabahDetail extends React.Component{
                           <Grid item sm={2} xs={12} >
                               <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="NPWP Detail" onClick={this.handleDialog}></input>
                           </Grid>
+                          <Grid item sm={2} xs={12} >
+                            <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto Profile Detail" onClick={this.handleDialog}></input>
+                        </Grid>
                       </Grid>                        
                     </Grid>
 
@@ -456,14 +472,6 @@ class CalonNasabahDetail extends React.Component{
                                 </Button>
                             }
 
-                            
-                            <Button disableElevation
-                                variant='contained'
-                                style={{padding: '2px', width:'100px',backgroundColor:'#2076B8', color:'white'}}
-                                onClick={this.btnCancel}
-                            >
-                                <b>Kembali</b>
-                            </Button>
                             
                             
                         </Grid>

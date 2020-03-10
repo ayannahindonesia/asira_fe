@@ -1,7 +1,8 @@
 import React from 'react'
 import { Redirect } from 'react-router-dom'
 // import CheckBox from '../subComponent/CheckBox';
-import Grid from '@material-ui/core/Grid'
+import { Grid, Tooltip, IconButton } from '@material-ui/core';
+
 import Loader from 'react-loader-spinner'
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
@@ -12,7 +13,7 @@ import { formatNumber, handleFormatDate, findAmount } from '../global/globalFunc
 import { getTokenClient } from '../index/token';
 import GridDetail from '../subComponent/GridDetail';
 import TitleBar from '../subComponent/TitleBar';
-import { Button } from '@material-ui/core';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 const styles = (theme) => ({
   container: {
@@ -115,6 +116,15 @@ class PencairanDetail extends React.Component{
                   sm={12} xs={12}
                   style={{padding:10, marginBottom:20, boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)', borderRadius:'15px'}}                  
                 >
+
+                <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                    <Tooltip title="Back" style={{outline:'none'}}>
+                        <IconButton aria-label="cancel" onClick={this.btnCancel}>
+                            <CancelIcon style={{width:'35px',height:'35px'}}/>
+                        </IconButton>
+                    </Tooltip>       
+                </Grid> 
+
                   <Grid container>
                     <Grid item sm={12} xs={12} style={{color:'red'}}>
                       {this.state.errorMessage}
@@ -224,14 +234,6 @@ class PencairanDetail extends React.Component{
                       ],                      
                     ]}                 
                   />
-
-                  <Button disableElevation
-                    variant='contained'
-                    style={{fontSize:'calc(10px + 0.3vw)', marginLeft: '10px', padding: '2px', width:'100px',backgroundColor:'#2076B8', color:'white', marginBottom:'2vh'}}
-                    onClick={this.btnCancel}
-                  >
-                    <b>Kembali</b>
-                  </Button>
 
 
                 </Grid>
