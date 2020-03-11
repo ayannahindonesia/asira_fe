@@ -301,8 +301,9 @@ function ResponsiveDrawer(props) {
               { checkPermission('lender_borrower_list_detail') && <Route path='/detailCalonNasabah/:id' component={calonNasabahDetail}></Route>}
 
               { getTokenClient() && getProfileUser() ?  <Route path="/login" component={Home}></Route>:  <Route path="/login" component={Login}></Route>} 
-              <Route path='/product' component={ProductList} />
-              <Route path='/productDetail/:id' component={ProductDetail} />
+             
+              { checkPermission('lender_product_list') && <Route path='/produk' component={ProductList}></Route>}
+              { checkPermission('lender_product_list_detail') && <Route path='/produkDetail/:id' component={ProductDetail}></Route>}
 
               { checkPermission('lender_service_list') && <Route path='/layanan' component={ServiceList}></Route>}
               { checkPermission('lender_service_list_detail') && <Route path='/layananDetail/:id' component={ServiceDetail}></Route>}
