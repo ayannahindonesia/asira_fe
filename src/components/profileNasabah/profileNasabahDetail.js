@@ -2,7 +2,6 @@ import React from 'react'
 import './../../support/css/profilenasabahdetail.css'
 import { Redirect } from 'react-router-dom'
 import {connect} from 'react-redux'
-import { Button } from 'reactstrap';
 import { getProfileNasabahDetailFunction } from './saga';
 import { getProfileUser,getTokenClient,getTokenAuth } from '../index/token'
 import GridDetail from './../subComponent/GridDetail'

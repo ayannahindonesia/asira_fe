@@ -1,144 +1,143 @@
-import React from 'react';
-import {connect } from 'react-redux'
+import React from 'react'
+import { listProductFunction } from './saga';
+import {checkPermission, formatNumber} from './../global/globalFunction'
 import { Redirect } from 'react-router-dom'
-import './../../support/css/pagination.css'
-import {getAllProfileNasabahFunction} from './saga'
-import 'moment/locale/id';
 import { getTokenClient,getTokenAuth } from '../index/token'
 import TableComponent from './../subComponent/TableComponent'
-import { checkPermission } from '../global/globalFunction';
 
 const columnDataUser = [
-  {
-      id: 'id',
-      numeric: false,
-      label: 'ID Product',
-  },
-  {
-      id: 'name',
-      numeric: false,
-      label: 'Nama Product',
-  },
-  {
-      id: 'status',
-      numeric: false,
-      label: 'Status',
-  }
+    {
+        id: 'id',
+        numeric: false,
+        label: 'ID Produk',
+    },
+    {
+        id: 'name',
+        numeric: false,
+        label: 'Nama Produk',
+    },
+    {
+        id: 'tenor',
+        numeric: false,
+        label: 'Tenor',
+    },
+    {
+        id: 'rentangPengajuan',
+        numeric: false,
+        label: 'Rentang Pengajuan (Rp)',
+    },
+    {
+        id: 'interest',
+        numeric: false,
+        label: 'Bunga (%)',
+    },
+    {
+        id: 'status',
+        numeric: false,
+        label: 'Status Produk',
+    }
 ]
-
-class Product extends React.Component {
-  
-  _isMounted = false
-  state = {
-    rows: [], 
-    searchRows:'',
-    paging:true,
-    page: 1,
-    rowsPerPage: 10,
-    isEdit: false,
-    total_data:0,
-    last_page:1,
-    //loading:true,
-  };
-  //-----------------------------------NIKO FUNCTION-------------------------------------------------------------
-  componentDidMount(){
-    this._isMounted=true
-   // this._isMounted && this.getProfileNasabah()
-  }
-  componentWillUnmount(){
-    this._isMounted=false
-  }
-
-  
-  //Ambil data pertama kali
-  getProfileNasabah = async function(){
-    const param ={
-      rows:this.state.rowsPerPage,
-      page:this.state.page
+class ProductList extends React.Component{
+    _isMounted = false;
+    state={
+        loading:true,paging:true,search:'',
+        rows:[],total_data:10,page:1,from:1,to:3,last_page:1,rowsPerPage:10,dataPerhalaman:5,errorMessage:null
     }
-    let hasil = this.state.searchRows
-
-    if(hasil){
-      param.search_all = hasil
-    }
-    const data = await getAllProfileNasabahFunction(param)
-    const dataNasabah = data.borrowerList.data;
-    
-    for (const key in dataNasabah){
-      dataNasabah[key].category = dataNasabah[key].category && dataNasabah[key].category==="account_executive"?"Account Executive" :dataNasabah[key].category === "agent"?"Agent":"Personal"
-      dataNasabah[key].loan_status = dataNasabah[key].loan_status && dataNasabah[key].loan_status==="active"?"Aktif" :"Tidak Aktif"
-   }
-    if(data){
-      if(!data.error){
-        this._isMounted && this.setState({loading:false,
-          rows:dataNasabah,
-          rowsPerPage:data.borrowerList.rows,
-          total_data:data.borrowerList.total_data,
-          last_page:data.borrowerList.last_page,
-          page:data.borrowerList.current_page})
-      }else{
-        this._isMounted && this.setState({errorMessage:data.error})
+    componentWillUnmount() {
+        this._isMounted = false;
       }
+    componentDidMount (){
+        this._isMounted = true;
+        this.getAllProduct()
     }
-  }
+    getAllProduct = async function () {
+        const params ={
+            page:this.state.page,
+            rows:10
+        }
+        var hasil = this.state.search;
 
-  onBtnSearch = (e)=>{
-    this.setState({loading:true,searchRows:e.target.value,page:1},()=>{
-      if(this.state.paging){
-      this.getProfileNasabah()
-    }
-    })
-  }
-  
-  onChangePage = (current) => {
-    
-    this.setState({loading:true,page:current},()=>{
-
-      if(this.state.paging){
-        this.getProfileNasabah()
-      }
-    })
-  }
-  
-  render() {
-    if(getTokenClient()&&getTokenAuth()){
-      return (
-        <div style={{padding:0}}>
-
-          < TableComponent
-            id={"id"}
-            title={'Product - List'}
-            search={
-              {
-                value: this.state.searchRows,
-                label: 'Search ID, Nama Product',
-                function: this.onBtnSearch,
-              }
-            }
-            errorMessage={this.state.errorMessage}
-            paging={this.state.paging}
-            loading={this.state.loading}
-            columnData={columnDataUser}
-            data={this.state.rows}
-            page={this.state.page}
-            rowsPerPage={this.state.rowsPerPage}
-            totalData={this.state.total_data}
-            onChangePage={this.onChangePage}             
-            permissionDetail={ checkPermission('lender_borrower_list_detail') ? '/productDetail/' : null}
-          /> 
+        if(hasil.toString().trim().length !== 0) {
+          params.search_all = hasil
+        }
         
-        </div>
-      );
+        const data = await listProductFunction (params)
+        
+        if(data){
+            const dataProduct = data.productList && data.productList.data;
+        
+            for(const key in dataProduct) {
+                dataProduct[key].status = dataProduct[key].status && dataProduct[key].status === 'active' ? 'Aktif' : 'Tidak Aktif'
+                dataProduct[key].tenor = `${dataProduct[key].min_timespan || '0'} - ${dataProduct[key].max_timespan || 0} Bulan`
+                dataProduct[key].rentangPengajuan = `Rp ${(dataProduct[key].min_loan && formatNumber(dataProduct[key].min_loan)) || '0'} - Rp ${(dataProduct[key].max_loan && formatNumber(dataProduct[key].max_loan)) || '0'}`
+            }
+
+            if(!data.error){
+                this.setState({loading:false,rows:data.productList.data,
+                    total_data:data.productList.total_data,
+                    page:data.productList.current_page,
+                    from:data.productList.from,
+                    to:data.productList.to,
+                    last_page:data.productList.last_page,
+                    rowsPerPage:data.productList.rows,
+                })
+            }else{
+                this.setState({errorMessage:data.error})
+            }
+        }
     }
-    else if(getTokenAuth()){
-      return  <Redirect to='/login' />
+    UNSAFE_componentWillReceiveProps(newProps){
+        this.setState({errorMessage:newProps.error})
     }
-  }
+    onChangePage = (current) => {
+        this.setState({loading:true, page : current}, () => {
+            if(this.state.paging){
+                this.getAllProduct()
+            }
+        })
+    }
+
+    onBtnSearch = (e)=>{
+        this.setState({loading : true, page:1,search:e.target.value},()=>{
+                this.getAllProduct()
+        })
+      }
+  
+    render(){
+    if(getTokenClient()&&getTokenAuth()){
+            return(
+                <div style={{padding:0}}>
+                    < TableComponent
+                        search={
+                            {
+                                value: this.state.search,
+                                label: 'Search Nama Produk, ID Produk..',
+                                function: this.onBtnSearch,
+                            }
+                        }
+                        id={"id"}
+                        title={'Produk - List'}
+                        paging={this.state.paging}
+                        loading={this.state.loading}
+                        columnData={columnDataUser}
+                        data={this.state.rows}
+                        page={this.state.page}
+                        rowsPerPage={this.state.rowsPerPage}
+                        totalData={this.state.total_data}
+                        onChangePage={this.onChangePage}         
+                        permissionDetail={ checkPermission('lender_product_list') ? '/produkDetail/' : null}
+                    /> 
+
+                </div>
+            )
+        }
+        if(getTokenAuth()){
+            return (
+                <Redirect to='/login' />
+            )    
+        }
+       
+    }
 }
 
-const mapStateToProp = (state)=>{
-  return{     
-      id: state.user.id
-  }
-}
-export default connect (mapStateToProp)(Product) ;
+export default ProductList;
