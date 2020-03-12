@@ -16,7 +16,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 class Main extends React.Component{
     _isMounted=false
 
-    state = {errorMessage:'',rows:{},items:[],borrowerDetail:{},status:'',endDate:null,diterima:false,ditolak:false,productInfo:'',loading:true,dateApprove:null,reason:null}
+    state = {errorMessage:'',rows:{},formInfo:[],items:[],borrowerDetail:{},status:'',endDate:null,diterima:false,ditolak:false,productInfo:'',loading:true,dateApprove:null,reason:null}
 
     formatMoney=(number)=>
     { return number.toLocaleString('in-RP', {style : 'currency', currency: 'IDR'})}
@@ -51,7 +51,12 @@ class Main extends React.Component{
         if(data){
             if(!data.error){
                 if(!status) {
-                    this.setState({rows:data.dataLender,items:data.dataLender.fees,status:data.dataLender.status,borrowerDetail:data.dataLender.borrower_info,loading:false})
+                    this.setState({rows:data.dataLender,
+                        formInfo:data.dataLender.form_info,
+                        items:data.dataLender.fees,
+                        status:data.dataLender.status,
+                        borrowerDetail:data.dataLender.borrower_info,
+                        loading:false})
                 } else if(status === 'terima'){
                     swal("Permintaan","Diterima","success")
                     this._isMounted && this.setState({errorMessage:'',diterima:true})
@@ -148,6 +153,37 @@ class Main extends React.Component{
             )
         })
          return jsx;
+    }
+    renderFormInfoJsx = ()=>{
+        var jsx = this.state.formInfo.map((val,index)=>{
+            return(
+                <Grid key={index} container style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
+                        
+                <Grid item sm={3} xs={3}>
+                    <b>{val.label}</b>
+                </Grid>
+
+                <Grid item sm={9} xs={9} style={{alignItems:"left",marginBottom:"20px"}}>
+                <b style={{marginRight:'10px'}}>:</b>
+                {this.desctructFormInfo(val.answers).toString()}
+                </Grid>
+
+        </Grid>
+            )
+        })
+        return jsx
+    }
+
+    desctructFormInfo = (array)=>{
+        var newArray=[]
+
+        for(var i=0;i<array.length;i++){
+            for (const key in array[i]){
+                newArray.push(key)
+            }
+        }
+
+        return newArray
     }
     calculateConvienceFee = (percent)=>{
         var imbalhasil = this.state.rows.interest*this.state.rows.loan_amount/100
@@ -256,7 +292,7 @@ class Main extends React.Component{
                             ['Pinjaman Pokok','Tenor (Bulan)','Total Pinjaman','Angsuran Perbulan'],
                             this.state.status==='processing'? 
                             ['Tujuan Pinjaman','Detail Tujuan','Tanggal Pengajuan']   :
-                            ['Tujuan Pinjaman','Detail Tujuan','Tanggal Pengajuan',
+                            ['Tujuan Pinjaman','Detail Tujuan','Tanggal Pengajuan', 
                             this.state.status==='approved'?"Tanggal Persetujuan":"Tanggal Ditolak"]
                         ] 
                         }
@@ -336,6 +372,9 @@ class Main extends React.Component{
                             
                         ]}                 
                     />
+
+                    {this.renderFormInfoJsx()}
+           
              
                     <Grid container style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
                         <Grid item xs={3} sm={3}>
@@ -370,6 +409,8 @@ class Main extends React.Component{
                                 <b> (Telah Diubah)</b>
                             }
                         </Grid>
+
+
                     </Grid>
 
                     {
@@ -421,6 +462,8 @@ class Main extends React.Component{
 
                         
                     </Grid>
+
+                  
 
                     </Grid>
                 </Grid>
