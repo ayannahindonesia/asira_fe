@@ -173,6 +173,7 @@ class ProductDetail extends React.Component{
                 const mandatory = destructMandatory(dataProduct.form)
 
                 this.setState({
+                    tipeBunga:dataProduct.interest_type,
                     id: dataProduct.id,
                     namaProduct: dataProduct.name,
                     layanan: dataProduct.service_id,
