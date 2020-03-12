@@ -157,18 +157,19 @@ class Main extends React.Component{
     renderFormInfoJsx = ()=>{
         var jsx = this.state.formInfo.map((val,index)=>{
             return(
-                <Grid key={index} container style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
-                        
-                <Grid item sm={3} xs={3}>
-                    <b>{val.label}</b>
-                </Grid>
-
-                <Grid item sm={9} xs={9} style={{alignItems:"left",marginBottom:"20px"}}>
-                <b style={{marginRight:'10px'}}>:</b>
-                {this.desctructFormInfo(val.answers).toString()}
-                </Grid>
-
-        </Grid>
+                <GridDetail
+                key={index}
+                gridLabel={[3,7]}
+                label={
+                [
+                    
+                    [val.label]
+                ] 
+                }
+                data={this.state.rows && [
+                    [this.desctructFormInfo(val.answers).toString()]
+                ]}                 
+                />
             )
         })
         return jsx
