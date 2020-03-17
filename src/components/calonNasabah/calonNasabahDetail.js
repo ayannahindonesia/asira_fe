@@ -1,6 +1,6 @@
 import React from 'react'
 import { Redirect } from 'react-router-dom'
-import Loader from 'react-loader-spinner'
+import Loading from '../subComponent/Loading';
 import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
@@ -11,12 +11,11 @@ import { getTokenClient } from '../index/token';
 import GridDetail from '../subComponent/GridDetail';
 import { formatNumber, handleFormatDate, checkPermission, decryptImage } from '../global/globalFunction';
 import DialogComponent from './../subComponent/DialogComponent'
-import { TextField, Grid, Button,IconButton, Tooltip } from '@material-ui/core';
+import { TextField, Grid } from '@material-ui/core';
 import swal from 'sweetalert';
 import TitleBar from '../subComponent/TitleBar';
 import './../../support/css/profilenasabahdetail.css'
-
-import CancelIcon from '@material-ui/icons/Cancel';
+import ActionComponent from '../subComponent/ActionComponent';
 
 const styles = (theme) => ({
     container: {
@@ -156,7 +155,7 @@ class CalonNasabahDetail extends React.Component{
       } 
     }
 
-    permissionApproval = () => {
+    permissionApprove = () => {
       let flag = true;
 
       if(this.state.dataUser && this.state.dataUser.status && this.state.dataUser.status === 'reject') {
@@ -232,17 +231,10 @@ class CalonNasabahDetail extends React.Component{
         if(this.state.diKlik){
             return <Redirect to='/listCalonNasabah'/>            
         } else if (this.state.loading){
-          return  (
-            <div  key="zz">
-              <div align="center" colSpan={6}>
-                <Loader 
-                  type="Circles"
-                  color="#00BFFF"
-                  height="40"	
-                  width="40"
-                />   
-              </div>
-            </div>
+          return(
+            <Loading
+                title={'Calon Nasabah - Detail'}
+            />
           )
         } else if(getTokenClient()){
             return(
@@ -259,19 +251,29 @@ class CalonNasabahDetail extends React.Component{
                 >
 
                   <Grid container>
+                    <DialogComponent
+                      title={this.state.title}
+                      openDialog={this.state.dialog}
+                      message={this.state.message}
+                      type='image'
+                      onClose={this.handleClose}
+                      base64Boolean={this.state.title ==='Foto Nasabah' ? true : false}
+                    />
+
+                    <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                        <ActionComponent
+                          permissionApprove={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'terima') : null}
+                          permissionReject={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'tolak') : null}
+                          onCancel={this.btnCancel}
+                        />
+                    </Grid> 
 
                     <Grid item sm={12} xs={12} style={{color:'red'}}>
                       {this.state.errorMessage}
                     </Grid>
 
                     <Grid item sm={12} xs={12} style={{marginBottom:"10px"}}>
-                    <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
-                        <Tooltip title="Back" style={{outline:'none'}}>
-                            <IconButton aria-label="cancel" onClick={this.btnCancel}>
-                                <CancelIcon style={{width:'35px',height:'35px'}}/>
-                            </IconButton>
-                        </Tooltip>       
-                    </Grid> 
+                    
                       <Grid container spacing={2}>
                           <Grid item sm={2} xs={12} style={{marginBottom:'10px'}}>
                               <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto KTP" onClick={this.handleDialog}></input>                               
@@ -436,49 +438,6 @@ class CalonNasabahDetail extends React.Component{
                     </Grid>
 
 
-                    <div className="col-sm-12">
-                      <DialogComponent
-                        title={this.state.title}
-                        openDialog={this.state.dialog}
-                        message={this.state.message}
-                        type='image'
-                        onClose={this.handleClose}
-                        base64Boolean={this.state.title ==='Foto Nasabah' ? true : false}
-                      />
-                    </div>
-
-                        
-                    <Grid container style={{marginBottom:'10px', marginTop:'10px', paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
-                        <Grid item xs={12} sm={12}>
-                            {
-                                this.permissionApproval() &&
-                                <Button disableElevation
-                                  variant='contained'
-                                  style={{marginRight:'10px',padding: '2px', width:'100px',backgroundColor:'rgb(32, 184, 137)', color:'white'}}
-                                  onClick={(e) => this.btnApproveReject(e, 'terima')}
-                                >
-                                  <b>Terima</b>
-                                </Button>
-                            }
-
-                            {
-                                this.permissionApproval() &&
-                                <Button disableElevation
-                                  variant='contained'
-                                  style={{marginRight:'10px',padding: '2px', width:'100px',backgroundColor:'rgb(238, 105, 105)', color:'white'}}
-                                  onClick={(e) => this.btnApproveReject(e, 'tolak')}
-                                >
-                                  <b>Tolak</b>
-                                </Button>
-                            }
-
-                            
-                            
-                        </Grid>
-
-                        
-                    </Grid>
-                    
                     
                  </Grid>
                 </Grid>

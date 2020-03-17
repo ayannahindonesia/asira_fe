@@ -99,7 +99,7 @@ class GridDetails extends React.Component {
                   }
                 </Grid>
 
-                <Grid item sm={11} xs={11} style={{color:dataPerRow&& dataPerRow.color? dataPerRow.color:dataPerRow}} >
+                <Grid item sm={11} xs={11} style={{color:dataPerRow&& dataPerRow.color? dataPerRow.color:dataPerRow, paddingRight:'10px'}} >
                   {
                     dataPerRow && dataPerRow.color ?  dataPerRow.value : (dataPerRow ? this.findBold(dataPerRow) : '-')
                   }

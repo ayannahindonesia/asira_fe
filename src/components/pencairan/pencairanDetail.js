@@ -1,9 +1,9 @@
 import React from 'react'
 import { Redirect } from 'react-router-dom'
 // import CheckBox from '../subComponent/CheckBox';
-import { Grid, Tooltip, IconButton } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 
-import Loader from 'react-loader-spinner'
+import Loading from '../subComponent/Loading';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { withStyles } from '@material-ui/styles';
@@ -13,7 +13,7 @@ import { formatNumber, handleFormatDate, findAmount } from '../global/globalFunc
 import { getTokenClient } from '../index/token';
 import GridDetail from '../subComponent/GridDetail';
 import TitleBar from '../subComponent/TitleBar';
-import CancelIcon from '@material-ui/icons/Cancel';
+import ActionComponent from '../subComponent/ActionComponent';
 
 const styles = (theme) => ({
   container: {
@@ -86,17 +86,10 @@ class PencairanDetail extends React.Component{
         if(this.state.diKlik){
             return <Redirect to='/pencairanList'/>            
         } else if (this.state.loading){
-          return  (
-            <div  key="zz">
-              <div align="center" colSpan={6}>
-                <Loader 
-                  type="Circles"
-                  color="#00BFFF"
-                  height="40"	
-                  width="40"
-                />   
-              </div>
-            </div>
+          return(
+            <Loading
+                title={'Pencairan - Detail'}
+            />
           )
         } else if(getTokenClient()){
             return(
@@ -116,15 +109,13 @@ class PencairanDetail extends React.Component{
                   style={{padding:10, marginBottom:20, boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)', borderRadius:'15px'}}                  
                 >
 
-                <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
-                    <Tooltip title="Back" style={{outline:'none'}}>
-                        <IconButton aria-label="cancel" onClick={this.btnCancel}>
-                            <CancelIcon style={{width:'35px',height:'35px'}}/>
-                        </IconButton>
-                    </Tooltip>       
-                </Grid> 
-
                   <Grid container>
+                    <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                      <ActionComponent
+                        onCancel={this.btnCancel}
+                      />
+                    </Grid> 
+
                     <Grid item sm={12} xs={12} style={{color:'red'}}>
                       {this.state.errorMessage}
                     </Grid> 
