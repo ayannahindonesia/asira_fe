@@ -293,8 +293,8 @@ function ResponsiveDrawer(props) {
               { checkPermission('lender_borrower_list_detail') && <Route path="/profileNasabahDetail/:id" component={profileNasabahDetail}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path="/permintaanpinjaman" component={PermintaanPinjaman}></Route>}
               { checkPermission('lender_loan_request_detail') && <Route path="/permintaanpinjamanDetail/:idLoan" component={PermintaanPinjamanDetail}></Route>}
-              { checkPermission('lender_loan_request_list') && <Route path='/pinjamansetuju' component={PinjamanSetuju}></Route>}
-              { checkPermission('lender_loan_request_list') && <Route path='/pinjamanrejected' component={PinjamanRejected}></Route>}
+              { checkPermission('lender_loan_request_list') && <Route path='/pinjamanSetuju' component={PinjamanSetuju}></Route>}
+              { checkPermission('lender_loan_request_list') && <Route path='/pinjamanTolak' component={PinjamanRejected}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path='/pencairanList' component={PencairanList}></Route>}
               { checkPermission('lender_loan_request_detail') && <Route path='/pencairanDetail/:idLoan' component={PencairanDetail}></Route>}
               { checkPermission('lender_borrower_list') && <Route path='/listCalonNasabah' component={CalonNasabahList}></Route>}

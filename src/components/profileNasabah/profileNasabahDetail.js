@@ -1,5 +1,6 @@
 import React from 'react'
 import './../../support/css/profilenasabahdetail.css'
+import Loading from '../subComponent/Loading';
 import { Redirect } from 'react-router-dom'
 import {connect} from 'react-redux'
 import { getProfileNasabahDetailFunction } from './saga';
@@ -8,15 +9,25 @@ import GridDetail from './../subComponent/GridDetail'
 import { handleFormatDate, decryptImage } from '../global/globalFunction';
 import TitleBar from '../subComponent/TitleBar';
 import DialogComponent from './../subComponent/DialogComponent'
-
-import { Grid, IconButton, Tooltip } from '@material-ui/core';
-import CancelIcon from '@material-ui/icons/Cancel';
+import { Grid } from '@material-ui/core';
+import ActionComponent from '../subComponent/ActionComponent';
 
 class profileNasabahDetail extends React.Component{
     _isMounted = false
-    state={bankName:'',
-    title:'',message:'',diKlik:false,
-    rows:[],modalKTP:false,modalNPWP:false,npwp:null,ktp:null,gambarKTP:null,gambarNPWP:null}
+    state={
+        bankName:'',
+        title:'',
+        message:'',
+        diKlik:false,
+        rows:[],
+        modalKTP:false,
+        modalNPWP:false,
+        npwp:null,
+        ktp:null,
+        gambarKTP:null,
+        gambarNPWP:null,
+        loading: true,
+    }
     
     componentDidMount(){
         this._isMounted=true
@@ -43,10 +54,10 @@ class profileNasabahDetail extends React.Component{
                 data.detailProfileNasabah.taxid_image = decryptImage(data.detailProfileNasabah.taxid_image)
 
 
-                this._isMounted && this.setState({rows:data.detailProfileNasabah,diKlik:flag})
+                this._isMounted && this.setState({rows:data.detailProfileNasabah,diKlik:flag, loading:false})
 
              }else{
-                this._isMounted && this.setState({errorMessage:data.error})
+                this._isMounted && this.setState({errorMessage:data.error, loading:false})
              }
          }  
     }
@@ -75,19 +86,28 @@ class profileNasabahDetail extends React.Component{
           message,
           title,
         })
-      }
+    }
 
-      handleClose = () => {
+    handleClose = () => {
         this.setState({dialog: false})
-      }
+    }
+
+    btnCancel = ()=>{
+        this.setState({diKlik:true})
+    }
   
     render(){
         if(this.state.diKlik){
             return(
                 <Redirect to='/profileNasabah'/>
             )
-        }
-        if(getTokenAuth() && getTokenClient()){
+        } else if (this.state.loading){
+            return(
+              <Loading
+                  title={'Calon Nasabah - Detail'}
+              />
+            )
+        }else if(getTokenAuth() && getTokenClient()){
             return(
                 <Grid container className="containerDetail">
                     <Grid item sm={12} xs={12} style={{maxHeight:50}}>
@@ -103,18 +123,17 @@ class profileNasabahDetail extends React.Component{
                         style={{padding:10, marginBottom:20, boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)', borderRadius:'15px'}}                  
                     >
                         <Grid container>
+                            <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                                <ActionComponent
+                                    onCancel={this.btnCancel}
+                                />
+                            </Grid> 
+
                             <Grid item sm={12} xs={12} style={{color:'red'}}>
                                 {this.state.errorMessage}
                             </Grid>
 
                             <Grid item sm={12} xs={12} style={{marginBottom:"10px"}}>
-                                <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
-                                    <Tooltip title="Back" style={{outline:'none'}}>
-                                        <IconButton aria-label="cancel" onClick={()=> this.setState({diKlik:true})}>
-                                            <CancelIcon style={{width:'35px',height:'35px'}}/>
-                                        </IconButton>
-                                    </Tooltip>       
-                                </Grid> 
                                 <Grid container spacing={2}>
                                     <Grid item sm={2} xs={12} style={{marginBottom:'10px'}}>
                                         <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto KTP" onClick={this.handleDialog}></input>                               
@@ -290,8 +309,7 @@ class profileNasabahDetail extends React.Component{
                 </Grid>
             )
         
-        }
-        if(getTokenAuth()){
+        } else if(getTokenAuth()){
             return (
                 <Redirect to='/login' />
             )    

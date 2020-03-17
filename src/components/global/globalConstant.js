@@ -32,13 +32,13 @@ exports.dataMenu = [
             {
                 permission: 'lender_loan_request_list',
                 label: 'Disetujui',
-                link: '/pinjamansetuju',
+                link: '/pinjamanSetuju',
                 logo:'pinjamanDiterima.svg',
             },
             {
                 permission: 'lender_loan_request_list',
                 label: 'Tidak Disetujui',
-                link: '/pinjamanrejected',
+                link: '/pinjamanTolak',
                 logo:'pinjamanDitolak.svg',
             }
         ]

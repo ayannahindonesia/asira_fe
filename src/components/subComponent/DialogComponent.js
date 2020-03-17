@@ -116,7 +116,7 @@ class DialogComponent extends React.Component {
                         { type && type === 'image' && this.imageArea(classes, message, title, this.props.base64Boolean)}
                         { type && type !== 'image' && 
                             <Typography gutterBottom>
-                                {message}
+                              {message}
                             </Typography>
                         }
                     </DialogContent>
@@ -126,11 +126,11 @@ class DialogComponent extends React.Component {
                             {
                               type === 'textfield' && 
                               <Button color="primary" onClick={(e) => onClose(e,true)} style={{outline:'none'}}>
-                                Yes
+                                Ya
                               </Button>
                             }
                             <Button color="primary" onClick={onClose} style={{outline:'none'}}>
-                                No
+                              Tidak
                             </Button>
                         </DialogActions>
                     }

@@ -3,20 +3,33 @@ import { Redirect } from 'react-router-dom'
 import Moment from 'react-moment'
 import swal from 'sweetalert';
 import { getPermintaanPinjamanDetailFunction } from './saga';
-import Loader from 'react-loader-spinner'
+import Loading from '../subComponent/Loading';
 import { checkPermission, handleFormatDate,formatNumber, findAmount } from './../global/globalFunction'
 import { getTokenAuth, getTokenClient } from '../index/token';
 import GridDetail from './../subComponent/GridDetail'
 import TitleBar from '../subComponent/TitleBar';
-import { Button } from '@material-ui/core';
 import DatePicker from './../subComponent/DateTimePicker'
-import { Grid, Tooltip, IconButton } from '@material-ui/core';
-import CancelIcon from '@material-ui/icons/Cancel';
+import { Grid, TextField } from '@material-ui/core';
+import ActionComponent from '../subComponent/ActionComponent';
 
 class Main extends React.Component{
     _isMounted=false
 
-    state = {errorMessage:'',rows:{},formInfo:[],items:[],borrowerDetail:{},status:'',endDate:null,diterima:false,ditolak:false,productInfo:'',loading:true,dateApprove:null,reason:null}
+    state = {
+        errorMessage:'',
+        rows:{},
+        formInfo:[],
+        items:[],
+        borrowerDetail:{},
+        status:'',
+        endDate:null,
+        diterima:false,
+        ditolak:false,
+        productInfo:'',
+        loading:true,
+        dateApprove:null,
+        reason:'',
+    }
 
     formatMoney=(number)=>
     { return number.toLocaleString('in-RP', {style : 'currency', currency: 'IDR'})}
@@ -47,16 +60,20 @@ class Main extends React.Component{
                 param.reason = this.state.reason
             }
         }
+
         const data = await getPermintaanPinjamanDetailFunction (param,status)
+
         if(data){
             if(!data.error){
                 if(!status) {
-                    this.setState({rows:data.dataLender,
+                    this.setState({
+                        rows:data.dataLender,
                         formInfo:data.dataLender.form_info,
                         items:data.dataLender.fees,
                         status:data.dataLender.status,
                         borrowerDetail:data.dataLender.borrower_info,
-                        loading:false})
+                        loading:false
+                    })
                 } else if(status === 'terima'){
                     swal("Permintaan","Diterima","success")
                     this._isMounted && this.setState({errorMessage:'',diterima:true})
@@ -75,7 +92,8 @@ class Main extends React.Component{
         this.setState({
           endDate: date
         });
-      }
+    }
+
     renderAdminFee = ()=>{
         var jsx = this.state.items.map((val,index)=>{
             return (
@@ -128,12 +146,12 @@ class Main extends React.Component{
 
 
     btnTolakPinjaman = ()=>{
-        var reject = this.refs.alasanPenolakan.value
+        const reject = this.state.reason
 
         if(!reject || reject.trim()===''){
             this.setState({errorMessage:"Alasan Penolakan Kosong - Harap Cek Ulang"})
         }else{
-            this.setState({reason: reject}, () => { this.getDataDetailBtn('tolak')});
+            this.getDataDetailBtn('tolak')
         }
       
     }
@@ -154,21 +172,22 @@ class Main extends React.Component{
         })
          return jsx;
     }
+
     renderFormInfoJsx = ()=>{
         var jsx = this.state.formInfo.map((val,index)=>{
             return(
                 <GridDetail
-                key={index}
-                gridLabel={[3,7]}
-                label={
-                [
-                    
-                    [val.label]
-                ] 
-                }
-                data={this.state.rows && [
-                    [this.desctructFormInfo(val.answers).toString()]
-                ]}                 
+                    key={index}
+                    gridLabel={[3,7]}
+                    label={
+                        [
+                            [val.label]
+                        ] 
+                    }
+                    data={this.state.rows && [
+                        [this.desctructFormInfo(val.answers).toString()]
+                    ]
+                }                 
                 />
             )
         })
@@ -198,26 +217,33 @@ class Main extends React.Component{
         }
     }
 
+    onChangeTextField = (e, labelData, number) => {
+        let dataText = e.target.value;
+
+        if(number && isNaN(dataText)) {           
+            dataText = this.state[labelData];          
+        }
+
+        this.setState({[labelData]:dataText})
+    }
+
     render(){
         if(this.state.loading){
             return(
-                <Loader 
-                type="ThreeDots"
-                color="#00BFFF"
-                height="30"	
-                width="30"
-                />  
+                <Loading
+                    title={'Pinjaman - Detail'}
+                /> 
             )
         }
         if(this.state.diterima){
             return (
-                <Redirect to='/pinjamansetuju' />
+                <Redirect to='/pinjamanSetuju' />
             )   
         }
         
         if(this.state.ditolak){
             return (
-                <Redirect to='/pinjamanrejected' />
+                <Redirect to='/pinjamanTolak' />
             )   
         }
         if(getTokenAuth() && getTokenClient()){
@@ -238,231 +264,213 @@ class Main extends React.Component{
                     style={{padding:10, marginBottom:20, boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)', borderRadius:'15px'}}                  
                 >
                     
-                <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
-                    <Tooltip title="Back" style={{outline:'none'}}>
-                        <IconButton aria-label="cancel" onClick={this.btnBack}>
-                            <CancelIcon style={{width:'35px',height:'35px'}}/>
-                        </IconButton>
-                    </Tooltip>       
-                </Grid> 
-                   <Grid container>
-                    <Grid item sm={12} xs={12} style={{color:'red'}}>
-                        {this.state.errorMessage}
-                    </Grid>
+                    <Grid container>
+
+                        <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                            <ActionComponent
+                                permissionApprove={checkPermission("lender_loan_approve_reject") && this.state.status === 'processing' ? (e) => this.btnTerimaPinjaman : null}
+                                permissionReject={checkPermission("lender_loan_approve_reject") && this.state.status === 'processing' ? (e) => this.btnTolakPinjaman : null}
+                                onCancel={this.btnBack}
+                            />
+                        </Grid> 
+
+                        <Grid item sm={12} xs={12} style={{color:'red'}}>
+                            {this.state.errorMessage}
+                        </Grid>
+
+                        <Grid container style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
+                            <Grid item xs={3} sm={3}>
+                                {
+                                    this.state.status && (this.state.status === "processing" || this.state.status === "approved") &&
+                                    <b>Tanggal Pencairan</b>
+                                }
+                            </Grid>
+                            <Grid item xs={9} sm={9} style={{alignItems:"left"}}>
+                                {
+                                    this.state.status && (this.state.status === "processing" || this.state.status === "approved") &&
+                                    <b style={{marginRight:'10px'}}>:</b>
+                                }
+                                
+                                {
+                                    this.state.status && this.state.status === "processing" &&
+                                    
+                                    <DatePicker
+                                        type='dateOnly'
+                                        onChange={this.handleEndChange}
+                                        value={this.state.endDate}
+                                        style={{top:"-20px",border:"1px solid grey",borderRadius:"3px"}}
+                                        InputProps={{disableUnderline: true}}
+                                    />
+                                }
+                                {
+                                    this.state.status && this.state.status === "approved" &&
+                                    <Moment date={this.state.rows.disburse_date} format=" DD  MMMM  YYYY" />   
+                                }
+                                {
+                                    this.state.rows.disburse_date_changed &&
+                                    <b> (Telah Diubah)</b>
+                                }
+                            </Grid>
+
+
+                        </Grid>
+
+                        {
+                            this.state.status && (this.state.status === "processing" || this.state.status === "rejected") &&
+                            <Grid container style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
+                                <Grid item xs={3} sm={3}>
+                                    <b>Alasan Penolakan</b>
+                                </Grid>
+                                <Grid item xs={4} sm={4} >
+                                    {
+                                        this.state.status === "processing" &&
+                                        <TextField
+                                            id="reason"
+                                            value={this.state.reason}
+                                            onChange={(e) => this.onChangeTextField(e,'reason')} 
+                                            margin="dense"
+                                            variant="outlined"
+                                            fullWidth
+                                        />
+                                    }
+                                    {
+                                        this.state.status === "rejected" &&
+                                        this.state.rows.reject_reason
+                                    }
+                                    
+                                </Grid>
+                            </Grid>
+                        }
 
                     {/* -----------------------------------------------------FIRST ROW----------------------------------------------------------------- */}
-                    <GridDetail
-                        gridLabel={[5,5,3]}
-                        noTitleLine
-                        background
-                        label={[
-                            ['ID Pinjaman','Nama Nasabah'],
-                            ['Rekening Pinjaman','Status Pinjaman'],
-                            ['Kategori', 'Agen/ AE'],
-                        ]}
-                        data={this.state.rows && [
-                            [
-                            this.state.rows.id,
-                            this.state.rows.borrower_name
-                            ],
-                            [
-                            this.state.rows.bank_account,
-                            this.state.status &&   this.state.status === "processing"?
-                                {value:"Dalam Proses", color:'blue'}
-                                : this.state.status === "approved" && this.state.rows.disburse_status ==="confirmed"?
-                                {value:"Telah Dicairkan", color:'blue'}:
-                                this.state.status ==='rejected'?
-                                {value:"Ditolak", color:'red'}:
-                                this.state.status === 'approved'?
-                                {value:"Diterima", color:'green'}:
-                                null
-                            ],
-                            [
-                            this.state.rows.category===""?"Personal":this.state.rows.category==="account_executive"?"Account Executive":"Agent",
-                            `${this.state.rows.agent_name?this.state.rows.agent_name:"-"} (${this.state.rows.agent_provider_name?this.state.rows.agent_provider_name:"-"})`
-                            ],
-                        ]}                 
-                    />
+                        <GridDetail
+                            gridLabel={[5,5,3]}
+                            noTitleLine
+                            background
+                            label={[
+                                ['ID Pinjaman','Nama Nasabah'],
+                                ['Rekening Pinjaman','Status Pinjaman'],
+                                ['Kategori', 'Agen/ AE'],
+                            ]}
+                            data={this.state.rows && [
+                                [
+                                this.state.rows.id,
+                                this.state.rows.borrower_name
+                                ],
+                                [
+                                this.state.rows.bank_account,
+                                this.state.status &&   this.state.status === "processing"?
+                                    {value:"Dalam Proses", color:'blue'}
+                                    : this.state.status === "approved" && this.state.rows.disburse_status ==="confirmed"?
+                                    {value:"Telah Dicairkan", color:'blue'}:
+                                    this.state.status ==='rejected'?
+                                    {value:"Ditolak", color:'red'}:
+                                    this.state.status === 'approved'?
+                                    {value:"Diterima", color:'green'}:
+                                    null
+                                ],
+                                [
+                                this.state.rows.category===""?"Personal":this.state.rows.category==="account_executive"?"Account Executive":"Agent",
+                                `${this.state.rows.agent_name?this.state.rows.agent_name:"-"} (${this.state.rows.agent_provider_name?this.state.rows.agent_provider_name:"-"})`
+                                ],
+                            ]}                 
+                        />
 
                     {/* -----------------------------------------------------SECOND ROW----------------------------------------------------------------- */}
-                    <GridDetail
-                        gridLabel={[5,5]}
-                        label={
-                        [
-                            
-                            ['Pinjaman Pokok','Tenor (Bulan)','Total Pinjaman','Angsuran Perbulan'],
-                            this.state.status==='processing'? 
-                            ['Tujuan Pinjaman','Detail Tujuan','Tanggal Pengajuan']   :
-                            ['Tujuan Pinjaman','Detail Tujuan','Tanggal Pengajuan', 
-                            this.state.status==='approved'?"Tanggal Persetujuan":"Tanggal Ditolak"]
-                        ] 
-                        }
-                        data={this.state.rows && [
+                        <GridDetail
+                            gridLabel={[5,5]}
+                            label={
                             [
-                                this.formatMoney(parseInt(this.state.rows.loan_amount)),
-                                this.state.rows.installment,
-                                this.formatMoney(parseInt(this.state.rows.total_loan)),
-                                this.formatMoney(parseInt(this.state.rows.layaway_plan)),
-                            ],
-                            this.state.status==='processing'?
-                            [
-                                this.state.rows.loan_intention,
-                                this.state.rows.intention_details,
-                                handleFormatDate(this.state.rows.created_at)          
-                            ] :
-                            [
-                                this.state.rows.loan_intention,
-                                this.state.rows.intention_details,
-                                handleFormatDate(this.state.rows.created_at),
-                                handleFormatDate(this.state.rows.updated_at)           
-                            ],
-                            []
-                        ]}                 
-                    />
+                                
+                                ['Pinjaman Pokok','Tenor (Bulan)','Total Pinjaman','Angsuran Perbulan'],
+                                this.state.status==='processing'? 
+                                ['Tujuan Pinjaman','Detail Tujuan','Tanggal Pengajuan']   :
+                                ['Tujuan Pinjaman','Detail Tujuan','Tanggal Pengajuan', 
+                                this.state.status==='approved'?"Tanggal Persetujuan":"Tanggal Ditolak"]
+                            ] 
+                            }
+                            data={this.state.rows && [
+                                [
+                                    this.formatMoney(parseInt(this.state.rows.loan_amount)),
+                                    this.state.rows.installment,
+                                    this.formatMoney(parseInt(this.state.rows.total_loan)),
+                                    this.formatMoney(parseInt(this.state.rows.layaway_plan)),
+                                ],
+                                this.state.status==='processing'?
+                                [
+                                    this.state.rows.loan_intention,
+                                    this.state.rows.intention_details,
+                                    handleFormatDate(this.state.rows.created_at)          
+                                ] :
+                                [
+                                    this.state.rows.loan_intention,
+                                    this.state.rows.intention_details,
+                                    handleFormatDate(this.state.rows.created_at),
+                                    handleFormatDate(this.state.rows.updated_at)           
+                                ],
+                                []
+                            ]}                 
+                        />
 
                  
                     {/* Fee Section */}
-                    <GridDetail
-                        gridLabel={[8]}
-                        noEquals
-                        label={[
-                            ['','Imbal Hasil/ Bunga','Admin Fee','Convenience Fee'],
-                            [
-                                '(Jumlah)',
-                                "Rp. "+formatNumber(this.state.rows && this.state.rows.loan_amount && this.state.rows.interest && parseFloat(this.state.rows.interest * this.state.rows.loan_amount / 100).toFixed(0), true),
-                                "Rp. "+formatNumber(findAmount(this.state.rows && this.state.rows.fees, 'Admin Fee',this.state.rows && this.state.rows.loan_amount,false), true),
-                                "Rp. "+formatNumber(findAmount(this.state.rows && this.state.rows.fees, 'Convenience Fee',this.state.rows && this.state.rows.loan_amount,false), true)
-            
-            
-                            ],
-                            ['','','','']
-                    
-                        ]}
-                        data={this.state.rows && [
-                            [
-                                '<b>(%)',
-                                `<b>${parseFloat(this.state.rows.interest).toFixed(2)}%`,
-                                `<b>${findAmount(this.state.rows && this.state.rows.fees, 'Admin Fee',this.state.rows && this.state.rows.loan_amount,true)}%`,
-                                `<b>${findAmount(this.state.rows && this.state.rows.fees, 'Convenience Fee',this.state.rows && this.state.rows.loan_amount,true)}%`
-                            ],
-                            [' ',' ',' ',' '],
-                            [' ',' ',' ',' '],
-                            [' ',' ',' ',' '],
-                        ]}   
-                    />
+                        <GridDetail
+                            gridLabel={[8]}
+                            noEquals
+                            label={[
+                                ['','Imbal Hasil/ Bunga','Admin Fee','Convenience Fee'],
+                                [
+                                    '(Jumlah)',
+                                    "Rp. "+formatNumber(this.state.rows && this.state.rows.loan_amount && this.state.rows.interest && parseFloat(this.state.rows.interest * this.state.rows.loan_amount / 100).toFixed(0), true),
+                                    "Rp. "+formatNumber(findAmount(this.state.rows && this.state.rows.fees, 'Admin Fee',this.state.rows && this.state.rows.loan_amount,false), true),
+                                    "Rp. "+formatNumber(findAmount(this.state.rows && this.state.rows.fees, 'Convenience Fee',this.state.rows && this.state.rows.loan_amount,false), true)
+                
+                
+                                ],
+                                ['','','','']
+                        
+                            ]}
+                            data={this.state.rows && [
+                                [
+                                    '<b>(%)',
+                                    `<b>${parseFloat(this.state.rows.interest).toFixed(2)}%`,
+                                    `<b>${findAmount(this.state.rows && this.state.rows.fees, 'Admin Fee',this.state.rows && this.state.rows.loan_amount,true)}%`,
+                                    `<b>${findAmount(this.state.rows && this.state.rows.fees, 'Convenience Fee',this.state.rows && this.state.rows.loan_amount,true)}%`
+                                ],
+                                [' ',' ',' ',' '],
+                                [' ',' ',' ',' '],
+                                [' ',' ',' ',' '],
+                            ]}   
+                        />
 
 
                 
             
-             {/* -----------------------------------------------------THIRD ROW----------------------------------------------------------------- */}
+                    {/* -----------------------------------------------------THIRD ROW----------------------------------------------------------------- */}
             
-                    <GridDetail
-                        title={'Info Penghasilan Saat Pengajuan'}
-                        gridLabel={[3]}
-                        label={[
-                            ['Pendapatan perbulan','Penghasilan lain-lain (jika ada)','Sumber Penghasilan lain-lain']
-                        ]}
-                        data={this.state.rows && this.state.borrowerDetail&& [
-                            [
-                            this.state.borrowerDetail.monthly_income?
-                            this.formatMoney(parseInt(this.state.borrowerDetail.monthly_income))
-                            :0,
-                            this.state.borrowerDetail.other_income?this.formatMoney(parseInt(this.state.borrowerDetail.other_income)):0,
-                            this.state.borrowerDetail.other_incomesource
-                            ],
-                            
-                        ]}                 
-                    />
+                        <GridDetail
+                            title={'Info Penghasilan Saat Pengajuan'}
+                            gridLabel={[3]}
+                            label={[
+                                ['Pendapatan perbulan','Penghasilan lain-lain (jika ada)','Sumber Penghasilan lain-lain']
+                            ]}
+                            data={this.state.rows && this.state.borrowerDetail&& [
+                                [
+                                this.state.borrowerDetail.monthly_income?
+                                this.formatMoney(parseInt(this.state.borrowerDetail.monthly_income))
+                                :0,
+                                this.state.borrowerDetail.other_income?this.formatMoney(parseInt(this.state.borrowerDetail.other_income)):0,
+                                this.state.borrowerDetail.other_incomesource
+                                ],
+                                
+                            ]}                 
+                        />
 
-                    {this.renderFormInfoJsx()}
+                        {this.renderFormInfoJsx()}
            
              
-                    <Grid container style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
-                        <Grid item xs={3} sm={3}>
-                            {
-                                this.state.status && (this.state.status === "processing" || this.state.status === "approved") &&
-                                <b>Tanggal Pencairan</b>
-                            }
-                        </Grid>
-                        <Grid item xs={9} sm={9} style={{alignItems:"left"}}>
-                            {
-                                this.state.status && (this.state.status === "processing" || this.state.status === "approved") &&
-                                <b style={{marginRight:'10px'}}>:</b>
-                            }
-                            
-                            {
-                                this.state.status && this.state.status === "processing" &&
-                                
-                                <DatePicker
-                                    type='dateOnly'
-                                    onChange={this.handleEndChange}
-                                    value={this.state.endDate}
-                                    style={{top:"-20px",border:"1px solid grey",borderRadius:"3px"}}
-                                    InputProps={{disableUnderline: true}}
-                                />
-                            }
-                            {
-                                this.state.status && this.state.status === "approved" &&
-                                <Moment date={this.state.rows.disburse_date} format=" DD  MMMM  YYYY" />   
-                            }
-                            {
-                                this.state.rows.disburse_date_changed &&
-                                <b> (Telah Diubah)</b>
-                            }
-                        </Grid>
-
-
-                    </Grid>
-
-                    {
-                        this.state.status && (this.state.status === "processing" || this.state.status === "rejected") &&
-                        <Grid container style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
-                            <Grid item xs={3} sm={3}>
-                                <b>Alasan Penolakan</b>
-                            </Grid>
-                            <Grid item xs={9} sm={9} >
-                                <b style={{marginRight:'10px'}} >:</b>
-                                {
-                                    this.state.status === "processing" &&
-                                    <input type="text" ref="alasanPenolakan" placeholder="Masukan alasan.." style={{width:"250px",borderRadius:"3px"}}/>
-                                }
-                                {
-                                    this.state.status === "rejected" &&
-                                    this.state.rows.reject_reason
-                                }
-                                
-                            </Grid>
-                        </Grid>
-                    }
-
-                    <Grid container style={{marginBottom:'10px', marginTop:'10px', paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
-                        <Grid item xs={12} sm={12}>
-                            {
-                                checkPermission("lender_loan_approve_reject") && this.state.rows.status === 'processing' &&
-                                <Button disableElevation
-                                    variant='contained'
-                                    style={{marginRight:'10px',padding: '2px', width:'100px',backgroundColor:'rgb(32, 184, 137)', color:'white'}}
-                                    onClick={this.btnTerimaPinjaman}
-                                >
-                                   <b>Terima</b> 
-                                </Button>
-                            }
-
-                            {
-                                checkPermission("lender_loan_approve_reject") && this.state.rows.status === 'processing' &&
-                                <Button disableElevation
-                                    variant='contained'
-                                    style={{marginRight:'10px',padding: '2px', width:'100px',backgroundColor:'rgb(238, 105, 105)', color:'white'}}
-                                    onClick={this.btnTolakPinjaman}
-                                >
-                                    <b>Tolak</b>
-                                </Button>
-                            }  
-                            
-                        </Grid>
-
                         
-                    </Grid>
+
 
                   
 

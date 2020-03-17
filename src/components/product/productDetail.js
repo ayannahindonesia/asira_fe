@@ -5,18 +5,14 @@ import DropDown from '../subComponent/DropDown';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import TitleBar from '../subComponent/TitleBar';
-import { Grid, InputAdornment, FormControlLabel, Checkbox, TextField, IconButton, Tooltip } from '@material-ui/core';
+import { Grid, InputAdornment, FormControlLabel, Checkbox, TextField, IconButton } from '@material-ui/core';
 import {  detailProductFunction,detailServiceProductFunction} from './saga';
 import { getAllLayananListFunction } from '../layanan/saga';
 import { getTokenAuth, getTokenClient } from '../index/token';
-// import EditIcon from '@material-ui/icons/Edit';
-// import SaveIcon from '@material-ui/icons/Save';
-// import { checkPermission } from '../global/globalFunction';
-import DialogComponent from '../subComponent/DialogComponent';
 import NumberFormatCustom from '../subComponent/NumberFormatCustom';
 import Loading from '../subComponent/Loading';
-import CancelIcon from '@material-ui/icons/Cancel';
 import { constructFees, constructCollaterals, constructSector, constructMandatory, destructFees, destructSector, destructCollaterals, destructMandatory } from './function';
+import ActionComponent from '../subComponent/ActionComponent';
 
 
 
@@ -41,7 +37,6 @@ class ProductDetail extends React.Component{
         loading:true,
         checkAuto:true,
         modifyType: false,
-        dialog:false,
         feeType:'deduct_loan',
         description:'',
         listTypeFee:[
@@ -162,7 +157,6 @@ class ProductDetail extends React.Component{
         const data = await detailProductFunction({id},detailServiceProductFunction);
 
         if(data){
-            console.log(data)
             if(!data.error){
                 const dataProduct = data.dataProduct || [];
 
@@ -230,18 +224,6 @@ class ProductDetail extends React.Component{
 
         return flag
     }
-
-    // productEditBtn = async function (params) {
-    //     const data = await editProductFunction(params)
-    //     if(data){
-    //         if(!data.error){
-    //             swal("Berhasil","Produk berhasil bertambah","success")
-    //             this.setState({errorMessage:null,diKlik:true, loading:false})
-    //         }else{
-    //             this.setState({errorMessage:data.error, loading: false})
-    //         }
-    //     }
-    // }
     
     getBankService = async function () {
         const data = await getAllLayananListFunction({})
@@ -251,14 +233,6 @@ class ProductDetail extends React.Component{
             }else{
                 this.setState({errorMessage:data.error})
             }
-        }
-    }
-
-    btnConfirmationDialog = (e, nextStep) => {
-        this.setState({dialog: !this.state.dialog})
-
-        if(nextStep) {
-            this.btnSaveProduct()
         }
     }
 
@@ -397,7 +371,7 @@ class ProductDetail extends React.Component{
         } else if(this.state.loading) {
             return(
                 <Loading
-                    title={'Tipe Mitra - Tambah'}
+                    title={this.state.modifyType ?'Produk - Edit' : 'Produk - Detail'}
                 />
             )
             
@@ -419,49 +393,18 @@ class ProductDetail extends React.Component{
                         style={{padding:'20px', marginBottom:20, boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)', borderRadius:'15px'}}                  
                     >
                         <Grid container>
-                            {/* Dialog */}
-                            <DialogComponent 
-                                title={'Confirmation'}
-                                message={'Are you sure want to save this data ?'}
-                                type={'textfield'}
-                                openDialog={this.state.dialog}
-                                onClose={this.btnConfirmationDialog}
-                            />
+                             {/* Action Button */}
+                            <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                                <ActionComponent
+                                    onCancel={this.btnCancel}
+                                />
+                            </Grid> 
+
                             {/* Error */}
                             <Grid item xs={12} sm={12} style={{fontSize:'20px', padding:'0px 10px 10px', color:'red'}}>
                                 {this.state.errorMessage}
                             </Grid>
-                            {/* Action Button */}
-                            <Grid item xs={12} sm={12} style={{fontSize:'20px', padding:'0px 10px 10px', color:'red', display:'flex', justifyContent:'flex-end'}}>
-                                <Grid container style={{display:'flex', justifyContent:'flex-end', padding:'0'}}>
-                                    <Grid item xs={2} sm={2} style={{display:'flex', justifyContent:'flex-end'}}>
-                                        
-                                        {/* {
-                                           checkPermission('core_product_patch') && this.state.modifyType &&
-                                            <Tooltip title="Save" style={{outline:'none'}}>
-                                                <IconButton aria-label="save" onClick={this.btnConfirmationDialog} >
-                                                    <SaveIcon style={{width:'35px',height:'35px'}}/>
-                                                </IconButton>
-                                            </Tooltip>
-                                        }
-
-                                        {
-                                            checkPermission('core_product_patch') && !this.state.modifyType &&
-                                            <Tooltip title="Edit" style={{outline:'none'}}>
-                                                <IconButton aria-label="edit" onClick={this.btnEditProduct}>
-                                                    <EditIcon style={{width:'35px',height:'35px'}}/>
-                                                </IconButton>
-                                            </Tooltip>
-                                        } */}
-
-                                        <Tooltip title="Back" style={{outline:'none'}}>
-                                            <IconButton aria-label="cancel" onClick={this.btnCancel}>
-                                                <CancelIcon style={{width:'35px',height:'35px'}} />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Grid>
-                                </Grid>
-                            </Grid>
+                           
                             {/* Nama Produk */}
                             <Grid item xs={12} sm={12} style={{fontSize:'20px', padding:'0px 10px 10px'}}>
                                 <Grid container>

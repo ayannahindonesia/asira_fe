@@ -213,3 +213,14 @@ export function destructErrorMessage(objError) {
 
   return errorMessage
 }
+
+export async function changeFileToBase64(file) { 
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = function(e) { 
+        resolve(e.target.result)
+    };
+    reader.onerror = error => resolve({error});
+  });
+}
