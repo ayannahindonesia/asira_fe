@@ -151,7 +151,7 @@ class PinjamanRejected extends React.Component {
             rowsPerPage={this.state.rowsPerPage}
             totalData={this.state.total_data}
             onChangePage={this.onChangePage}             
-            permissionDetail={ checkPermission('lender_loan_request_detail') ? '/permintaanpinjamanDetail/' : null}
+            permissionDetail={ checkPermission('lender_loan_request_detail') ? '/pinjamanDetail/' : null}
         /> 
 
         

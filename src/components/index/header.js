@@ -86,7 +86,7 @@ class Example extends React.Component {
             }
 
             
-            { checkPermission('core_loan_get_all') && <Link to="/permintaanpinjaman"><label><i className="fas fa-hand-holding-usd"></i> Pinjaman</label></Link>}
+            { checkPermission('core_loan_get_all') && <Link to="/permintaanPinjaman"><label><i className="fas fa-hand-holding-usd"></i> Pinjaman</label></Link>}
             
             { checkPermission(['core_service_new','core_service_list']) && 
               <UncontrolledDropdown  nav inNavbar>

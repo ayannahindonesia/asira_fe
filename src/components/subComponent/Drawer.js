@@ -20,12 +20,11 @@ import Login from './../index/login'
 import Home from './../index/main'
 import Nasabah from './../profileNasabah/profileNasabah'
 import profileNasabahDetail from './../profileNasabah/profileNasabahDetail'
-import PermintaanPinjaman from './../permintaanPinjaman/permintaanPinjaman'
-import PermintaanPinjamanDetail from './../permintaanPinjaman/permintaanPinjamanDetail'
-import PinjamanSetuju from './../permintaanPinjaman/pinjamanSetuju'
-import PinjamanRejected from './../permintaanPinjaman/pinjamanRejected'
-import PencairanList from './../pencairan/pencairanList'
-import PencairanDetail from './../pencairan/pencairanDetail'
+import PermintaanPinjaman from '../pinjaman/permintaanPinjaman'
+import PermintaanPinjamanDetail from '../pinjaman/pinjamanDetail'
+import PinjamanSetuju from '../pinjaman/pinjamanSetuju'
+import PinjamanRejected from '../pinjaman/pinjamanRejected'
+import PencairanList from '../pinjaman/pencairanList'
 import CalonNasabahList from './../calonNasabah/calonNasabahList';
 import calonNasabahDetail from './../calonNasabah/calonNasabahDetail';
 import {Route,Switch} from 'react-router-dom'
@@ -50,7 +49,7 @@ const useStyles = makeStyles(theme => ({
   drawer: {
     backgroundColor: '#2076B8',
     fontSize:'12px',
-    color: 'white',
+    color: '#2076B8',
     [theme.breakpoints.up('sm')]: {
       width: drawerWidth,
       flexShrink: 0,
@@ -59,7 +58,7 @@ const useStyles = makeStyles(theme => ({
   appBar: {
     marginLeft: drawerWidth,
     backgroundColor: 'transparent',
-    color: 'white',
+    color: '#2076B8',
     shadow: 'rgba(0,0,0,0)',
     [theme.breakpoints.up('sm')]: {
       width: `0px`,
@@ -73,10 +72,12 @@ const useStyles = makeStyles(theme => ({
   },
   toolbar: theme.mixins.toolbar,
   drawerPaper: {
-    backgroundColor: '#2076B8',
+    backgroundColor: '#F2F5F8',
     fontSize:'12px',
-    color: 'white',
+    color: '#2076B8',
     width: drawerWidth,
+    boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', 
+    WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)'
   },
   content: {
     flexGrow: 1,
@@ -88,7 +89,7 @@ const useStyles = makeStyles(theme => ({
     },
     fontSize:'14px',
     opacity: "100%",
-    color:'white',
+    color:'#2076B8',
   },
 
   textColorChild: {
@@ -98,7 +99,7 @@ const useStyles = makeStyles(theme => ({
     },
     fontSize:'12px',
     opacity: "100%",
-    color:'white',
+    color:'#2076B8',
   },
 }));
 
@@ -154,17 +155,17 @@ function ResponsiveDrawer(props) {
   const drawer = (
     <div>
       <List style={{padding:0}}>
-        <Link to={'/'}  style={{textDecoration:'none', color:'white'}}>
-          <ListItem style={{paddingTop:'10%',paddingLeft:'38%', backgroundColor:'#196197'}}>
+        <Link to={'/'}  style={{textDecoration:'none', color:'#2076B8'}}>
+          <ListItem style={{paddingTop:'10%',paddingLeft:'38%', backgroundColor:'#F2F5F8'}}>
             <ListItemText style={{minWidth:30}} primary=
             {
-              <Typography style={{textAlign:'center', borderRadius:'3px', backgroundColor:'white', height:'50px', width:'50px'}}>
-                { bank.image && <img src={`${bank.image}`} alt='' style={{textAlign:'center', borderRadius:'3px', backgroundColor:'white', height:'50px', width:'50px'}} />}
+              <Typography style={{textAlign:'center', borderRadius:'3px', backgroundColor:'#2076B8', height:'50px', width:'50px'}}>
+                { bank.image && <img src={`${bank.image}`} alt='' style={{textAlign:'center', borderRadius:'3px', backgroundColor:'#F2F5F8', height:'50px', width:'50px'}} />}
               </Typography>
             }
             />
           </ListItem>
-          <ListItem style={{backgroundColor:'#196197',padding:0, paddingBottom:'5%'}}>       
+          <ListItem style={{backgroundColor:'#F2F5F8',padding:0, paddingBottom:'5%'}}>       
             <ListItemText primary={<Typography style={{textAlign: 'center',fontSize:'16px'}}> {bank.name} </Typography>} />
           </ListItem>
         </Link>
@@ -175,7 +176,7 @@ function ResponsiveDrawer(props) {
               if(!menuParent.child) {
                 return (
                   <div key={`${menuParent.label}-${index}`} className={classes.textColorHeader} >
-                    <Link to={menuParent.link || '/'}  style={{textDecoration:'none', color:'white'}}>
+                    <Link to={menuParent.link || '/'}  style={{textDecoration:'none', color:'#2076B8'}}>
                       <ListItem button onClick={menuParent.permission === 'keluar' ? logOutBtn : null}>
                         <ListItemIcon style={{minWidth:30}}>{menuParent.logo && <img src={require(`./../../icons/${menuParent.logo}`)} alt='' style={{maxWidth:20, height: 'auto'}} />}</ListItemIcon>
                         <ListItemText primary={<Typography style={{fontSize:'14px'}}> {menuParent.label} </Typography>} />
@@ -200,7 +201,7 @@ function ResponsiveDrawer(props) {
                             if(checkPermission(menuChild.permission)) {
                               return(
                                 <div key={`${menuChild.label}-${index}`} className={classes.textColorChild} >
-                                  <Link to={menuChild.link || '/'}  style={{textDecoration:'none', color:'white'}}>
+                                  <Link to={menuChild.link || '/'}  style={{textDecoration:'none', color:'#2076B8'}}>
                                     <ListItem button >
                                       <ListItemIcon style={{minWidth:30}}>{menuChild.logo && <img src={require(`./../../icons/${menuChild.logo}`)} alt='' style={{maxWidth:20, height: 'auto'}} />}</ListItemIcon>
                                       <ListItemText primary={<Typography style={{fontSize:'12px'}}> {menuChild.label} </Typography> } />
@@ -244,7 +245,7 @@ function ResponsiveDrawer(props) {
             onClick={handleDrawerToggle}
             className={classes.menuButton}
           >
-            <MenuIcon style={{backgroundColor:'#2076B8', borderRadius:'3px'}} />
+            <MenuIcon style={{color:'#F2F5F8',backgroundColor:'#2076B8', borderRadius:'3px'}} />
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -276,6 +277,7 @@ function ResponsiveDrawer(props) {
               paper: classes.drawerPaper,
             }}
             variant="permanent"
+            elevation={16}
             open
           >
             
@@ -291,12 +293,11 @@ function ResponsiveDrawer(props) {
               <Route path='/' component={Home} exact></Route>
               { checkPermission('lender_borrower_list') && <Route path='/profileNasabah' component={Nasabah}></Route>}
               { checkPermission('lender_borrower_list_detail') && <Route path="/profileNasabahDetail/:id" component={profileNasabahDetail}></Route>}
-              { checkPermission('lender_loan_request_list') && <Route path="/permintaanpinjaman" component={PermintaanPinjaman}></Route>}
-              { checkPermission('lender_loan_request_detail') && <Route path="/permintaanpinjamanDetail/:idLoan" component={PermintaanPinjamanDetail}></Route>}
+              { checkPermission('lender_loan_request_list') && <Route path="/permintaanPinjaman" component={PermintaanPinjaman}></Route>}
+              { checkPermission('lender_loan_request_detail') && <Route path="/pinjamanDetail/:idLoan" component={PermintaanPinjamanDetail}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path='/pinjamanSetuju' component={PinjamanSetuju}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path='/pinjamanTolak' component={PinjamanRejected}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path='/pencairanList' component={PencairanList}></Route>}
-              { checkPermission('lender_loan_request_detail') && <Route path='/pencairanDetail/:idLoan' component={PencairanDetail}></Route>}
               { checkPermission('lender_borrower_list') && <Route path='/listCalonNasabah' component={CalonNasabahList}></Route>}
               { checkPermission('lender_borrower_list_detail') && <Route path='/detailCalonNasabah/:id' component={calonNasabahDetail}></Route>}
 

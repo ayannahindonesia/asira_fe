@@ -523,7 +523,7 @@ class PinjamanSetuju extends React.Component {
                 },
               ]
             }        
-            permissionDetail={ checkPermission('lender_loan_request_detail') ? '/permintaanpinjamanDetail/' : null}
+            permissionDetail={ checkPermission('lender_loan_request_detail') ? '/pinjamanDetail/' : null}
           /> 
         
         </div>
