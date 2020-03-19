@@ -13,6 +13,8 @@ import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardMedia from '@material-ui/core/CardMedia';
 import BrokenLink from './../../support/img/default.png'
+import DatePicker from './../subComponent/DateTimePicker'
+import { Grid, TextField } from '@material-ui/core';
 
 const styles = theme => ({
   root: {
@@ -114,21 +116,66 @@ class DialogComponent extends React.Component {
                     </DialogTitle>
                     <DialogContent dividers>
                         { type && type === 'image' && this.imageArea(classes, message, title, this.props.base64Boolean)}
-                        { type && type !== 'image' && 
+                        { (!type || (type && type === 'textfield')) && 
                             <Typography gutterBottom>
                               {message}
                             </Typography>
+                        }
+                        {
+                          type && type === 'form' && message && message.map((formMessage, index) => {
+                            if(formMessage.type && formMessage.type === 'textfield') {
+                              return (
+                                <Grid container key={`${formMessage.id}-${index}`} style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
+                                  <Grid item xs={3} sm={3} style={{paddingTop:'20px'}}>
+                                      <b>{formMessage.title}</b>
+                                  </Grid>
+                                  <Grid item xs={4} sm={4} >
+                                      <TextField
+                                          id={formMessage.id}
+                                          value={formMessage.value}
+                                          onChange={(e) => formMessage.function(e,formMessage.id)} 
+                                          margin="dense"
+                                          variant="outlined"
+                                          fullWidth
+                                      /> 
+                                  </Grid>
+                              </Grid>
+                              )
+                            } else if (formMessage.type && formMessage.type === 'date'){
+                              return (
+                                <Grid container key={`${formMessage.id}-${index}`} style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
+                                    <Grid item xs={3} sm={3} style={{paddingTop:'25px'}}>
+                                        <b>{formMessage.title}</b>
+                                        
+                                    </Grid>
+                                    <Grid item xs={4} sm={4} style={{alignItems:"left"}}>
+                                        <DatePicker
+                                            id={formMessage.id}
+                                            type='dateOnly'
+                                            onChange={formMessage.function}
+                                            value={formMessage.value}
+                                            style={{top:"-20px",border:"1px solid grey",borderRadius:"3px", padding:'5px 0px 5px 10px'}}
+                                        />
+                                        
+                                    </Grid>
+
+
+                                </Grid>
+                              )
+                            } else {
+                              return null
+                            }
+                          }, this)
                         }
                     </DialogContent>
                     {
                         type && type !== 'image' && 
                         <DialogActions>
-                            {
-                              type === 'textfield' && 
-                              <Button color="primary" onClick={(e) => onClose(e,true)} style={{outline:'none'}}>
-                                Ya
-                              </Button>
-                            }
+                            
+                            <Button color="primary" onClick={(e) => onClose(e,true)} style={{outline:'none'}}>
+                              Ya
+                            </Button>
+                            
                             <Button color="primary" onClick={onClose} style={{outline:'none'}}>
                               Tidak
                             </Button>
@@ -144,7 +191,6 @@ class DialogComponent extends React.Component {
 DialogComponent.propTypes = {
     title: PropTypes.string,
     type: PropTypes.string,
-    message: PropTypes.string,
     onClose: PropTypes.func,
 };
   
