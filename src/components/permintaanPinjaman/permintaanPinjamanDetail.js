@@ -1,16 +1,15 @@
 import React from 'react'
 import { Redirect } from 'react-router-dom'
-import Moment from 'react-moment'
 import swal from 'sweetalert';
 import { getPermintaanPinjamanDetailFunction } from './saga';
 import Loading from '../subComponent/Loading';
-import { checkPermission, handleFormatDate,formatNumber, findAmount } from './../global/globalFunction'
+import { checkPermission, handleFormatDate, findAmount, formatMoney } from './../global/globalFunction'
 import { getTokenAuth, getTokenClient } from '../index/token';
 import GridDetail from './../subComponent/GridDetail'
 import TitleBar from '../subComponent/TitleBar';
-import DatePicker from './../subComponent/DateTimePicker'
-import { Grid, TextField } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 import ActionComponent from '../subComponent/ActionComponent';
+import DialogComponent from '../subComponent/DialogComponent';
 
 class Main extends React.Component{
     _isMounted=false
@@ -18,8 +17,6 @@ class Main extends React.Component{
     state = {
         errorMessage:'',
         rows:{},
-        formInfo:[],
-        items:[],
         borrowerDetail:{},
         status:'',
         endDate:null,
@@ -29,25 +26,24 @@ class Main extends React.Component{
         loading:true,
         dateApprove:null,
         reason:'',
+        dialog: false,
+        statusPinjaman: '',
+        title:'',
     }
-
-    formatMoney=(number)=>
-    { return number.toLocaleString('in-RP', {style : 'currency', currency: 'IDR'})}
 
     componentDidMount(){
         this._isMounted=true
         this.getDataDetail()
     }
-    UNSAFE_componentWillReceiveProps(newProps){
-        this.setState({errorMessage:newProps.error})
-    }
 
     componentWillUnmount(){
         this._isMounted=false
     }
+
     getDataDetail =()=>{
         this._isMounted && this.getDataDetailBtn()
     }
+
     getDataDetailBtn = async function(status){
         const param = {}
         param.idLoan = this.props.match.params.idLoan 
@@ -66,60 +62,168 @@ class Main extends React.Component{
         if(data){
             if(!data.error){
                 if(!status) {
+                    console.log(data.dataLender)
+                    const rows = data.dataLender;
+
+                    
+                    const pinjamanInfo = this.getPinjamanInfo(rows);
+                    const feesInfo = this.getFeesInfo(data.dataLender && data.dataLender.fees, rows && rows.loan_amount)
+                    const formInfo = this.getFormInfo(data.dataLender && data.dataLender.form_info)
+
+
                     this.setState({
-                        rows:data.dataLender,
-                        formInfo:data.dataLender.form_info,
-                        items:data.dataLender.fees,
+                        rows,
+                        pinjamanInfo,
+                        formInfo,
+                        feesInfo,
                         status:data.dataLender.status,
                         borrowerDetail:data.dataLender.borrower_info,
                         loading:false
                     })
                 } else if(status === 'terima'){
                     swal("Permintaan","Diterima","success")
-                    this._isMounted && this.setState({errorMessage:'',diterima:true})
+                    this._isMounted && this.setState({errorMessage:'',diterima:true, loading:false})
                 } else if(status === 'tolak'){
                     swal("Permintaan","Ditolak","warning")
-                    this._isMounted && this.setState({errorMessage:'',ditolak:true})
+                    this._isMounted && this.setState({errorMessage:'',ditolak:true , loading:false})
                 }
                 
             }else{
-                this.setState({errorMessage:data.error})
+                this.setState({errorMessage:data.error, loading:false})
             }
         }
     }
+
+    getPinjamanInfo = (rows) => {
+        let pinjamanInfo = {};
+
+        if(rows) {
+            pinjamanInfo = {
+                title: [
+                    ['Total Pinjaman','Pinjaman Pokok', 'Bunga'],
+                    ['Tenor', 'Tujuan Pinjaman','Keterangan'],
+                    ['Tanggal Pengajuan']
+                ],
+                value: [
+                    [formatMoney(rows.total_loan),formatMoney(rows.loan_amount),`${rows.interest}%`],
+                    [rows.installment, rows.loan_intention, rows.intention_details],
+                    [handleFormatDate(rows.created_at)]
+                ],
+            }
     
-    handleEndChange = (date)=> {
-        this.setState({
-          endDate: date
-        });
+            if(rows.status === 'approved') {
+                pinjamanInfo.title[1].push('Total Pencairan')
+                pinjamanInfo.value[1].push(formatMoney(rows.disburse_amount))
+                pinjamanInfo.title[2].push('Tanggal Penerimaan')
+                pinjamanInfo.value[2].push(handleFormatDate(rows.approval_date))
+                pinjamanInfo.title[2].push('Tanggal Pencairan')
+                pinjamanInfo.value[2].push(`${handleFormatDate(rows.disburse_date)} ${rows.disburse_date_changed ? '(Telah Diubah)' : ''}`)
+            } else if(rows.status === 'rejected') {
+                pinjamanInfo.title[2].push('Tanggal Penolakan')
+                pinjamanInfo.value[2].push(handleFormatDate(rows.approval_date))
+                pinjamanInfo.title[2].push('Alasan Penolakan')
+                pinjamanInfo.value[2].push(rows.reject_reason)
+            }
+        }
+        
+
+        return pinjamanInfo;
     }
 
-    renderAdminFee = ()=>{
-        var jsx = this.state.items.map((val,index)=>{
-            return (
-            <tr key={index}>
-                <td>{val.description}</td>
-                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                <td>
-                    {String(val.amount).includes("%")?
-                     val.amount :
-                     parseInt(val.amount)/parseInt(this.state.rows.loan_amount)*100 +"%"}
-                </td>
-                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                <td>{String(val.amount).includes("%")  ?
-                    this.formatMoney(parseInt(val.amount.slice(0,val.amount.indexOf("%")))*this.state.rows.loan_amount/100):
-                    this.formatMoney(parseInt(val.amount))}</td>
-            </tr>
-            )
-        })
-        return jsx
+    getFeesInfo = (fees, loanAmount) => {
+        let feesInfo = {}
+        
+        if(fees) {
+            feesInfo = {
+                title: [],
+                value: [],
+            }
+
+            let arrayFee = 0;
+
+            for(const key in fees) {
+                if(arrayFee === 2) {
+                    arrayFee = 0;
+                }
+
+                if(!feesInfo.title[arrayFee]) {
+                    feesInfo.title[arrayFee] = []
+                };
+                feesInfo.title[arrayFee].push(fees[key].description)
+
+                if(!feesInfo.value[arrayFee]) {
+                    feesInfo.value[arrayFee] = []
+                };
+                feesInfo.value[arrayFee].push(findAmount(fees[key] && fees[key].amount, loanAmount))
+
+                arrayFee += 1;
+            }
+        }
+
+        return feesInfo;
     }
-   
+
+    getFormInfo = (form) => {
+        let formInfo = {};
+
+        if(form) { 
+            formInfo = {
+                title: [],
+                value: [],
+            }
+
+            let arrayForm = 0;
+
+            for(const key in form) {
+                if(arrayForm === 3) {
+                    arrayForm = 0
+                }
+
+                if(!formInfo.title[arrayForm]) {
+                    formInfo.title[arrayForm] = []
+                };
+                formInfo.title[arrayForm].push(form[key].label)
+
+                if(!formInfo.value[arrayForm]) {
+                    formInfo.value[arrayForm] = []
+                };
+                
+                if(typeof(form[key].answers) === 'object') {
+                    const answers = form[key].answers;
+                    let stringAnswers = '';
+
+                    for(const keyAnswers in answers) {
+                        if(stringAnswers.length !== 0) {
+                            stringAnswers += ', '
+                        }
+                        console.log(isNaN(keyAnswers))
+                        if(!isNaN(keyAnswers)) {
+                            console.log(answers[keyAnswers])
+                            console.log(keyAnswers)
+                            stringAnswers += answers[keyAnswers] ? keyAnswers : ''
+                        } else {
+                            stringAnswers += answers[keyAnswers] 
+                        }
+                        
+                    }
+                } else {
+                    formInfo.value[arrayForm].push(form[key].answers)
+                }
+                
+
+
+                arrayForm += 1;
+            }
+        }
+
+        return formInfo;
+    }
     
     btnTerimaPinjaman = ()=>{
-        const {endDate} = this.state
-        if (endDate === null){
-            this.setState({errorMessage:"Tanggal Pencairan Kosong - Harap Cek Ulang"})
+        const {endDate} = this.state;
+        
+        if (endDate === null || (endDate && endDate.toString() === 'Invalid Date')){
+            this.setState({errorMessage:"Harap Masukkan Tanggal Pencairan dengan benar"})
         }else{
             var endMonth =''+ (endDate.getMonth()+1),
             endDay = '' + endDate.getDate(),
@@ -138,12 +242,11 @@ class Main extends React.Component{
             }
             
             const newFormatEndDate = endYear+"-"+newMonth+"-"+newDay
-            this.setState({dateApprove: newFormatEndDate},()=>{
+            this.setState({dateApprove: newFormatEndDate, loading: true},()=>{
                 this.getDataDetailBtn('terima')
             });
         }
     }
-
 
     btnTolakPinjaman = ()=>{
         const reject = this.state.reason
@@ -151,6 +254,7 @@ class Main extends React.Component{
         if(!reject || reject.trim()===''){
             this.setState({errorMessage:"Alasan Penolakan Kosong - Harap Cek Ulang"})
         }else{
+            this.setState({loading: true})
             this.getDataDetailBtn('tolak')
         }
       
@@ -160,61 +264,12 @@ class Main extends React.Component{
         window.history.back()
     }
 
-    getBiayaAdmin =()=>{
-        var jsx = this.state.items
-        .map((val,index)=>{
-            return (
-                    <tr key={index}>
-                    <td>{val.description}</td>
-                    <td>: {this.formatMoney(parseInt(val.amount))}</td>
-                    </tr>
-            )
-        })
-         return jsx;
-    }
-
-    renderFormInfoJsx = ()=>{
-        var jsx = this.state.formInfo.map((val,index)=>{
-            return(
-                <GridDetail
-                    key={index}
-                    gridLabel={[3,7]}
-                    label={
-                        [
-                            [val.label]
-                        ] 
-                    }
-                    data={this.state.rows && [
-                        [this.desctructFormInfo(val.answers).toString()]
-                    ]
-                }                 
-                />
-            )
-        })
-        return jsx
-    }
-
-    desctructFormInfo = (array)=>{
-        var newArray=[]
-
-        for(var i=0;i<array.length;i++){
-            for (const key in array[i]){
-                newArray.push(key)
-            }
-        }
-
-        return newArray
-    }
-    calculateConvienceFee = (percent)=>{
-        var imbalhasil = this.state.rows.interest*this.state.rows.loan_amount/100
-        var total = this.state.items.map((val)=>{
-            return parseInt(val.amount) * this.state.rows.loan_amount/100
-        })
-        if(percent) {
-            return (parseInt(this.state.rows.total_loan)-parseInt(this.state.rows.loan_amount)-parseInt(imbalhasil) - parseInt(total)) / parseInt(this.state.rows.loan_amount) * 100 
-        } else {
-            return this.formatMoney(parseInt(this.state.rows.total_loan)-parseInt(this.state.rows.loan_amount)-parseInt(imbalhasil) - parseInt(total))
-        }
+    handleEndChange = (date)=> {
+        this.setState({
+          endDate: date
+        },() => {
+            this.settingMessage()
+        });
     }
 
     onChangeTextField = (e, labelData, number) => {
@@ -223,8 +278,62 @@ class Main extends React.Component{
         if(number && isNaN(dataText)) {           
             dataText = this.state[labelData];          
         }
+        
+        this.setState({[labelData]:dataText}, () => {
+            if(labelData === 'reason') {
+                this.settingMessage()
+            } 
+            
+        })
+    }
 
-        this.setState({[labelData]:dataText})
+    settingMessage = (statusPinjamanParam) => {
+        let message = this.state.message;
+        let title = this.state.title;
+        let statusPinjaman = statusPinjamanParam || this.state.statusPinjaman
+
+        if(statusPinjaman && statusPinjaman === 'terima') {
+            title = 'Persetujuan';
+            message = [
+                {
+                    id: 'endDate',
+                    title: 'Tanggal Pencairan',
+                    type:'date',
+                    value:this.state.endDate,
+                    function:this.handleEndChange,
+                }
+            ]
+        } else if(statusPinjaman && statusPinjaman === 'tolak') {
+            title = 'Penolakan'
+            message = [
+                {
+                    id: 'reason',
+                    title: 'Alasan Penolakan',
+                    type: 'textfield',
+                    value: this.state.reason,
+                    function: this.onChangeTextField,
+                }
+            ]
+            
+            
+        }
+
+
+        this.setState({title, message})
+    }
+
+    btnConfirmationDialog = (e, nextStep, statusPinjaman) => {
+        
+        this.settingMessage(statusPinjaman)
+        this.setState({dialog: !this.state.dialog, statusPinjaman});
+  
+        if(nextStep) {
+            if(this.state.statusPinjaman === 'terima') {
+                this.btnTerimaPinjaman()
+            } else if (this.state.statusPinjaman === 'tolak') {
+                this.btnTolakPinjaman()
+            }
+        }
     }
 
     render(){
@@ -253,7 +362,7 @@ class Main extends React.Component{
                 <Grid item sm={12} xs={12} style={{maxHeight:50}}>
                     
                     <TitleBar
-                        title={'Permintaan Pinjaman - Detail'}
+                        title={'Pinjaman - Detail'}
                     />
 
                 </Grid>
@@ -266,10 +375,18 @@ class Main extends React.Component{
                     
                     <Grid container>
 
+                        <DialogComponent
+                            title={`Konfirmasi ${this.state.title}`}
+                            openDialog={this.state.dialog}
+                            message={this.state.message}
+                            type='form'
+                            onClose={this.btnConfirmationDialog}
+                        />
+
                         <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
                             <ActionComponent
-                                permissionApprove={checkPermission("lender_loan_approve_reject") && this.state.status === 'processing' ? (e) => this.btnTerimaPinjaman : null}
-                                permissionReject={checkPermission("lender_loan_approve_reject") && this.state.status === 'processing' ? (e) => this.btnTolakPinjaman : null}
+                                permissionApprove={checkPermission("lender_loan_approve_reject") && this.state.status === 'processing' ? (e, nextStep) => this.btnConfirmationDialog(e, nextStep,'terima') : null}
+                                permissionReject={checkPermission("lender_loan_approve_reject") && this.state.status === 'processing' ? (e, nextStep) => this.btnConfirmationDialog(e, nextStep, 'tolak') : null}
                                 onCancel={this.btnBack}
                             />
                         </Grid> 
@@ -278,71 +395,7 @@ class Main extends React.Component{
                             {this.state.errorMessage}
                         </Grid>
 
-                        <Grid container style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
-                            <Grid item xs={3} sm={3}>
-                                {
-                                    this.state.status && (this.state.status === "processing" || this.state.status === "approved") &&
-                                    <b>Tanggal Pencairan</b>
-                                }
-                            </Grid>
-                            <Grid item xs={9} sm={9} style={{alignItems:"left"}}>
-                                {
-                                    this.state.status && (this.state.status === "processing" || this.state.status === "approved") &&
-                                    <b style={{marginRight:'10px'}}>:</b>
-                                }
-                                
-                                {
-                                    this.state.status && this.state.status === "processing" &&
-                                    
-                                    <DatePicker
-                                        type='dateOnly'
-                                        onChange={this.handleEndChange}
-                                        value={this.state.endDate}
-                                        style={{top:"-20px",border:"1px solid grey",borderRadius:"3px"}}
-                                        InputProps={{disableUnderline: true}}
-                                    />
-                                }
-                                {
-                                    this.state.status && this.state.status === "approved" &&
-                                    <Moment date={this.state.rows.disburse_date} format=" DD  MMMM  YYYY" />   
-                                }
-                                {
-                                    this.state.rows.disburse_date_changed &&
-                                    <b> (Telah Diubah)</b>
-                                }
-                            </Grid>
-
-
-                        </Grid>
-
-                        {
-                            this.state.status && (this.state.status === "processing" || this.state.status === "rejected") &&
-                            <Grid container style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
-                                <Grid item xs={3} sm={3}>
-                                    <b>Alasan Penolakan</b>
-                                </Grid>
-                                <Grid item xs={4} sm={4} >
-                                    {
-                                        this.state.status === "processing" &&
-                                        <TextField
-                                            id="reason"
-                                            value={this.state.reason}
-                                            onChange={(e) => this.onChangeTextField(e,'reason')} 
-                                            margin="dense"
-                                            variant="outlined"
-                                            fullWidth
-                                        />
-                                    }
-                                    {
-                                        this.state.status === "rejected" &&
-                                        this.state.rows.reject_reason
-                                    }
-                                    
-                                </Grid>
-                            </Grid>
-                        }
-
-                    {/* -----------------------------------------------------FIRST ROW----------------------------------------------------------------- */}
+                        {/* Detail Pinjaman */}
                         <GridDetail
                             gridLabel={[5,5,3]}
                             noTitleLine
@@ -376,77 +429,23 @@ class Main extends React.Component{
                             ]}                 
                         />
 
-                    {/* -----------------------------------------------------SECOND ROW----------------------------------------------------------------- */}
+                        {/* Pinjaman Section */}
                         <GridDetail
+                            title={'Informasi Pinjaman'}
                             gridLabel={[5,5]}
-                            label={
-                            [
-                                
-                                ['Pinjaman Pokok','Tenor (Bulan)','Total Pinjaman','Angsuran Perbulan'],
-                                this.state.status==='processing'? 
-                                ['Tujuan Pinjaman','Detail Tujuan','Tanggal Pengajuan']   :
-                                ['Tujuan Pinjaman','Detail Tujuan','Tanggal Pengajuan', 
-                                this.state.status==='approved'?"Tanggal Persetujuan":"Tanggal Ditolak"]
-                            ] 
-                            }
-                            data={this.state.rows && [
-                                [
-                                    this.formatMoney(parseInt(this.state.rows.loan_amount)),
-                                    this.state.rows.installment,
-                                    this.formatMoney(parseInt(this.state.rows.total_loan)),
-                                    this.formatMoney(parseInt(this.state.rows.layaway_plan)),
-                                ],
-                                this.state.status==='processing'?
-                                [
-                                    this.state.rows.loan_intention,
-                                    this.state.rows.intention_details,
-                                    handleFormatDate(this.state.rows.created_at)          
-                                ] :
-                                [
-                                    this.state.rows.loan_intention,
-                                    this.state.rows.intention_details,
-                                    handleFormatDate(this.state.rows.created_at),
-                                    handleFormatDate(this.state.rows.updated_at)           
-                                ],
-                                []
-                            ]}                 
+                            label={ this.state.pinjamanInfo && this.state.pinjamanInfo.title }
+                            data={ this.state.pinjamanInfo && this.state.pinjamanInfo.value }                 
                         />
 
-                 
-                    {/* Fee Section */}
+                        {/* Fee Section */}
                         <GridDetail
-                            gridLabel={[8]}
-                            noEquals
-                            label={[
-                                ['','Imbal Hasil/ Bunga','Admin Fee','Convenience Fee'],
-                                [
-                                    '(Jumlah)',
-                                    "Rp. "+formatNumber(this.state.rows && this.state.rows.loan_amount && this.state.rows.interest && parseFloat(this.state.rows.interest * this.state.rows.loan_amount / 100).toFixed(0), true),
-                                    "Rp. "+formatNumber(findAmount(this.state.rows && this.state.rows.fees, 'Admin Fee',this.state.rows && this.state.rows.loan_amount,false), true),
-                                    "Rp. "+formatNumber(findAmount(this.state.rows && this.state.rows.fees, 'Convenience Fee',this.state.rows && this.state.rows.loan_amount,false), true)
-                
-                
-                                ],
-                                ['','','','']
-                        
-                            ]}
-                            data={this.state.rows && [
-                                [
-                                    '<b>(%)',
-                                    `<b>${parseFloat(this.state.rows.interest).toFixed(2)}%`,
-                                    `<b>${findAmount(this.state.rows && this.state.rows.fees, 'Admin Fee',this.state.rows && this.state.rows.loan_amount,true)}%`,
-                                    `<b>${findAmount(this.state.rows && this.state.rows.fees, 'Convenience Fee',this.state.rows && this.state.rows.loan_amount,true)}%`
-                                ],
-                                [' ',' ',' ',' '],
-                                [' ',' ',' ',' '],
-                                [' ',' ',' ',' '],
-                            ]}   
+                            gridLabel={[4,4]}
+                            title={'Informasi Biaya'}
+                            label={this.state.feesInfo && this.state.feesInfo.title}
+                            data={this.state.feesInfo && this.state.feesInfo.value}   
                         />
-
-
-                
-            
-                    {/* -----------------------------------------------------THIRD ROW----------------------------------------------------------------- */}
+    
+                    {/* Penghasilan Section */}
             
                         <GridDetail
                             title={'Info Penghasilan Saat Pengajuan'}
@@ -454,24 +453,28 @@ class Main extends React.Component{
                             label={[
                                 ['Pendapatan perbulan','Penghasilan lain-lain (jika ada)','Sumber Penghasilan lain-lain']
                             ]}
-                            data={this.state.rows && this.state.borrowerDetail&& [
+                            data={this.state.rows && this.state.borrowerDetail && [
                                 [
                                 this.state.borrowerDetail.monthly_income?
-                                this.formatMoney(parseInt(this.state.borrowerDetail.monthly_income))
+                                formatMoney(parseInt(this.state.borrowerDetail.monthly_income))
                                 :0,
-                                this.state.borrowerDetail.other_income?this.formatMoney(parseInt(this.state.borrowerDetail.other_income)):0,
+                                this.state.borrowerDetail.other_income?formatMoney(parseInt(this.state.borrowerDetail.other_income)):0,
                                 this.state.borrowerDetail.other_incomesource
                                 ],
                                 
                             ]}                 
                         />
 
-                        {this.renderFormInfoJsx()}
-           
-             
                         
-
-
+                        {/* Form Section */}
+                        {this.state.formInfo && this.state.formInfo.title && this.state.formInfo.value &&
+                            <GridDetail
+                                gridLabel={[4,4]}
+                                title={'Informasi Form'}
+                                label={this.state.formInfo && this.state.formInfo.title}
+                                data={this.state.formInfo && this.state.formInfo.value}   
+                            />
+                        }
                   
 
                     </Grid>
