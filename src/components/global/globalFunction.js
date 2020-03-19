@@ -156,26 +156,20 @@ export function decryptImage(textImage) {
   
 }
 
-export function findAmount (dataFees, stringFee, amountPinjamanPokok, charPersen){
+export function formatMoney(number){ 
+  return number.toLocaleString('in-RP', {style : 'currency', currency: 'IDR'})
+}
+
+export function findAmount (dataFees, amountPinjamanPokok){
   let feeNew = '';
   
-  if(dataFees && stringFee && amountPinjamanPokok) {
-    for(const key in dataFees) {
-      if(dataFees[key].description.toString().toLowerCase() === stringFee.toString().toLowerCase()) {
-        if(dataFees[key].amount.toString().toLowerCase().includes('%')) {
-          if(charPersen) {
-            feeNew = parseFloat(dataFees[key].amount).toFixed(2);
-          } else {
-            feeNew = parseInt(dataFees[key].amount) * amountPinjamanPokok / 100;
-          }
-        } else {
-          if(charPersen) {
-            feeNew = parseFloat(parseInt(dataFees[key].amount)  * 100 / amountPinjamanPokok).toFixed(2);
-          } else {
-            feeNew = parseInt(dataFees[key].amount);
-          }
-        }
-      }
+  if(dataFees && amountPinjamanPokok) {
+    if(dataFees.toString().toLowerCase().includes('%')) {
+      feeNew = `${parseFloat(dataFees).toFixed(2)}%`;
+      feeNew += ` atau ${formatMoney(parseInt(dataFees) * amountPinjamanPokok / 100)}`;
+    } else {
+      feeNew = `${parseFloat(parseInt(dataFees)  * 100 / amountPinjamanPokok).toFixed(2)}%`;
+      feeNew += ` atau ${formatMoney(parseInt(dataFees))}`;
     }
   }
 
