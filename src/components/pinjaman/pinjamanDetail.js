@@ -3,9 +3,9 @@ import { Redirect } from 'react-router-dom'
 import swal from 'sweetalert';
 import { getPermintaanPinjamanDetailFunction } from './saga';
 import Loading from '../subComponent/Loading';
-import { checkPermission, handleFormatDate, findAmount, formatMoney } from './../global/globalFunction'
+import { checkPermission, handleFormatDate, findAmount, formatMoney } from '../global/globalFunction'
 import { getTokenAuth, getTokenClient } from '../index/token';
-import GridDetail from './../subComponent/GridDetail'
+import GridDetail from '../subComponent/GridDetail'
 import TitleBar from '../subComponent/TitleBar';
 import { Grid } from '@material-ui/core';
 import ActionComponent from '../subComponent/ActionComponent';
@@ -17,10 +17,11 @@ class Main extends React.Component{
     state = {
         errorMessage:'',
         rows:{},
-        borrowerDetail:{},
         status:'',
         endDate:null,
         diterima:false,
+        dicairkan: false,
+        dipinjam:false,
         ditolak:false,
         productInfo:'',
         loading:true,
@@ -28,6 +29,7 @@ class Main extends React.Component{
         reason:'',
         dialog: false,
         statusPinjaman: '',
+        disburse_status: '',
         title:'',
     }
 
@@ -67,8 +69,10 @@ class Main extends React.Component{
 
                     
                     const pinjamanInfo = this.getPinjamanInfo(rows);
+                    const detailInfo = this.getDetailInfo(rows);
                     const feesInfo = this.getFeesInfo(data.dataLender && data.dataLender.fees, rows && rows.loan_amount)
                     const formInfo = this.getFormInfo(data.dataLender && data.dataLender.form_info)
+                    const borrowerInfo = this.getBorrowerInfo(data.dataLender && data.dataLender.borrower_info)
 
 
                     this.setState({
@@ -76,8 +80,10 @@ class Main extends React.Component{
                         pinjamanInfo,
                         formInfo,
                         feesInfo,
+                        borrowerInfo,
+                        detailInfo,
                         status:data.dataLender.status,
-                        borrowerDetail:data.dataLender.borrower_info,
+                        disburse_status: data.dataLender.disburse_status,
                         loading:false
                     })
                 } else if(status === 'terima'){
@@ -94,26 +100,77 @@ class Main extends React.Component{
         }
     }
 
-    getPinjamanInfo = (rows) => {
-        let pinjamanInfo = {};
+    getDetailInfo = (rows) => {
+        let pinjamanInfo = null;
 
         if(rows) {
             pinjamanInfo = {
                 title: [
-                    ['Total Pinjaman','Pinjaman Pokok', 'Bunga'],
-                    ['Tenor', 'Tujuan Pinjaman','Keterangan'],
+                    ['ID Pinjaman','Nasabah', 'Rekening'],
+                    ['Status Pinjaman','Kategori', 'Agen/ AE'],
+                ],
+                value: [
+                    [
+                        rows.id,
+                        `${rows.borrower_name || '-'} ( ${rows.borrower || '-'} )`,
+                        rows.bank_account,
+                    ],
+                    [
+                        rows.status &&   rows.status === "processing" ? {value:"Dalam Proses", color:'blue'} : 
+                        rows.status === "approved" && rows.disburse_status ==="confirmed" ? {value:"Telah Dicairkan", color:'blue'} :
+                        rows.status ==='rejected'? {value:"Ditolak", color:'red'} :
+                        rows.status === 'approved'? {value:"Diterima", color:'green'} : null,
+                        rows.category === ""? "Personal":
+                        rows.category==="account_executive"?"Account Executive":"Agent",
+                        `${rows.agent_name?rows.agent_name:"-"} (${rows.agent_provider_name?rows.agent_provider_name:"-"})`
+                    ],
+                ],
+            }
+        }
+        
+
+        return pinjamanInfo;
+    }
+
+    getBorrowerInfo = (borrower) => {
+        let borrowerInfo = null;
+
+        if(borrower) {
+            borrowerInfo = {
+                title: [
+                    ['Ulang Tahun','Nomor Telepon', 'Nomor KTP', 'Nomor NPWP'],
+                    ['Pendapatan', 'Sumber Pendapatan', 'Pendapatan Lainnya','Sumber Pendapatan Lainnya'],
+                ],
+                value: [
+                    [handleFormatDate(borrower.birthday), borrower.phone, borrower.idcard_number, borrower.taxid_number ],
+                    [formatMoney(borrower.monthly_income), borrower.occupation, formatMoney(borrower.other_income), borrower.other_incomesource]
+                ],
+            }
+        }
+
+        return borrowerInfo;
+    }
+
+    getPinjamanInfo = (rows) => {
+        let pinjamanInfo = null;
+
+        if(rows) {
+            pinjamanInfo = {
+                title: [
+                    ['Total Pinjaman','Pinjaman Pokok', 'Tenor'],
+                    ['Produk', 'Bunga', 'Tujuan Pinjaman','Keterangan'],
                     ['Tanggal Pengajuan']
                 ],
                 value: [
-                    [formatMoney(rows.total_loan),formatMoney(rows.loan_amount),`${rows.interest}%`],
-                    [rows.installment, rows.loan_intention, rows.intention_details],
+                    [formatMoney(rows.total_loan),formatMoney(rows.loan_amount), rows.installment],
+                    [rows.product,`${rows.interest}%`, rows.loan_intention, rows.intention_details],
                     [handleFormatDate(rows.created_at)]
                 ],
             }
     
             if(rows.status === 'approved') {
-                pinjamanInfo.title[1].push('Total Pencairan')
-                pinjamanInfo.value[1].push(formatMoney(rows.disburse_amount))
+                pinjamanInfo.title[0].push('Total Pencairan')
+                pinjamanInfo.value[0].push(formatMoney(rows.disburse_amount))
                 pinjamanInfo.title[2].push('Tanggal Penerimaan')
                 pinjamanInfo.value[2].push(handleFormatDate(rows.approval_date))
                 pinjamanInfo.title[2].push('Tanggal Pencairan')
@@ -131,7 +188,7 @@ class Main extends React.Component{
     }
 
     getFeesInfo = (fees, loanAmount) => {
-        let feesInfo = {}
+        let feesInfo = null
         
         if(fees) {
             feesInfo = {
@@ -164,7 +221,7 @@ class Main extends React.Component{
     }
 
     getFormInfo = (form) => {
-        let formInfo = {};
+        let formInfo = null;
 
         if(form) { 
             formInfo = {
@@ -196,21 +253,11 @@ class Main extends React.Component{
                         if(stringAnswers.length !== 0) {
                             stringAnswers += ', '
                         }
-                        console.log(isNaN(keyAnswers))
-                        if(!isNaN(keyAnswers)) {
-                            console.log(answers[keyAnswers])
-                            console.log(keyAnswers)
-                            stringAnswers += answers[keyAnswers] ? keyAnswers : ''
-                        } else {
-                            stringAnswers += answers[keyAnswers] 
-                        }
-                        
+                        stringAnswers += answers[keyAnswers] 
                     }
                 } else {
                     formInfo.value[arrayForm].push(form[key].answers)
                 }
-                
-
 
                 arrayForm += 1;
             }
@@ -261,7 +308,18 @@ class Main extends React.Component{
     }
 
     btnBack = ()=>{
-        window.history.back()
+        if(this.state.status === 'processing') {
+            this.setState({dipinjam: true})
+        } else if(this.state.status === 'approved' && this.state.disburse_status === 'confirmed') {
+            this.setState({dicairkan: true})
+        } else if(this.state.status === 'approved' && this.state.disburse_status === 'processing') {
+            this.setState({diterima: true})
+        } else if(this.state.status === 'rejected') {
+            this.setState({ditolak: true})
+        } else {
+            window.history.back()
+        }
+        
     }
 
     handleEndChange = (date)=> {
@@ -343,19 +401,23 @@ class Main extends React.Component{
                     title={'Pinjaman - Detail'}
                 /> 
             )
-        }
-        if(this.state.diterima){
+        } else if(this.state.dipinjam){
+            return (
+                <Redirect to='/pencairanList' />
+            )   
+        } else if(this.state.dicairkan){
+            return (
+                <Redirect to='/pencairanList' />
+            )   
+        } else if(this.state.diterima){
             return (
                 <Redirect to='/pinjamanSetuju' />
             )   
-        }
-        
-        if(this.state.ditolak){
+        } else if(this.state.ditolak){
             return (
                 <Redirect to='/pinjamanTolak' />
             )   
-        }
-        if(getTokenAuth() && getTokenClient()){
+        } else if(getTokenAuth() && getTokenClient()){
             return(
               <Grid container className="containerDetail">
                       
@@ -396,83 +458,56 @@ class Main extends React.Component{
                         </Grid>
 
                         {/* Detail Pinjaman */}
-                        <GridDetail
-                            gridLabel={[5,5,3]}
-                            noTitleLine
-                            background
-                            label={[
-                                ['ID Pinjaman','Nama Nasabah'],
-                                ['Rekening Pinjaman','Status Pinjaman'],
-                                ['Kategori', 'Agen/ AE'],
-                            ]}
-                            data={this.state.rows && [
-                                [
-                                this.state.rows.id,
-                                this.state.rows.borrower_name
-                                ],
-                                [
-                                this.state.rows.bank_account,
-                                this.state.status &&   this.state.status === "processing"?
-                                    {value:"Dalam Proses", color:'blue'}
-                                    : this.state.status === "approved" && this.state.rows.disburse_status ==="confirmed"?
-                                    {value:"Telah Dicairkan", color:'blue'}:
-                                    this.state.status ==='rejected'?
-                                    {value:"Ditolak", color:'red'}:
-                                    this.state.status === 'approved'?
-                                    {value:"Diterima", color:'green'}:
-                                    null
-                                ],
-                                [
-                                this.state.rows.category===""?"Personal":this.state.rows.category==="account_executive"?"Account Executive":"Agent",
-                                `${this.state.rows.agent_name?this.state.rows.agent_name:"-"} (${this.state.rows.agent_provider_name?this.state.rows.agent_provider_name:"-"})`
-                                ],
-                            ]}                 
-                        />
+                        {   this.state.detailInfo && 
+                            <GridDetail
+                                gridLabel={[4,4]}
+                                noTitleLine
+                                background
+                                label={this.state.detailInfo.title}
+                                data={this.state.detailInfo.value}                 
+                            />
+                        }
+                        
 
                         {/* Pinjaman Section */}
-                        <GridDetail
-                            title={'Informasi Pinjaman'}
-                            gridLabel={[5,5]}
-                            label={ this.state.pinjamanInfo && this.state.pinjamanInfo.title }
-                            data={ this.state.pinjamanInfo && this.state.pinjamanInfo.value }                 
-                        />
+                        {   this.state.pinjamanInfo &&
+                            <GridDetail
+                                title={'Informasi Pinjaman'}
+                                gridLabel={[5,5]}
+                                label={ this.state.pinjamanInfo.title }
+                                data={ this.state.pinjamanInfo.value }                 
+                            />
+                        }
+
+                        {/* Nasabah Section */}
+                        {   this.state.borrowerInfo &&
+                            <GridDetail
+                                title={'Informasi Nasabah'}
+                                gridLabel={[4,6]}
+                                label={this.state.borrowerInfo.title}
+                                data={this.state.borrowerInfo.value}                 
+                            />
+                        }
 
                         {/* Fee Section */}
-                        <GridDetail
-                            gridLabel={[4,4]}
-                            title={'Informasi Biaya'}
-                            label={this.state.feesInfo && this.state.feesInfo.title}
-                            data={this.state.feesInfo && this.state.feesInfo.value}   
-                        />
-    
-                    {/* Penghasilan Section */}
-            
-                        <GridDetail
-                            title={'Info Penghasilan Saat Pengajuan'}
-                            gridLabel={[3]}
-                            label={[
-                                ['Pendapatan perbulan','Penghasilan lain-lain (jika ada)','Sumber Penghasilan lain-lain']
-                            ]}
-                            data={this.state.rows && this.state.borrowerDetail && [
-                                [
-                                this.state.borrowerDetail.monthly_income?
-                                formatMoney(parseInt(this.state.borrowerDetail.monthly_income))
-                                :0,
-                                this.state.borrowerDetail.other_income?formatMoney(parseInt(this.state.borrowerDetail.other_income)):0,
-                                this.state.borrowerDetail.other_incomesource
-                                ],
-                                
-                            ]}                 
-                        />
-
+                        {
+                            this.state.feesInfo &&
+                            <GridDetail
+                                gridLabel={[4,4]}
+                                title={'Informasi Biaya'}
+                                label={this.state.feesInfo.title}
+                                data={this.state.feesInfo.value}   
+                            />
+                        }
+                        
                         
                         {/* Form Section */}
-                        {this.state.formInfo && this.state.formInfo.title && this.state.formInfo.value &&
+                        {   this.state.formInfo && 
                             <GridDetail
                                 gridLabel={[4,4]}
                                 title={'Informasi Form'}
-                                label={this.state.formInfo && this.state.formInfo.title}
-                                data={this.state.formInfo && this.state.formInfo.value}   
+                                label={this.state.formInfo.title}
+                                data={this.state.formInfo.value}   
                             />
                         }
                   
@@ -480,8 +515,7 @@ class Main extends React.Component{
                     </Grid>
                 </Grid>
             </Grid>
-        )}
-        if(getTokenAuth()){
+        )} else {
             return (
                 <Redirect to='/login' />
             )    

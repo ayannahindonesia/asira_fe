@@ -134,7 +134,7 @@ class PermintaanPinjaman extends React.Component {
             search={
               {
                 value: this.state.searchRows,
-                label: 'Search ID Nasabah, Nama Nasabah',
+                label: 'Search ID Pinjaman, Nama Nasabah',
                 function: this.onBtnSearch,
               }
             }
@@ -149,7 +149,7 @@ class PermintaanPinjaman extends React.Component {
             rowsPerPage={this.state.rowsPerPage}
             totalData={this.state.total_data}
             onChangePage={this.onChangePage}             
-            permissionDetail={ checkPermission('lender_loan_request_detail') ? '/permintaanpinjamanDetail/' : null}
+            permissionDetail={ checkPermission('lender_loan_request_detail') ? '/pinjamanDetail/' : null}
         /> 
 
         

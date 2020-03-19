@@ -1,6 +1,6 @@
 import React from 'react'
 import { Redirect } from 'react-router-dom'
-import { getPermintaanPinjamanFunction } from '../permintaanPinjaman/saga';
+import { getPermintaanPinjamanFunction } from './saga';
 import { checkPermission } from '../global/globalFunction';
 import { getTokenClient } from '../index/token';
 import TableComponent from '../subComponent/TableComponent'
@@ -117,7 +117,7 @@ class PencairanList extends React.Component{
 
                    < TableComponent
                         id={"id"}
-                        title={'Pencairan - Loan'}
+                        title={'Pinjaman Cair - List'}
                         errorMessage={this.state.errorMessage}
                         search={
                             {
@@ -134,7 +134,7 @@ class PencairanList extends React.Component{
                         rowsPerPage={this.state.rowsPerPage}
                         totalData={this.state.totalData}
                         onChangePage={this.onChangePage}             
-                        permissionDetail={ checkPermission('lender_loan_request_detail') ? '/pencairanDetail/' : null}
+                        permissionDetail={ checkPermission('lender_loan_request_detail') ? '/pinjamanDetail/' : null}
                     />
 
                   
