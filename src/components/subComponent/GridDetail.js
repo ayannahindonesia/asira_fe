@@ -73,7 +73,7 @@ class GridDetails extends React.Component {
   }
 
   findBold = (data) => {
-    let dataNew = data.toString();
+    let dataNew = (data && data.toString()) || '-';
 
     if(dataNew.includes('<b>')) {
       dataNew = dataNew.split('<b>')
@@ -131,21 +131,8 @@ class GridDetails extends React.Component {
                   }
                 </Grid>
 
-                { dataPerRow && !dataPerRow.type &&
-                  <Grid item sm={11} xs={11} style={{color:dataPerRow&& dataPerRow.color? dataPerRow.color:dataPerRow, paddingRight:'10px'}} >
-                    {
-                      dataPerRow && dataPerRow.color ?  dataPerRow.value : (dataPerRow ? this.findBold(dataPerRow) : '-')
-                    }
-                  </Grid>
-                }
+                { this.renderDataPerRow(dataPerRow) }
 
-                { dataPerRow && dataPerRow.type && dataPerRow.type==='image' &&
-                  <Grid item sm={11} xs={11} style={{paddingRight:'10px'}} >
-                    {
-                      this.imageArea(dataPerRow.value, dataPerRow.label, dataPerRow.base64Boolean)
-                    }
-                  </Grid>
-                }
               </Grid>
             </Grid>
           </Grid>
@@ -155,6 +142,33 @@ class GridDetails extends React.Component {
     }, this);
       
     return tester
+  }
+
+  renderDataPerRow = (dataPerRow) => {
+    if(dataPerRow) {
+      if(dataPerRow && dataPerRow.type && dataPerRow.type==='image') {
+        return(
+          <Grid item sm={11} xs={11} style={{paddingRight:'10px'}} >
+            {
+              this.imageArea(dataPerRow.value, dataPerRow.label, dataPerRow.base64Boolean)
+            }
+          </Grid> 
+        )
+      }
+      return (
+        <Grid item sm={11} xs={11} style={{color:dataPerRow&& dataPerRow.color? dataPerRow.color:dataPerRow, paddingRight:'10px'}} >
+          {
+            dataPerRow.value ? this.findBold(dataPerRow.value) : this.findBold(dataPerRow)
+          }
+        </Grid>
+      )                 
+    }
+
+    return (
+      <Grid item sm={11} xs={11} style={{paddingRight:'10px'}} >
+        {'-'}
+      </Grid>
+    )
   }
 
   render() {

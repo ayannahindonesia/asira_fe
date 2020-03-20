@@ -2,16 +2,14 @@ import React from 'react'
 import { Redirect } from 'react-router-dom'
 import './../../support/css/productEdit.css'
 import DropDown from '../subComponent/DropDown';
-import AddIcon from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
 import TitleBar from '../subComponent/TitleBar';
-import { Grid, InputAdornment, FormControlLabel, Checkbox, TextField, IconButton } from '@material-ui/core';
+import { Grid, InputAdornment, FormControlLabel, Checkbox, TextField } from '@material-ui/core';
 import {  detailProductFunction,detailServiceProductFunction} from './saga';
 import { getAllLayananListFunction } from '../layanan/saga';
 import { getTokenAuth, getTokenClient } from '../index/token';
 import NumberFormatCustom from '../subComponent/NumberFormatCustom';
 import Loading from '../subComponent/Loading';
-import { constructFees, constructCollaterals, constructSector, constructMandatory, destructFees, destructSector, destructCollaterals, destructMandatory } from './function';
+import { destructFees, destructSector, destructCollaterals, destructMandatory } from './function';
 import ActionComponent from '../subComponent/ActionComponent';
 
 
@@ -36,7 +34,6 @@ class ProductDetail extends React.Component{
         tipeBunga:'fixed',
         loading:true,
         checkAuto:true,
-        modifyType: false,
         feeType:'deduct_loan',
         description:'',
         listTypeFee:[
@@ -151,7 +148,6 @@ class ProductDetail extends React.Component{
         this.setState({errorMessage:newProps.error})
     }
        
-    
     getProductDetailId = async function () {
         const id = this.props.match.params.id
         const data = await detailProductFunction({id},detailServiceProductFunction);
@@ -172,13 +168,14 @@ class ProductDetail extends React.Component{
                     namaProduct: dataProduct.name,
                     layanan: dataProduct.service_id,
                     check: dataProduct.status === 'active' ? true : false,
-                    checkAuto: dataProduct.auto_paid ? true : false,
+                    checkAuto: dataProduct.record_installment_details ? true : false,
                     interest: dataProduct.interest,
                     rentangFrom: dataProduct.min_loan,
                     rentangTo: dataProduct.max_loan,
                     timeFrom: dataProduct.min_timespan,
                     timeTo: dataProduct.max_timespan,
                     asuransi: dataProduct.assurance,
+                    description: dataProduct.description,
                     feeType,
                     mandatory,
                     sektor,
@@ -193,38 +190,6 @@ class ProductDetail extends React.Component{
         }
     }
     
-      
-    validate = () => {
-        let flag = true;
-
-        if(!this.state.namaProduct || this.state.namaProduct.trim().length === 0) {
-            flag = false;
-            this.setState({errorMessage: 'Mohon isi Nama Produk dengan benar'})
-        } else if(!this.state.layanan || this.state.layanan === 0) {
-            flag = false;
-            this.setState({errorMessage: 'Mohon pilih layanan dengan benar'})
-        } else if(!this.state.interest || this.state.interest === 0 || this.state.interest.toString().trim().length === 0) {
-            flag = false;
-            this.setState({errorMessage: 'Mohon isi bunga dengan benar'})
-        } else if(
-            !this.state.rentangFrom || this.state.rentangFrom === 0 || this.state.rentangFrom.toString().trim().length === 0 ||
-            !this.state.rentangTo || this.state.rentangTo === 0 || this.state.rentangTo.toString().trim().length === 0 ||
-            parseFloat(this.state.rentangFrom) > parseFloat(this.state.rentangTo)
-        ) {
-            flag = false;
-            this.setState({errorMessage: 'Mohon isi Rentang Nilai Pengajuan dengan benar'})
-        } else if(
-            !this.state.timeFrom || this.state.timeFrom === 0 || this.state.timeFrom.toString().trim().length === 0 ||
-            !this.state.timeTo || this.state.timeTo === 0 || this.state.timeTo.toString().trim().length === 0 ||
-            parseFloat(this.state.timeFrom) > parseFloat(this.state.timeTo)
-        ) {
-            flag = false;
-            this.setState({errorMessage: 'Mohon isi jangka waktu dengan benar'})
-        }
-
-        return flag
-    }
-    
     getBankService = async function () {
         const data = await getAllLayananListFunction({})
         if(data){
@@ -236,131 +201,8 @@ class ProductDetail extends React.Component{
         }
     }
 
-    btnSaveProduct = ()=>{
-        if(this.validate()) {
-            let newData = {
-                id: this.state.id,
-                name: this.state.namaProduct,
-                service_id: parseInt(this.state.layanan),
-                min_timespan: parseInt(this.state.timeFrom),
-                max_timespan: parseInt(this.state.timeTo),
-                interest: parseFloat(this.state.interest),
-                min_loan: parseFloat(this.state.rentangFrom),
-                max_loan: parseFloat(this.state.rentangTo),
-                interest_type: this.state.tipeBunga,
-                auto_paid: this.state.checkAuto,
-                status: this.state.check ? 'active':'nonactive',
-                description: this.state.description,
-            }
-
-            let fees = constructFees(this.state.fee || [], this.state.feeType);
-            let agunan = constructCollaterals(this.state.agunan || []);
-            let sektor = constructSector(this.state.sektor || []);
-            let mandatory = constructMandatory(this.state.mandatory || []);
-
-            if(this.state.asuransi && this.state.asuransi.toString().trim().length !== 0) {
-                newData.assurance = this.state.asuransi
-            }
-
-            if(fees) {
-                newData.fees = fees;
-            }
-
-            if(sektor) {
-                newData.financing_sector = sektor;
-            }
-
-            if(agunan) {
-                newData.collaterals = agunan;
-            }
-
-            if(mandatory) {
-                newData.form = mandatory;
-            }
-
-            this.setState({loading: true})
-
-            this.productEditBtn(newData)
-        }
-        
-    }
-
     btnCancel = ()=>{
         this.setState({diKlik:true})
-    }
-
-    handleChecked = (e, labelData)=>{
-        this.setState({[labelData]:!this.state[labelData]})
-    }
-
-    changeFlexibleData = (e, stringLabel, index, labelData, numeric) => {
-        const arrayData = this.state[labelData];
-
-        if(numeric && isNaN(e.target.value)) {           
-                      
-        } else {
-            arrayData[index][stringLabel] = e.target.value;
-        }
-
-        this.setState({[labelData]: arrayData})
-    }
-
-    btnTambahFlexibleData = (e, labelData) => {
-        const arrayData = this.state[labelData];
-
-        const dataNew = {
-            label: '',
-            type: labelData === 'mandatory' ? 'textfield' : labelData === 'fee' ? 'percent' : '',
-        }
-
-        if(labelData === 'mandatory') {
-            dataNew.status='required';
-            dataNew.value='';
-        } else {
-            dataNew.value='';
-        }
-
-        arrayData.push(dataNew)
-
-        
-
-        this.setState({[labelData]:arrayData});
-    }
-
-    deleteFlexibleData = (e, index, labelData) => {
-        
-        const arrayData = this.state[labelData];
-        const newArray = [];
-
-        for(const key in arrayData) {
-            
-            if(key.toString() !== index.toString() || (key.toString() === '0' && arrayData.length === 1)) {
-                newArray.push(arrayData[key])
-            }
-
-        }
-        
-        this.setState({[labelData]: newArray});
-    }
-
-    onChangeTextField = (e, labelData, number) => {
-        let dataText = e.target.value;
-
-        if(number && isNaN(dataText)) {           
-            dataText = this.state[labelData];          
-        }
-
-        this.setState({[labelData]:dataText})
-    }
-
-    changeDropDown = (e, labelData) => {
-        let newData = e.target.value;
-
-        this.setState({[labelData]: newData})
-    }
-
-    btnEditProduct = () => {
-        this.setState({modifyType: true})
     }
 
     render(){
@@ -371,7 +213,7 @@ class ProductDetail extends React.Component{
         } else if(this.state.loading) {
             return(
                 <Loading
-                    title={this.state.modifyType ?'Produk - Edit' : 'Produk - Detail'}
+                    title={'Produk - Detail'}
                 />
             )
             
@@ -383,7 +225,7 @@ class ProductDetail extends React.Component{
                     <Grid item sm={12} xs={12} style={{maxHeight:50}}>
                         
                         <TitleBar
-                            title={this.state.modifyType ?'Produk - Edit' : 'Produk - Detail'}
+                            title={'Produk - Detail'}
                         />
 
                     </Grid>
@@ -415,11 +257,10 @@ class ProductDetail extends React.Component{
                                         <TextField
                                             id="namaProduct"
                                             value={this.state.namaProduct}
-                                            onChange={(e) => this.onChangeTextField(e,'namaProduct')} 
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                         />
                                     </Grid>
                                 </Grid>
@@ -437,9 +278,8 @@ class ProductDetail extends React.Component{
                                             data={this.state.bankService}
                                             id="id"
                                             labelName={"name"}
-                                            onChange={(e) => this.changeDropDown(e,'layanan')}
                                             fullWidth
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                         />
                                     </Grid>
                                 </Grid>
@@ -454,7 +294,6 @@ class ProductDetail extends React.Component{
                                         <TextField
                                             id="interest"
                                             value={this.state.interest}
-                                            onChange={(e) => this.onChangeTextField(e,'interest', true)} 
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
@@ -462,7 +301,7 @@ class ProductDetail extends React.Component{
                                                 inputComponent: NumberFormatCustom,
                                                 endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                             }}
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                         />
                                     </Grid>
                                     <Grid item xs={3} sm={3} >
@@ -472,9 +311,8 @@ class ProductDetail extends React.Component{
                                             data={this.state.listBunga}
                                             id="id"
                                             labelName={"name"}
-                                            onChange={(e) => this.changeDropDown(e,'tipeBunga')}
                                             fullWidth
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                         />
                                     </Grid>
                                 </Grid>
@@ -489,11 +327,10 @@ class ProductDetail extends React.Component{
                                         <TextField
                                             id="timeFrom"
                                             value={this.state.timeFrom}
-                                            onChange={(e) => this.onChangeTextField(e, 'timeFrom', true)} 
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                             InputProps={{
                                                 inputComponent: NumberFormatCustom,
                                             }}
@@ -506,11 +343,10 @@ class ProductDetail extends React.Component{
                                         <TextField
                                             id="timeTo"
                                             value={this.state.timeTo}
-                                            onChange={(e) => this.onChangeTextField(e, 'timeTo', true)} 
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                             InputProps={{
                                                 inputComponent: NumberFormatCustom,
                                             }}
@@ -528,7 +364,6 @@ class ProductDetail extends React.Component{
                                         <TextField
                                             id="rentangFrom"
                                             value={this.state.rentangFrom}
-                                            onChange={(e) => this.onChangeTextField(e, 'rentangFrom', true)} 
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
@@ -536,7 +371,7 @@ class ProductDetail extends React.Component{
                                                 inputComponent: NumberFormatCustom,
                                                 startAdornment: <InputAdornment position="start"> Rp </InputAdornment>,
                                             }}
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                         />
                                     </Grid>
                                     <Grid item sm={1} xs={1} style={{paddingTop:'10px'}}>
@@ -546,7 +381,6 @@ class ProductDetail extends React.Component{
                                         <TextField
                                             id="rentangTo"
                                             value={this.state.rentangTo}
-                                            onChange={(e) => this.onChangeTextField(e, 'rentangTo', true)} 
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
@@ -554,7 +388,7 @@ class ProductDetail extends React.Component{
                                                 inputComponent: NumberFormatCustom,
                                                 startAdornment: <InputAdornment position="start"> Rp </InputAdornment>,
                                             }}
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                         />
                                     </Grid>
                                 </Grid>
@@ -569,11 +403,10 @@ class ProductDetail extends React.Component{
                                         <TextField
                                             id="asuransi"
                                             value={this.state.asuransi}
-                                            onChange={(e) => this.onChangeTextField(e,'asuransi')} 
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                         />
                                     </Grid>
                                 </Grid>
@@ -582,7 +415,7 @@ class ProductDetail extends React.Component{
                             <Grid item xs={12} sm={12} style={{fontSize:'20px', padding:'0px 10px 10px', marginBottom:'25px'}}>
                                 <Grid container>
                                     <Grid item xs={4} sm={4} style={{paddingTop:'30px'}}>
-                                        Tipe Fee
+                                        Tipe Biaya
                                     </Grid>
                                     <Grid item xs={4} sm={4} >
                                         <DropDown
@@ -591,9 +424,8 @@ class ProductDetail extends React.Component{
                                             data={this.state.listTypeFee}
                                             id="id"
                                             labelName={"name"}
-                                            onChange={(e) => this.changeDropDown(e,'feeType')}
                                             fullWidth
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                         />
                                     </Grid>
                                 </Grid>
@@ -608,35 +440,33 @@ class ProductDetail extends React.Component{
                                         <TextField
                                             id="description"
                                             value={this.state.description}
-                                            onChange={(e) => this.onChangeTextField(e,'description')} 
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
                                             multiline
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                         />
                                     </Grid>
                                 </Grid>
                             </Grid>
-                            {/* Auto Paid */}
+                            {/* Pantau Cicilan */}
                             <Grid item xs={12} sm={12} style={{fontSize:'20px', padding:'0px 10px 10px', marginBottom:'20px'}}>
                                 <Grid container>
                                     <Grid item xs={4} sm={4} style={{paddingTop:'10px'}}>
-                                        Auto Paid
+                                        Pantau Cicilan
                                     </Grid>
                                     <Grid item xs={4} sm={4} >
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
                                                     checked={this.state.checkAuto}
-                                                    onChange={(e) => this.handleChecked(e, 'checkAuto')}
                                                     color={this.state.checkAuto ? "primary":"default"}
                                                     value="default"
                                                     inputProps={{ 'aria-label': 'checkbox with default color' }}
                                                 />
                                             }
-                                            label={'Auto Paid'}
-                                            disabled={this.state.modifyType ? false : true}
+                                            label={'Pantau Cicilan'}
+                                            disabled
                                         />
                                         
                                     </Grid>
@@ -654,14 +484,13 @@ class ProductDetail extends React.Component{
                                             control={
                                                 <Checkbox
                                                     checked={this.state.check}
-                                                    onChange={(e) => this.handleChecked(e, 'check')}
                                                     color={this.state.check ? "primary":"default"}
                                                     value="default"
                                                     inputProps={{ 'aria-label': 'checkbox with default color' }}
                                                 />
                                             }
                                             label={'Aktif'}
-                                            disabled={this.state.modifyType ? false : true}
+                                            disabled
                                         />
                                         
                                     </Grid>
@@ -670,12 +499,8 @@ class ProductDetail extends React.Component{
                             {/* Sektor Pembiayaan */}
                             <Grid item xs={12} sm={12} style={{fontSize:'20px', padding:'0px 10px 10px'}}>
                                 <Grid container>
-                                    <Grid item xs={3} sm={3} >
+                                    <Grid item xs={12} sm={12} >
                                         Sektor Pembiayaan
-                                        <IconButton aria-label="delete" disabled={this.state.modifyType ? false : true} onClick={(e) => this.btnTambahFlexibleData(e, 'sektor')} style={{marginLeft:'5px',outline:'none'}}>
-                                            <AddIcon />
-                                        </IconButton>
-
                                     </Grid>
 
                                     <Grid item xs={12} sm={12} style={{marginBottom:'10px'}}>
@@ -689,19 +514,13 @@ class ProductDetail extends React.Component{
                                                             <Grid item xs={10} sm={10} style={{marginRight:'2px',paddingTop:'10px'}}>
                                                                 <TextField 
                                                                     fullWidth
-                                                                    onChange={(e) => this.changeFlexibleData(e,'label', index, 'sektor')}
                                                                     placeholder={'Sektor Pembiayaan'}
                                                                     value={sektorPerData.label}
                                                                     margin="dense"
                                                                     variant="outlined"
-                                                                    disabled={this.state.modifyType ? false : true}
+                                                                    disabled
                                                                 />
                                                             </Grid> 
-                                                            <Grid item xs={1} sm={1} style={{paddingTop:'12px'}}>
-                                                                <IconButton aria-label="delete" disabled={this.state.modifyType ? false : true} onClick={(e) => this.deleteFlexibleData(e,index,'sektor')} style={{outline:'none'}}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            </Grid>  
                                                         </Grid>
                                                          
                                                     </Grid> 
@@ -718,12 +537,8 @@ class ProductDetail extends React.Component{
                             {/* Agunan */}
                             <Grid item xs={12} sm={12} style={{fontSize:'20px', padding:'0px 10px 10px'}}>
                                 <Grid container>
-                                    <Grid item xs={2} sm={2} >
+                                    <Grid item xs={12} sm={12} >
                                         Agunan
-                                        <IconButton aria-label="delete" disabled={this.state.modifyType ? false : true} onClick={(e) => this.btnTambahFlexibleData(e, 'agunan')} style={{marginLeft:'5px',outline:'none'}}>
-                                            <AddIcon />
-                                        </IconButton>
-
                                     </Grid>
 
                                     <Grid item xs={12} sm={12} style={{marginBottom:'10px'}}>
@@ -737,19 +552,13 @@ class ProductDetail extends React.Component{
                                                             <Grid item xs={10} sm={10} style={{marginRight:'2px',paddingTop:'10px'}}>
                                                                 <TextField 
                                                                     fullWidth
-                                                                    onChange={(e) => this.changeFlexibleData(e,'label', index, 'agunan')}
                                                                     placeholder={'Nama Agunan'}
                                                                     value={agunanPerData.label}
                                                                     margin="dense"
                                                                     variant="outlined"
-                                                                    disabled={this.state.modifyType ? false : true}
+                                                                    disabled
                                                                 />
                                                             </Grid> 
-                                                            <Grid item xs={1} sm={1} style={{paddingTop:'12px'}}>
-                                                                <IconButton aria-label="delete"disabled={this.state.modifyType ? false : true}  onClick={(e) => this.deleteFlexibleData(e,index,'agunan')} style={{outline:'none'}}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            </Grid>  
                                                         </Grid>
                                                          
                                                     </Grid> 
@@ -766,12 +575,8 @@ class ProductDetail extends React.Component{
                             {/* Fee */}
                             <Grid item xs={12} sm={12} style={{fontSize:'20px', padding:'0px 10px 10px'}}>
                                 <Grid container>
-                                    <Grid item xs={2} sm={2} >
-                                        Fee
-                                        <IconButton aria-label="delete" disabled={this.state.modifyType ? false : true} onClick={(e) => this.btnTambahFlexibleData(e, 'fee')} style={{marginLeft:'5px',outline:'none'}}>
-                                            <AddIcon />
-                                        </IconButton>
-
+                                    <Grid item xs={12} sm={12} >
+                                        Biaya
                                     </Grid>
 
                                     {
@@ -783,12 +588,11 @@ class ProductDetail extends React.Component{
                                                             <Grid item xs={3} sm={3} style={{marginRight:'20px',paddingTop:'12px'}}>
                                                                 <TextField 
                                                                     fullWidth
-                                                                    onChange={(e) => this.changeFlexibleData(e,'label', index, 'fee')}
                                                                     placeholder={'Nama Fee'}
                                                                     value={feePerData.label}
                                                                     margin="dense"
                                                                     variant="outlined"
-                                                                    disabled={this.state.modifyType ? false : true}
+                                                                    disabled
                                                                 />
                                                             </Grid> 
                                                             
@@ -799,9 +603,8 @@ class ProductDetail extends React.Component{
                                                                     data={this.state.listInterestType}
                                                                     id="id"
                                                                     labelName={"label"}
-                                                                    onChange={(e) => this.changeFlexibleData(e,'type', index, 'fee')}
                                                                     fullWidth
-                                                                    disabled={this.state.modifyType ? false : true}
+                                                                    disabled
                                                                 />
                                                             </Grid>                                      
                                                         
@@ -809,24 +612,16 @@ class ProductDetail extends React.Component{
                                                             <Grid item xs={2} sm={2} style={{marginRight:'10px',paddingTop:'12px'}}>
                                                                 <TextField 
                                                                     fullWidth
-                                                                    onChange={(e) => this.changeFlexibleData(e,'value', index, 'fee', true)}
                                                                     placeholder={'Amount'}
                                                                     value={feePerData.value}
                                                                     margin="dense"
                                                                     variant="outlined"
-                                                                    disabled={this.state.modifyType ? false : true}
+                                                                    disabled
                                                                     InputProps={{
                                                                         inputComponent: NumberFormatCustom,
                                                                     }}
                                                                 />
-                                                            </Grid> 
-                                                            
-
-                                                            <Grid item xs={1} sm={1} style={{marginRight:'20px', paddingTop:'12px'}}>
-                                                                <IconButton aria-label="delete" disabled={this.state.modifyType ? false : true} onClick={(e) => this.deleteFlexibleData(e,index,'fee')} style={{outline:'none'}}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            </Grid>         
+                                                            </Grid>          
                                                             
                                                         </Grid>
                                                     }
@@ -840,12 +635,8 @@ class ProductDetail extends React.Component{
                             {/* Form */}
                             <Grid item xs={12} sm={12} style={{fontSize:'20px', padding:'0px 10px 10px',marginBottom:'15px'}}>
                                 <Grid container>
-                                    <Grid item xs={2} sm={2}>
+                                    <Grid item xs={12} sm={12}>
                                         Form
-                                        <IconButton aria-label="delete" disabled={this.state.modifyType ? false : true} onClick={(e) => this.btnTambahFlexibleData(e, 'mandatory')} style={{marginLeft:'5px',outline:'none'}}>
-                                            <AddIcon />
-                                        </IconButton>
-
                                     </Grid>
                         
 
@@ -858,12 +649,11 @@ class ProductDetail extends React.Component{
                                                             <Grid item xs={3} sm={3} style={{marginRight:'20px',paddingTop:'12px'}}>
                                                                 <TextField 
                                                                     fullWidth
-                                                                    onChange={(e) => this.changeFlexibleData(e,'label', index, 'mandatory')}
                                                                     placeholder={'Judul Pertanyaan'}
                                                                     value={mandatoryPerData.label}
                                                                     margin="dense"
                                                                     variant="outlined"
-                                                                    disabled={this.state.modifyType ? false : true}
+                                                                    disabled
                                                                 />
                                                             </Grid> 
                                                             
@@ -874,9 +664,8 @@ class ProductDetail extends React.Component{
                                                                     data={this.state.listType}
                                                                     id="id"
                                                                     labelName={"label"}
-                                                                    onChange={(e) => this.changeFlexibleData(e,'type', index, 'mandatory')}
                                                                     fullWidth
-                                                                    disabled={this.state.modifyType ? false : true}
+                                                                    disabled
                                                                 />
                                                             </Grid> 
 
@@ -887,9 +676,8 @@ class ProductDetail extends React.Component{
                                                                     data={this.state.listRequired}
                                                                     id="id"
                                                                     labelName={"label"}
-                                                                    onChange={(e) => this.changeFlexibleData(e,'status', index, 'mandatory')}
                                                                     fullWidth
-                                                                    disabled={this.state.modifyType ? false : true}
+                                                                    disabled
                                                                 />
                                                             </Grid>                                      
                                                         
@@ -898,21 +686,14 @@ class ProductDetail extends React.Component{
                                                                 <Grid item xs={3} sm={3} style={{marginRight:'10px',paddingTop:'12px'}}>
                                                                     <TextField 
                                                                         fullWidth
-                                                                        onChange={(e) => this.changeFlexibleData(e,'value', index, 'mandatory')}
                                                                         placeholder={'Pilihan Pertanyaan ex:albert,ganteng'}
                                                                         value={mandatoryPerData.value}
                                                                         margin="dense"
                                                                         variant="outlined"
-                                                                        disabled={this.state.modifyType ? false : true}
+                                                                        disabled
                                                                     />
                                                                 </Grid> 
-                                                            }
-
-                                                            <Grid item xs={1} sm={1} style={{marginRight:'20px', paddingTop:'10px'}}>
-                                                                <IconButton aria-label="delete" disabled={this.state.modifyType ? false : true} onClick={(e) => this.deleteFlexibleData(e,index,'mandatory')} style={{outline:'none'}}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            </Grid>         
+                                                            }       
                                                             
                                                         </Grid>
                                                     }
