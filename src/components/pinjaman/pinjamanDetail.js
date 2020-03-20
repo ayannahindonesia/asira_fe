@@ -355,7 +355,7 @@ class Main extends React.Component{
             message = [
                 {
                     id: 'endDate',
-                    title: 'Tanggal Pencairan',
+                    title: 'Mohon isi Tanggal Pencairan',
                     type:'date',
                     value:this.state.endDate,
                     function:this.handleEndChange,
@@ -366,7 +366,7 @@ class Main extends React.Component{
             message = [
                 {
                     id: 'reason',
-                    title: 'Alasan Penolakan',
+                    title: 'Mohon isi Alasan Penolakan',
                     type: 'textfield',
                     value: this.state.reason,
                     function: this.onChangeTextField,

@@ -126,7 +126,7 @@ class DialogComponent extends React.Component {
                             if(formMessage.type && formMessage.type === 'textfield') {
                               return (
                                 <Grid container key={`${formMessage.id}-${index}`} style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
-                                  <Grid item xs={3} sm={3} style={{paddingTop:'20px'}}>
+                                  <Grid item xs={4} sm={4} style={{paddingTop:'20px'}}>
                                       <b>{formMessage.title}</b>
                                   </Grid>
                                   <Grid item xs={4} sm={4} >
@@ -144,7 +144,7 @@ class DialogComponent extends React.Component {
                             } else if (formMessage.type && formMessage.type === 'date'){
                               return (
                                 <Grid container key={`${formMessage.id}-${index}`} style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
-                                    <Grid item xs={3} sm={3} style={{paddingTop:'25px'}}>
+                                    <Grid item xs={4} sm={4} style={{paddingTop:'25px'}}>
                                         <b>{formMessage.title}</b>
                                         
                                     </Grid>
