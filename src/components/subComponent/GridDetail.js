@@ -2,7 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/styles';
 import Grid from '@material-ui/core/Grid';
-import './../../support/css/gridDetail.css'
+import BrokenLink from './../../support/img/default.png';
+import './../../support/css/gridDetail.css';
+import Card from '@material-ui/core/Card';
+import CardActionArea from '@material-ui/core/CardActionArea';
+import CardMedia from '@material-ui/core/CardMedia';
 
 const styles = (theme) => ({
 
@@ -79,6 +83,34 @@ class GridDetails extends React.Component {
     return dataNew;
   }
 
+  imageArea = (message, title, base64Boolean) => {
+
+    const dataImage = message;
+
+    return (
+      <Card>
+        <CardActionArea>
+          {
+            base64Boolean && 
+            <img alt={title}
+            onError={(e)=>{e.target.attributes.getNamedItem("src").value = BrokenLink}}
+            src={`data:image/PNG;base64,${dataImage}`}/>
+          }
+
+          {
+            !base64Boolean && 
+            <CardMedia
+              image={dataImage && dataImage.includes('http') ? dataImage : require('./../../support/img/default.png')}
+              title={title}
+            />
+          }
+          
+          
+        </CardActionArea>
+      </Card>
+    );
+  }
+
   renderDataRow = (dataRow, dataPerLabel, indexColumn) => {
     let tester = '';
 
@@ -99,11 +131,21 @@ class GridDetails extends React.Component {
                   }
                 </Grid>
 
-                <Grid item sm={11} xs={11} style={{color:dataPerRow&& dataPerRow.color? dataPerRow.color:dataPerRow, paddingRight:'10px'}} >
-                  {
-                    dataPerRow && dataPerRow.color ?  dataPerRow.value : (dataPerRow ? this.findBold(dataPerRow) : '-')
-                  }
-                </Grid>
+                { dataPerRow && !dataPerRow.type &&
+                  <Grid item sm={11} xs={11} style={{color:dataPerRow&& dataPerRow.color? dataPerRow.color:dataPerRow, paddingRight:'10px'}} >
+                    {
+                      dataPerRow && dataPerRow.color ?  dataPerRow.value : (dataPerRow ? this.findBold(dataPerRow) : '-')
+                    }
+                  </Grid>
+                }
+
+                { dataPerRow && dataPerRow.type && dataPerRow.type==='image' &&
+                  <Grid item sm={11} xs={11} style={{paddingRight:'10px'}} >
+                    {
+                      this.imageArea(dataPerRow.value, dataPerRow.label, dataPerRow.base64Boolean)
+                    }
+                  </Grid>
+                }
               </Grid>
             </Grid>
           </Grid>

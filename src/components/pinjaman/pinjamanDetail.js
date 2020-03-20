@@ -138,7 +138,7 @@ class Main extends React.Component{
         if(borrower) {
             borrowerInfo = {
                 title: [
-                    ['Ulang Tahun','Nomor Telepon', 'Nomor KTP', 'Nomor NPWP'],
+                    ['Tanggal lahir','Nomor Telepon', 'Nomor KTP', 'Nomor NPWP'],
                     ['Pendapatan', 'Sumber Pendapatan', 'Pendapatan Lainnya','Sumber Pendapatan Lainnya'],
                 ],
                 value: [
