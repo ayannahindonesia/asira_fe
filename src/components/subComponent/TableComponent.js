@@ -179,6 +179,10 @@ class TableComponent extends React.Component {
                                 </Button>
                               }
                               {
+                                dataRow.type && dataRow.type === 'button'  && this.checkConditionButton(dataTable, dataRow.conditions) && !dataRow.permission &&
+                                '-'
+                              }
+                              {
                                 dataRow.type && dataRow.type === 'button' && !this.checkConditionButton(dataTable, dataRow.conditions) &&
                                 this.checkWordCondition(dataRow.id, dataTable)
                               }

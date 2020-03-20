@@ -49,21 +49,8 @@ exports.dataMenu = [
             },
         ]
     },
-    // {
-    //     permission:'lender_loan_request_list',
-    //     label: 'Pencairan',
-    //     logo:'pencairan.svg',
-    //     child: [
-    //         {
-    //             permission: 'lender_borrower_list',
-    //             label: 'Pinjaman Telah Dicairkan',
-    //             link: '/pencairanList',
-    //             logo:'checklist.svg',
-    //         },
-    //     ]
-    // },
     {
-        permission:'lender_product_list lender_service_list',
+        permission:['lender_product_list','lender_service_list'],
         label: 'Produk & Layanan',
         logo:'ProdukService.svg',
         child: [
