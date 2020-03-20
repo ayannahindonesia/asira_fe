@@ -30,7 +30,7 @@ export function handleFormatDate (dateBefore){
 
   let dateAfter = new Date(dateBeforeNow);
 
-  return `${dateAfter.getDate()} ${getMonthNow(dateAfter.getMonth().toString())} ${dateAfter.getFullYear()}`;
+  return dateAfter.getFullYear() > 1700 ? `${dateAfter.getDate()} ${getMonthNow(dateAfter.getMonth().toString())} ${dateAfter.getFullYear()}` : '-';
 };
 
 export function getMonthNow(bulanNow) {

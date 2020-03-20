@@ -6,7 +6,7 @@ import {connect} from 'react-redux'
 import { getProfileNasabahDetailFunction } from './saga';
 import { getProfileUser,getTokenClient,getTokenAuth } from '../index/token'
 import GridDetail from './../subComponent/GridDetail'
-import { handleFormatDate, decryptImage } from '../global/globalFunction';
+import { handleFormatDate, decryptImage, formatMoney } from '../global/globalFunction';
 import TitleBar from '../subComponent/TitleBar';
 import DialogComponent from './../subComponent/DialogComponent'
 import { Grid } from '@material-ui/core';
@@ -40,8 +40,6 @@ class profileNasabahDetail extends React.Component{
     componentWillUnmount(){
         this._isMounted=false
     }
-    formatMoney=(number)=>
-    { return number.toLocaleString('in-RP', {style : 'currency', currency: 'IDR'})}
 
     getDataDetail = async function (){
          const param = {id:this.props.match.params.id}
@@ -263,8 +261,8 @@ class profileNasabahDetail extends React.Component{
                                     this.state.rows.employer_number 
                                     ],
                                     [
-                                        this.state.rows.monthly_income ? this.formatMoney(parseInt(this.state.rows.monthly_income)):0,
-                                        this.state.rows.other_income ? this.formatMoney(parseInt(this.state.rows.other_income)):0,
+                                        this.state.rows.monthly_income && parseInt(this.state.rows.monthly_income) !== 0 ? formatMoney(parseInt(this.state.rows.monthly_income)):'-',
+                                        this.state.rows.other_income && parseInt(this.state.rows.other_income) !== 0 ? formatMoney(parseInt(this.state.rows.other_income)):'-',
                                         this.state.rows.other_incomesource,
                                     ]
                                 ]}                 

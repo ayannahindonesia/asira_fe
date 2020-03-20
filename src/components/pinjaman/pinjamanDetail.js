@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom'
 import swal from 'sweetalert';
 import { getPermintaanPinjamanDetailFunction } from './saga';
 import Loading from '../subComponent/Loading';
-import { checkPermission, handleFormatDate, findAmount, formatMoney } from '../global/globalFunction'
+import { checkPermission, handleFormatDate, findAmount, formatMoney, decryptImage } from '../global/globalFunction'
 import { getTokenAuth, getTokenClient } from '../index/token';
 import GridDetail from '../subComponent/GridDetail'
 import TitleBar from '../subComponent/TitleBar';
@@ -138,7 +138,7 @@ class Main extends React.Component{
         if(borrower) {
             borrowerInfo = {
                 title: [
-                    ['Ulang Tahun','Nomor Telepon', 'Nomor KTP', 'Nomor NPWP'],
+                    ['Tanggal lahir','Nomor Telepon', 'Nomor KTP', 'Nomor NPWP'],
                     ['Pendapatan', 'Sumber Pendapatan', 'Pendapatan Lainnya','Sumber Pendapatan Lainnya'],
                 ],
                 value: [
@@ -244,17 +244,12 @@ class Main extends React.Component{
                 if(!formInfo.value[arrayForm]) {
                     formInfo.value[arrayForm] = []
                 };
-                
-                if(typeof(form[key].answers) === 'object') {
-                    const answers = form[key].answers;
-                    let stringAnswers = '';
 
-                    for(const keyAnswers in answers) {
-                        if(stringAnswers.length !== 0) {
-                            stringAnswers += ', '
-                        }
-                        stringAnswers += answers[keyAnswers] 
-                    }
+                if(form[key].type === 'image') {
+                    formInfo.value[arrayForm].push({
+                        type:'image',
+                        value: form[key].answers && decryptImage(form[key].answers),
+                    })
                 } else {
                     formInfo.value[arrayForm].push(form[key].answers)
                 }
