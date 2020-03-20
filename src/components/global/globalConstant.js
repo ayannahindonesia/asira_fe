@@ -63,7 +63,7 @@ exports.dataMenu = [
     //     ]
     // },
     {
-        permission:'lender_borrower_list',
+        permission:'lender_product_list lender_service_list',
         label: 'Produk & Layanan',
         logo:'ProdukService.svg',
         child: [

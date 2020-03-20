@@ -119,18 +119,14 @@ class PinjamanSetuju extends React.Component {
     this._isMounted && this.getAllData();
 
     columnDataUser[7].function = this.btnKonfirmasi;
-    columnDataUser[7].permission = this.checkPermissionConfirmDisburse;
+    if(checkPermission('lender_loan_confirm_disburse')) {
+      columnDataUser[7].permission = true;
+    }
+    
     columnDataUser[8].function = this.toggleChangeDisburseDate;
-    columnDataUser[8].permission = this.checkPermissionChangeDisburseDate;
-  }
-
-
-  checkPermissionChangeDisburseDate = () => {
-    return checkPermission('lender_loan_change_disburse_date')
-  }
-
-  checkPermissionConfirmDisburse = () => {
-    return checkPermission('lender_loan_confirm_disburse')
+    if(checkPermission('lender_loan_change_disburse_date')) {
+      columnDataUser[8].permission = true;
+    }
   }
 
   componentWillUnmount(){
@@ -140,6 +136,7 @@ class PinjamanSetuju extends React.Component {
   getAllData = async function (){
     const param ={
       status:"approved",
+      disburse_status:'processing',
       rows:"10",
       page: this.state.page,
     }
@@ -475,7 +472,7 @@ class PinjamanSetuju extends React.Component {
           </ModalBody>
           <ModalFooter>
 
-            {this.renderBtnDisburseDate()}
+            { checkPermission('lender_loan_change_disburse_date') && this.renderBtnDisburseDate()}
             <Button disableElevation color="secondary" onClick={()=>this.setState({modal:false})}><b>Tutup</b></Button>
           </ModalFooter>
         </Modal>

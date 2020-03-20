@@ -167,7 +167,7 @@ class TableComponent extends React.Component {
                                 dataRow.type && dataRow.type === 'datetime' && handleFormatDate(dataTable[dataRow.id])
                               }
                               {
-                                dataRow.type && dataRow.type === 'button'  && this.checkConditionButton(dataTable, dataRow.conditions) &&
+                                dataRow.type && dataRow.type === 'button'  && this.checkConditionButton(dataTable, dataRow.conditions) && dataRow.permission &&
                                 <Button disableElevation
                                   variant='contained'
                                   style={{backgroundColor: '#2076B8', color:'white'}}
