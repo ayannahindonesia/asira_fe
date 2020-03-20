@@ -472,7 +472,7 @@ class PinjamanSetuju extends React.Component {
           </ModalBody>
           <ModalFooter>
 
-            { checkPermission('lender_loan_change_disburse_date') && this.renderBtnDisburseDate()}
+            { this.renderBtnDisburseDate()}
             <Button disableElevation color="secondary" onClick={()=>this.setState({modal:false})}><b>Tutup</b></Button>
           </ModalFooter>
         </Modal>

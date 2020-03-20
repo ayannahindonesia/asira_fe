@@ -109,20 +109,32 @@ export function formatNumber(number,money) {
   return tmp.toString().length !== 0 ? tmp : '-'
 }
 
-export function checkPermission(stringPermission, stringPermissionSecond) {
+export function checkPermission(stringPermission) {
   let flag = false;
   
   const listPermission = (getProfileUser() && JSON.parse(getProfileUser()) && JSON.parse(getProfileUser()).permissions) || [];
 
   for(const key in listPermission) {
-    if(stringPermission && listPermission[key] && listPermission[key].toString().toLowerCase() === stringPermission.toString().toLowerCase()) {
+    if(listPermission[key] && listPermission[key].toString().toLowerCase() === 'all') {
       flag = true;
       break;
-    } else if(stringPermissionSecond && listPermission[key] && listPermission[key].toString().toLowerCase() === stringPermissionSecond.toString().toLowerCase()) {
-      flag = true;
-      break;
-    } else if(listPermission[key] && listPermission[key].toString().toLowerCase() === 'all') {
-      flag = true;
+    }
+
+    if(typeof(stringPermission) === 'object') {
+      for(const keyPermit in stringPermission) {
+        if(stringPermission[keyPermit] && listPermission[key] && listPermission[key].toString().toLowerCase() === stringPermission[keyPermit].toString().toLowerCase()) {
+          flag = true;
+          break;
+        }
+      }
+    } else {
+      if(stringPermission && listPermission[key] && listPermission[key].toString().toLowerCase() === stringPermission.toString().toLowerCase()) {
+        flag = true;
+        break;
+      } 
+    }
+    
+    if(flag) {
       break;
     }
   }
