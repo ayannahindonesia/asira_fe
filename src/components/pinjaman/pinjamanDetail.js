@@ -3,13 +3,49 @@ import { Redirect } from 'react-router-dom'
 import swal from 'sweetalert';
 import { getPermintaanPinjamanDetailFunction } from './saga';
 import Loading from '../subComponent/Loading';
-import { checkPermission, handleFormatDate, findAmount, formatMoney, decryptImage } from '../global/globalFunction'
+import { checkPermission, handleFormatDate, findAmount, formatMoney, decryptImage, formatNumber } from '../global/globalFunction'
 import { getTokenAuth, getTokenClient } from '../index/token';
 import GridDetail from '../subComponent/GridDetail'
 import TitleBar from '../subComponent/TitleBar';
 import { Grid } from '@material-ui/core';
 import ActionComponent from '../subComponent/ActionComponent';
 import DialogComponent from '../subComponent/DialogComponent';
+import TableComponent from '../subComponent/TableComponent';
+
+const columnDataUser = [
+    {
+        id: 'id',
+        label: 'ID Pinjaman',
+        hidden: true,
+    },
+    {
+        id: 'period',
+        label: 'Period',
+    },
+    {
+        id: 'due_date',
+        label: 'Tanggal Jatuh Tempo',
+        type:'datetime'
+    },
+    {
+        id: 'total',
+        label: 'Total Cicilan',
+    },
+    {
+        id: 'paid_amount',
+        label: 'Total Pembayaran',
+    },
+    {
+        id: 'paid_date',
+        label: 'Tanggal Pembayaran',
+        type:'datetime'
+    },
+    {
+        id: 'paid_status_string',
+        label: 'Status',
+    },
+  
+]
 
 class Main extends React.Component{
     _isMounted=false
@@ -31,6 +67,11 @@ class Main extends React.Component{
         statusPinjaman: '',
         disburse_status: '',
         title:'',
+        rowsPerPage: 12,
+        page: 1,
+        totalData: 0,
+        paging: true,
+        loadingPage: false,
     }
 
     componentDidMount(){
@@ -71,9 +112,11 @@ class Main extends React.Component{
                     const pinjamanInfo = this.getPinjamanInfo(rows);
                     const detailInfo = this.getDetailInfo(rows);
                     const feesInfo = this.getFeesInfo(data.dataLender && data.dataLender.fees, rows && rows.loan_amount)
-                    const formInfo = this.getFormInfo(data.dataLender && data.dataLender.form_info)
-                    const borrowerInfo = this.getBorrowerInfo(data.dataLender && data.dataLender.borrower_info)
+                    const formInfo = this.getFormInfo(data.dataLender && data.dataLender.form_info && JSON.parse(data.dataLender.form_info))
+                    const borrowerInfo = this.getBorrowerInfo(data.dataLender && data.dataLender.borrower_info);                 
+                    const allInstallment = data.dataLender && data.dataLender.installment_details;
 
+                    this.getInstallmentInfo(data.dataLender && data.dataLender.installment_details);
 
                     this.setState({
                         rows,
@@ -82,9 +125,11 @@ class Main extends React.Component{
                         feesInfo,
                         borrowerInfo,
                         detailInfo,
+                        allInstallment,
                         status:data.dataLender.status,
                         disburse_status: data.dataLender.disburse_status,
-                        loading:false
+                        loading:false,
+                        loadingPage: false,
                     })
                 } else if(status === 'terima'){
                     swal("Permintaan","Diterima","success")
@@ -95,9 +140,33 @@ class Main extends React.Component{
                 }
                 
             }else{
-                this.setState({errorMessage:data.error, loading:false})
+                this.setState({errorMessage:data.error, loading:false, loadingPage: false,})
             }
         }
+    }
+
+    getInstallmentInfo = (installmentParam) => {
+        const installment = installmentParam || this.state.allInstallment;
+        const installmentInfo = [];
+        const page = this.state.page;
+        const rowsPerPage = this.state.rowsPerPage;
+        let totalData = 0;
+        
+        if(installment) {
+            for(const key in installment) {
+                if(parseInt(key) >= (rowsPerPage * (page-1)) && parseInt(key) < (rowsPerPage * page)) {
+                    const newInstallment = installment[key];
+
+                    newInstallment.paid_status_string = newInstallment.paid_status ? 'Sudah Bayar' : 'Belum Bayar';
+                    newInstallment.total = formatMoney(parseInt(newInstallment.loan_payment + newInstallment.interest_payment + newInstallment.penalty))
+                    installmentInfo.push(installment[key])
+                }
+                totalData += 1;
+            }
+        }
+        
+        this.setState({totalData, loadingPage: false, installmentInfo})
+        
     }
 
     getDetailInfo = (rows) => {
@@ -222,7 +291,7 @@ class Main extends React.Component{
 
     getFormInfo = (form) => {
         let formInfo = null;
-
+        console.log(form)
         if(form) { 
             formInfo = {
                 title: [],
@@ -257,7 +326,7 @@ class Main extends React.Component{
                 arrayForm += 1;
             }
         }
-
+        console.log(formInfo)
         return formInfo;
     }
     
@@ -340,10 +409,59 @@ class Main extends React.Component{
         })
     }
 
+    onChangeTextFieldForm = (e, labelData, number, dateParam) => {
+        console.log(e)
+        let detailPaid = this.state.detailPaid;
+        console.log(e.target.value)
+        if(dateParam) {
+            detailPaid[labelData] = e
+            
+        } else {
+            if(!number || (number && !isNaN(e.target.value))) {           
+                detailPaid[labelData] = e.target.value         
+            }             
+        }
+        
+        this.setState({detailPaid}, () => {
+            this.settingMessage()
+        })
+    }
+    
+    onChangeCheckbox = (e, labelData) => {
+        let detailPaid = this.state.detailPaid;
+
+        detailPaid[labelData] = !detailPaid[labelData];
+
+        this.setState({detailPaid}, () => {
+            this.settingMessage();
+        })
+    }
+
+    btnPaidAndDetail = (e, idPaid) => {
+        const newPaid = this.state.allInstallment;
+            
+        let detailPaid = this.state.detailPaid;
+        
+        if(idPaid) {
+            for(const key in newPaid) {
+                if(newPaid[key].id.toString() === idPaid.toString()) {
+                    detailPaid = newPaid[key];
+                    break;
+                }
+            }
+
+            
+        }
+
+        this.setState({detailPaid}, () => {
+            this.btnConfirmationDialog(e, false, 'paidInstallment')
+        })
+    }
+
     settingMessage = (statusPinjamanParam) => {
         let message = this.state.message;
         let title = this.state.title;
-        let statusPinjaman = statusPinjamanParam || this.state.statusPinjaman
+        let statusPinjaman = statusPinjamanParam || this.state.statusPinjaman;
 
         if(statusPinjaman && statusPinjaman === 'terima') {
             title = 'Persetujuan';
@@ -356,6 +474,7 @@ class Main extends React.Component{
                     function:this.handleEndChange,
                 }
             ]
+
         } else if(statusPinjaman && statusPinjaman === 'tolak') {
             title = 'Penolakan'
             message = [
@@ -368,15 +487,91 @@ class Main extends React.Component{
                 }
             ]
             
-            
+        } else if(statusPinjaman && statusPinjaman === 'paidInstallment') {
+            title = 'Pembayaran'          
+            let detailPaid = this.state.detailPaid;
+
+            if(detailPaid) {
+                
+                message = [
+                    {
+                        id: 'period',
+                        title: 'Period',
+                        type: 'textfield',
+                        value: detailPaid.period || 0,
+                        disabled: true,
+                    },
+                    {
+                        id: 'due_date',
+                        title: 'Tanggal Jatuh Tempo',
+                        type: 'date',
+                        value: detailPaid.due_date || '',
+                        function: this.onChangeTextFieldForm,
+                    },
+                    {
+                        id: 'loan_payment',
+                        title: 'Cicilan Pokok',
+                        type: 'textfield',
+                        value: formatNumber(detailPaid.loan_payment) || 0,
+                        disabled: true,
+                    },
+                    {
+                        id: 'interest_payment',
+                        title: 'Cicilan Bunga',
+                        type: 'textfield',
+                        value: formatNumber(detailPaid.interest_payment) || 0,
+                        disabled: true,
+                    },
+                    {
+                        id: 'penalty',
+                        title: 'Denda',
+                        type: 'textfield',
+                        numeric: true,
+                        value: detailPaid.penalty,
+                        function: this.onChangeTextFieldForm,
+                    },
+                    {
+                        id: 'paid_amount',
+                        title: 'Total Pembayaran',
+                        type: 'textfield',
+                        numeric: true,
+                        value: detailPaid.paid_amount,
+                        function: this.onChangeTextFieldForm,
+                    },
+                    {
+                        id: 'paid_date',
+                        title: 'Tanggal Pembayaran',
+                        type: 'textfield',
+                        value: handleFormatDate(detailPaid.paid_date || ''),
+                        disabled: true,
+                    },
+                    {
+                        id: 'paid_status',
+                        title: 'Status Pembayaran',
+                        label: 'Terbayar',
+                        type: 'checkbox',
+                        value: detailPaid.paid_status || '',
+                        function: this.onChangeCheckbox,
+                        disabled: false,
+                    },
+                    {
+                        id: 'note',
+                        title: 'Keterangan',
+                        type: 'textfield',
+                        value: detailPaid.note || '',
+                        function: this.onChangeTextFieldForm,
+                    }
+                ]
+                
+            }
         }
 
-
         this.setState({title, message})
+        
     }
 
     btnConfirmationDialog = (e, nextStep, statusPinjaman) => {
-        
+
         this.settingMessage(statusPinjaman)
         this.setState({dialog: !this.state.dialog, statusPinjaman});
   
@@ -388,6 +583,12 @@ class Main extends React.Component{
             }
         }
     }
+
+    onChangePage = (current) => {
+        this.setState({loadingPage:true,page:current},()=>{
+            this.getInstallmentInfo(this.state.allInstallment)
+        })
+      }
 
     render(){
         if(this.state.loading){
@@ -505,7 +706,27 @@ class Main extends React.Component{
                                 data={this.state.formInfo.value}   
                             />
                         }
-                  
+
+                        <GridDetail
+                            gridLabel={[4,4]}
+                            title={'Informasi Cicilan'}
+                            label={[]}
+                            data={[]}   
+                        />
+
+                        < TableComponent
+                            id={'id'}
+                            paging={this.state.paging}
+                            loading={this.state.loadingPage}
+                            columnData={columnDataUser}
+                            data={this.state.installmentInfo}
+                            page={this.state.page}
+                            rowsPerPage={this.state.rowsPerPage}
+                            totalData={this.state.totalData}
+                            onChangePage={this.onChangePage}  
+                            permissionPaid={(e, id) => this.btnPaidAndDetail(e, id)}        
+                        /> 
+                                
 
                     </Grid>
                 </Grid>

@@ -125,45 +125,43 @@ class PermintaanPinjaman extends React.Component {
 
   render() {
    
-  if(getTokenClient() && getTokenAuth()){
-      
-    return (
-        <div style={{padding:0}}>
-         
-        < TableComponent
-            search={
-              {
-                value: this.state.searchRows,
-                label: 'Search ID Pinjaman, Nama Nasabah',
-                function: this.onBtnSearch,
-              }
-            }
-            errorMessage={this.state.errorMessage}
-            title={'Permintaan Pinjaman - List'}
-            id={"id"}
-            paging={this.state.paging}
-            loading={this.state.loading}
-            columnData={columnDataUser}
-            data={this.state.rows}
-            page={this.state.page}
-            rowsPerPage={this.state.rowsPerPage}
-            totalData={this.state.total_data}
-            onChangePage={this.onChangePage}             
-            permissionDetail={ checkPermission('lender_loan_request_detail') ? '/pinjamanDetail/' : null}
-        /> 
-
+    if(getTokenClient() && getTokenAuth()){
         
-        </div>
-      
+      return (
+        <div style={{padding:0}}>
+          
+          < TableComponent
+              search={
+                {
+                  value: this.state.searchRows,
+                  label: 'Search ID Pinjaman, Nama Nasabah',
+                  function: this.onBtnSearch,
+                }
+              }
+              errorMessage={this.state.errorMessage}
+              title={'Permintaan Pinjaman - List'}
+              id={"id"}
+              paging={this.state.paging}
+              loading={this.state.loading}
+              columnData={columnDataUser}
+              data={this.state.rows}
+              page={this.state.page}
+              rowsPerPage={this.state.rowsPerPage}
+              totalData={this.state.total_data}
+              onChangePage={this.onChangePage}             
+              permissionDetail={ checkPermission('lender_loan_request_detail') ? '/pinjamanDetail/' : null}
+          /> 
 
-    );
-  
-  
+          
+          </div>
+      );
+    
+    
 
-}
-else if(getTokenAuth()){
-  return  <Redirect to='/login' />
-}
+    }
+    else if(getTokenAuth()){
+      return  <Redirect to='/login' />
+    }
     
   }
 }
