@@ -1,7 +1,7 @@
 import React from 'react'
 import { Redirect } from 'react-router-dom'
 import swal from 'sweetalert';
-import { getPermintaanPinjamanDetailFunction } from './saga';
+import { getPermintaanPinjamanDetailFunction, patchInstallmentFunction } from './saga';
 import Loading from '../subComponent/Loading';
 import { checkPermission, handleFormatDate, findAmount, formatMoney, decryptImage, formatNumber } from '../global/globalFunction'
 import { getTokenAuth, getTokenClient } from '../index/token';
@@ -32,7 +32,7 @@ const columnDataUser = [
         label: 'Total Cicilan',
     },
     {
-        id: 'paid_amount',
+        id: 'paid_amount_string',
         label: 'Total Pembayaran',
     },
     {
@@ -52,20 +52,19 @@ class Main extends React.Component{
 
     state = {
         errorMessage:'',
-        rows:{},
-        status:'',
         endDate:null,
         diterima:false,
         dicairkan: false,
         dipinjam:false,
         ditolak:false,
-        productInfo:'',
         loading:true,
         dateApprove:null,
         reason:'',
         dialog: false,
         statusPinjaman: '',
+        status:'',
         disburse_status: '',
+        payment_status: '',
         title:'',
         rowsPerPage: 12,
         page: 1,
@@ -84,15 +83,15 @@ class Main extends React.Component{
     }
 
     getDataDetail =()=>{
-        this._isMounted && this.getDataDetailBtn()
+        this._isMounted && this.refresh()
     }
 
-    getDataDetailBtn = async function(status){
+    refresh = async function(status){
         const param = {}
         param.idLoan = this.props.match.params.idLoan 
-        param.idBorrower =  this.props.match.params.idBorrower
 
         if(status) {
+            console.log(status)
             if(status === 'terima') {
                 param.dateApprove = this.state.dateApprove
             } else if(status === 'tolak') {
@@ -104,7 +103,7 @@ class Main extends React.Component{
 
         if(data){
             if(!data.error){
-                if(!status) {
+                if(!status || (status && status === 'paid')) {
                     console.log(data.dataLender)
                     const rows = data.dataLender;
 
@@ -116,26 +115,33 @@ class Main extends React.Component{
                     const borrowerInfo = this.getBorrowerInfo(data.dataLender && data.dataLender.borrower_info);                 
                     const allInstallment = data.dataLender && data.dataLender.installment_details;
 
-                    this.getInstallmentInfo(data.dataLender && data.dataLender.installment_details);
+                    if(checkPermission('lender_loan_request_list_installment_list')) {
+                        this.getInstallmentInfo(data.dataLender.installment_details);
+                    }
+                    
 
                     this.setState({
-                        rows,
                         pinjamanInfo,
                         formInfo,
                         feesInfo,
                         borrowerInfo,
                         detailInfo,
                         allInstallment,
-                        status:data.dataLender.status,
-                        disburse_status: data.dataLender.disburse_status,
+                        status: rows && rows.status,
+                        disburse_status: rows && rows.disburse_status,
+                        payment_status: rows && rows.payment_status,
                         loading:false,
                         loadingPage: false,
+                    }, () => {
+                        if(status && status === 'paid') {
+                            swal("Perubahan Detail Cicilan","Berhasil","success")
+                        }
                     })
                 } else if(status === 'terima'){
-                    swal("Permintaan","Diterima","success")
+                    swal("Permintaan Pinjaman","Diterima","success")
                     this._isMounted && this.setState({errorMessage:'',diterima:true, loading:false})
                 } else if(status === 'tolak'){
-                    swal("Permintaan","Ditolak","warning")
+                    swal("Permintaan Pinjaman","Ditolak","warning")
                     this._isMounted && this.setState({errorMessage:'',ditolak:true , loading:false})
                 }
                 
@@ -158,6 +164,7 @@ class Main extends React.Component{
                     const newInstallment = installment[key];
 
                     newInstallment.paid_status_string = newInstallment.paid_status ? 'Sudah Bayar' : 'Belum Bayar';
+                    newInstallment.paid_amount_string = formatMoney(parseInt(newInstallment.paid_amount || 0))
                     newInstallment.total = formatMoney(parseInt(newInstallment.loan_payment + newInstallment.interest_payment + newInstallment.penalty))
                     installmentInfo.push(installment[key])
                 }
@@ -336,25 +343,8 @@ class Main extends React.Component{
         if (endDate === null || (endDate && endDate.toString() === 'Invalid Date')){
             this.setState({errorMessage:"Harap Masukkan Tanggal Pencairan dengan benar"})
         }else{
-            var endMonth =''+ (endDate.getMonth()+1),
-            endDay = '' + endDate.getDate(),
-            endYear = endDate.getFullYear();
-            var newDay=''
-            var newMonth=''
-            if(parseInt(endDay)<10){
-                newDay+= "0"+endDay
-            }else{
-                newDay = endDay
-            }
-            if(parseInt(endMonth)<10){
-                newMonth+= "0"+endMonth
-            }else{
-                newMonth = endMonth
-            }
-            
-            const newFormatEndDate = endYear+"-"+newMonth+"-"+newDay
-            this.setState({dateApprove: newFormatEndDate, loading: true},()=>{
-                this.getDataDetailBtn('terima')
+            this.setState({dateApprove: endDate, loading: true},()=>{
+                this.refresh('terima')
             });
         }
     }
@@ -366,9 +356,45 @@ class Main extends React.Component{
             this.setState({errorMessage:"Alasan Penolakan Kosong - Harap Cek Ulang"})
         }else{
             this.setState({loading: true})
-            this.getDataDetailBtn('tolak')
+            this.refresh('tolak')
         }
       
+    }
+
+    btnPaidInstallment = () => {
+        this.setState({loading: true}, () => {
+            this.patchInstallment()
+        });
+    }
+
+    patchInstallment = async function() {
+        const dataDetail = this.state.detailPaid;
+
+        const param = {
+            idLoan: this.props.match.params.idLoan,
+            idInstallment: dataDetail && dataDetail.id,
+            newData : {
+                paid_status: dataDetail && dataDetail.paid_status,
+                paid_amount: parseFloat((dataDetail && dataDetail.paid_amount) || 0),
+                underpayment: dataDetail && dataDetail.paid_amount && dataDetail.loan_payment && dataDetail.interest_payment && dataDetail.penalty &&
+                parseFloat((dataDetail.loan_payment + dataDetail.interest_payment + dataDetail.penalty - dataDetail.paid_amount) || 0),
+                penalty: parseFloat((dataDetail && dataDetail.penalty) || 0),
+                due_date: dataDetail && dataDetail.due_date,
+                note: dataDetail && dataDetail.note
+            }
+            
+        }
+
+        const data = await patchInstallmentFunction(param);
+
+        if(data) {
+            if(!data.error) {
+                console.log(data)
+                this.refresh('paid')
+            } else {
+                this.setState({errorMessage:data.error, loading:false, loadingPage: false,})
+            }
+        }
     }
 
     btnBack = ()=>{
@@ -412,11 +438,13 @@ class Main extends React.Component{
     onChangeTextFieldForm = (e, labelData, number, dateParam) => {
         console.log(e)
         let detailPaid = this.state.detailPaid;
-        console.log(e.target.value)
+        
         if(dateParam) {
+            console.log(dateParam)
             detailPaid[labelData] = e
             
         } else {
+            console.log(e.target.value)
             if(!number || (number && !isNaN(e.target.value))) {           
                 detailPaid[labelData] = e.target.value         
             }             
@@ -507,6 +535,7 @@ class Main extends React.Component{
                         type: 'date',
                         value: detailPaid.due_date || '',
                         function: this.onChangeTextFieldForm,
+                        disabled: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve')
                     },
                     {
                         id: 'loan_payment',
@@ -526,17 +555,19 @@ class Main extends React.Component{
                         id: 'penalty',
                         title: 'Denda',
                         type: 'textfield',
-                        numeric: true,
-                        value: detailPaid.penalty,
+                        numeric: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve') ? false : true,
+                        value: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve') ? formatNumber(detailPaid.penalty) : detailPaid.penalty,
                         function: this.onChangeTextFieldForm,
+                        disabled: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve')
                     },
                     {
                         id: 'paid_amount',
                         title: 'Total Pembayaran',
                         type: 'textfield',
-                        numeric: true,
-                        value: detailPaid.paid_amount,
+                        numeric: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve') ? false : true,
+                        value: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve') ? formatNumber(detailPaid.paid_amount) : detailPaid.paid_amount,
                         function: this.onChangeTextFieldForm,
+                        disabled: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve')
                     },
                     {
                         id: 'paid_date',
@@ -550,9 +581,9 @@ class Main extends React.Component{
                         title: 'Status Pembayaran',
                         label: 'Terbayar',
                         type: 'checkbox',
-                        value: detailPaid.paid_status || '',
+                        value: detailPaid.paid_status || false,
                         function: this.onChangeCheckbox,
-                        disabled: false,
+                        disabled: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve')
                     },
                     {
                         id: 'note',
@@ -560,6 +591,7 @@ class Main extends React.Component{
                         type: 'textfield',
                         value: detailPaid.note || '',
                         function: this.onChangeTextFieldForm,
+                        disabled: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve')
                     }
                 ]
                 
@@ -580,6 +612,8 @@ class Main extends React.Component{
                 this.btnTerimaPinjaman()
             } else if (this.state.statusPinjaman === 'tolak') {
                 this.btnTolakPinjaman()
+            } else if (this.state.statusPinjaman === 'paidInstallment') {
+                this.btnPaidInstallment()
             }
         }
     }
@@ -707,25 +741,29 @@ class Main extends React.Component{
                             />
                         }
 
-                        <GridDetail
-                            gridLabel={[4,4]}
-                            title={'Informasi Cicilan'}
-                            label={[]}
-                            data={[]}   
-                        />
+                        {   this.state.installmentInfo &&
+                            <GridDetail
+                                gridLabel={[4,4]}
+                                title={'Informasi Cicilan'}
+                                label={[]}
+                                data={[]}   
+                            />
+                        }
 
-                        < TableComponent
-                            id={'id'}
-                            paging={this.state.paging}
-                            loading={this.state.loadingPage}
-                            columnData={columnDataUser}
-                            data={this.state.installmentInfo}
-                            page={this.state.page}
-                            rowsPerPage={this.state.rowsPerPage}
-                            totalData={this.state.totalData}
-                            onChangePage={this.onChangePage}  
-                            permissionPaid={(e, id) => this.btnPaidAndDetail(e, id)}        
-                        /> 
+                        {   this.state.installmentInfo &&
+                            < TableComponent
+                                id={'id'}
+                                paging={this.state.paging}
+                                loading={this.state.loadingPage}
+                                columnData={columnDataUser}
+                                data={this.state.installmentInfo}
+                                page={this.state.page}
+                                rowsPerPage={this.state.rowsPerPage}
+                                totalData={this.state.totalData}
+                                onChangePage={this.onChangePage}  
+                                permissionPaid={(e, id) => this.btnPaidAndDetail(e, id)}        
+                            /> 
+                        }
                                 
 
                     </Grid>

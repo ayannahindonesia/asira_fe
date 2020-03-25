@@ -42,9 +42,9 @@ export async function getPermintaanPinjamanDetailFunction (param, status, next) 
 
         if(status && status.toString().trim().length !== 0) {
             if(status === 'tolak') {
-            newLink += `/reject?reason=${param.reason}`
-            } else {
-            newLink += `/approve?disburse_date=${param.dateApprove}`
+                newLink += `/reject?reason=${param.reason}`
+            } else if(status === 'terima'){
+                newLink += `/approve?disburse_date=${param.dateApprove}`
             }
         }
           
@@ -119,3 +119,30 @@ export async function changeDisburseDateFunction (param){
     })
 }
 
+
+export async function patchInstallmentFunction (param, next) {
+    return new Promise(async (resolve)=>{
+        const config = {
+            headers: {'Authorization': "Bearer " + getTokenClient()}
+        };
+
+        let newLink = serverUrl+`lender/loanrequest_list/${param.idLoan}/detail/installment_approve/${param.idInstallment}`;
+
+        console.log(param.newData)
+        axios.patch(newLink, param.newData,config).then((res)=>{
+            param.dataInstallment = res.data;
+
+            if(next){
+                resolve(next(param))
+            }
+
+            resolve(param)
+        }).catch((err)=>{
+            console.log(err.response.data)
+            const error = err.response && err.response.data && err.response.data.message && `Error : ${err.response.data.message.toString().toUpperCase()}`
+            param.error = error;
+            resolve(param);
+        })
+    })
+    
+}

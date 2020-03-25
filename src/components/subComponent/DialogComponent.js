@@ -159,7 +159,7 @@ class DialogComponent extends React.Component {
                                       <TextField
                                           id={formMessage.id}
                                           value={formMessage.value}
-                                          onChange={(e) => formMessage.function(e,formMessage.id, formMessage.numeric)} 
+                                          onChange={(e) => formMessage.function(e, formMessage.id, formMessage.numeric)} 
                                           margin="dense"
                                           variant="outlined"
                                           disabled={formMessage.disabled}
@@ -180,7 +180,7 @@ class DialogComponent extends React.Component {
                                         <DatePicker
                                             id={formMessage.id}
                                             type='dateOnly'
-                                            onChange={formMessage.function}
+                                            onChange={(e) => formMessage.function(e, formMessage.id, false, formMessage.type === 'date')}
                                             value={formMessage.value}
                                             disabled={formMessage.disabled}
                                             style={{top:"-20px",border:"1px solid grey",borderRadius:"3px", padding:'5px 0px 5px 10px'}}

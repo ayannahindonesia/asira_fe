@@ -124,7 +124,7 @@ export function checkPermission(stringPermission) {
   let flag = false;
   
   const listPermission = (getProfileUser() && JSON.parse(getProfileUser()) && JSON.parse(getProfileUser()).permissions) || [];
-
+  
   for(const key in listPermission) {
     if(listPermission[key] && listPermission[key].toString().toLowerCase() === 'all') {
       flag = true;
