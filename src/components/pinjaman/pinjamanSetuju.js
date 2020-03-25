@@ -98,6 +98,7 @@ class PinjamanSetuju extends React.Component {
   _isMounted = false;
 
   state = {
+    statusFilter:'processing',
     checkedData:[],
     rows: [],
     page: 1,last_page:1,
@@ -111,6 +112,21 @@ class PinjamanSetuju extends React.Component {
     total_data:0,
     loading:true,loadingBtn:false,
     searching:false,errorMessage:'',
+    listFilter:[
+      {
+          id:'processing',
+          label:'Proses'
+      },
+      {
+          id:'approved',
+          label:'Disetujui'
+      },
+      {
+          id:'rejected',
+          label:'Ditolak'
+      }
+      
+  ],
     modal:false,idPinjaman:null,ubahTanggalPencairan:new Date(),disburse:false,telahDicairkan:'Dikonfirmasi',statusTanggalDisburse:'Diubah'
   };
 
@@ -135,7 +151,7 @@ class PinjamanSetuju extends React.Component {
 
   getAllData = async function (){
     const param ={
-      status:"approved",
+      status:this.state.statusFilter,
       disburse_status:'processing',
       rows:"10",
       page: this.state.page,
@@ -432,6 +448,12 @@ class PinjamanSetuju extends React.Component {
       )
     }
   }
+
+  onChangeDropDown =(e)=>{
+      this.setState({statusFilter:e.target.value},()=>{
+        this.getAllData()
+      })
+  }
     
   render() {
     if(getTokenClient() && getTokenAuth()){
@@ -477,10 +499,13 @@ class PinjamanSetuju extends React.Component {
           </ModalFooter>
         </Modal>
 
-       
           < TableComponent
             id={"id"}
-            title={'Pinjaman Disetujui - List'}
+            title={`Pinjaman 
+            ${this.state.statusFilter ==='processing'?"Proses":
+              this.state.statusFilter ==="approved"?"Disetujui":
+              "Ditolak"} 
+            - List`}
             errorMessage={this.state.errorMessage}
             checkBoxAction={this.handleCheckBox}
             searchDate={
@@ -521,6 +546,8 @@ class PinjamanSetuju extends React.Component {
               ]
             }        
             permissionDetail={ checkPermission('lender_loan_request_detail') ? '/pinjamanDetail/' : null}
+            listFilter={this.state.listFilter}
+            onChangeFilter ={this.onChangeDropDown}
           /> 
         
         </div>

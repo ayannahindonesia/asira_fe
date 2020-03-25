@@ -12,6 +12,7 @@ import TitleBar from './TitleBar';
 import SearchBar from './SearchBar';
 import DatePicker from "react-date-picker";
 import "react-datepicker/dist/react-datepicker.css";
+import DropDown from '../subComponent/DropDown';
 
 class TableComponent extends React.Component {
   constructor(props) {
@@ -277,7 +278,6 @@ class TableComponent extends React.Component {
               {this.props.errorMessage}
             </Grid>
 
-
             {
               this.props.searchDate &&
               <Grid item sm={12} xs={12} style={{marginBottom:'10px'}}>
@@ -286,7 +286,7 @@ class TableComponent extends React.Component {
                     <b> {this.props.searchDate.label} </b>
                   </Grid>
 
-                  <Grid item sm={5} xs={12} style={{maxWidth:'330px'}}>
+                  <Grid item sm={4} xs={12} style={{maxWidth:'330px'}}>
                     {
                       this.props.searchDate.value && 
                       <Grid container>
@@ -319,13 +319,12 @@ class TableComponent extends React.Component {
                             />
                           </Grid>
                         }
-                        
 
                       </Grid>
                     }
                   </Grid>
 
-                  <Grid item sm={5} xs={12}>
+                  <Grid item sm={4} xs={12}>
                     {
                       this.props.searchDate.button &&
                       <Grid container>
@@ -349,6 +348,21 @@ class TableComponent extends React.Component {
                     }
                   </Grid>
 
+                  <Grid item sm={2} xs={12} style={{maxWidth:"150px",marginTop:"-20px"}}>
+                    {this.props.listFilter &&
+                      <DropDown
+                      value={this.props.filter}
+                      label="label"
+                      data={this.props.listFilter}
+                      id="id"
+                      labelName={"label"}
+                      fullWidth
+                      onChange={this.props.onChangeFilter}
+                    />
+                    }
+                  </Grid>
+             
+
                 </Grid>
               
               </Grid>
@@ -367,7 +381,6 @@ class TableComponent extends React.Component {
               }
               
             </Grid>
-
             {
               this.renderTable()
             }
