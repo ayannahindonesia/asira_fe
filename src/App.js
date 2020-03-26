@@ -37,7 +37,6 @@ class App extends React.Component {
       setTokenAuth(res.data.token)
       this.setState({loading : false})
     }).catch((err)=>{
-      console.log(err.toString())
       setTimeout(function(){ alert("Coba reload halaman/ cek koneksi internet"); }, 5000);
     })
   }

@@ -128,7 +128,6 @@ export async function patchInstallmentFunction (param, next) {
 
         let newLink = serverUrl+`lender/loanrequest_list/${param.idLoan}/detail/installment_approve/${param.idInstallment}`;
 
-        console.log(param.newData)
         axios.patch(newLink, param.newData,config).then((res)=>{
             param.dataInstallment = res.data;
 
@@ -138,7 +137,6 @@ export async function patchInstallmentFunction (param, next) {
 
             resolve(param)
         }).catch((err)=>{
-            console.log(err.response.data)
             const error = err.response && err.response.data && err.response.data.message && `Error : ${err.response.data.message.toString().toUpperCase()}`
             param.error = error;
             resolve(param);

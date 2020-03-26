@@ -158,7 +158,6 @@ export async function changeFirstLoginFunction (param,next){
             resolve(res)
         })
         .catch((err)=>{
-            console.log(err.response)
             const error =( err.response && err.response.data && err.response.data.message && `Error : ${err.response.data.message.toString().toUpperCase()}`)|| err.toString()
             param.error = error;
             resolve(param);

@@ -107,7 +107,6 @@ class Main extends React.Component{
         param.idLoan = this.props.match.params.idLoan 
 
         if(status) {
-            console.log(status)
             if(status === 'terima') {
                 param.dateApprove = this.state.dateApprove
             } else if(status === 'tolak') {
@@ -126,7 +125,6 @@ class Main extends React.Component{
                     swal("Permintaan Pinjaman","Ditolak","warning")
                     this._isMounted && this.setState({errorMessage:'',ditolak:true , loading:false})
                 } else {                 
-                    console.log(data.dataLender)
                     const rows = data.dataLender;
 
                     
@@ -170,7 +168,6 @@ class Main extends React.Component{
     }
 
     getInstallmentInfo = (installmentParam) => {
-        console.log(installmentParam)
         const installment = installmentParam || this.state.allInstallment;
         const installmentInfo = [];
         const page = this.state.page;
@@ -317,7 +314,7 @@ class Main extends React.Component{
 
     getFormInfo = (form) => {
         let formInfo = null;
-        console.log(form)
+        
         if(form) { 
             formInfo = {
                 title: [],
@@ -352,7 +349,7 @@ class Main extends React.Component{
                 arrayForm += 1;
             }
         }
-        console.log(formInfo)
+        
         return formInfo;
     }
     
@@ -362,8 +359,6 @@ class Main extends React.Component{
         if (endDate === null || (endDate && endDate.toString() === 'Invalid Date')){
             this.setState({errorMessage:"Harap Masukkan Tanggal Pencairan dengan benar"})
         }else{
-            console.log(endDate)
-            console.log(this.constructDate(endDate))
             this.setState({dateApprove: this.constructDate(endDate), loading: true},()=>{
                 this.refresh('terima')
             });
@@ -410,7 +405,6 @@ class Main extends React.Component{
 
         if(data) {
             if(!data.error) {
-                console.log(data)
                 this.refresh('paid')
             } else {
                 this.setState({errorMessage:data.error, loading:false, loadingPage: false,})
@@ -457,15 +451,11 @@ class Main extends React.Component{
     }
 
     onChangeTextFieldForm = (e, labelData, number, dateParam) => {
-        console.log(e)
         let detailPaid = this.state.detailPaid;
         
         if(dateParam) {
-            console.log(dateParam)
             detailPaid[labelData] = e
-            
         } else {
-            console.log(e.target.value)
             if(!number || (number && !isNaN(e.target.value))) {           
                 detailPaid[labelData] = e.target.value         
             }             
@@ -544,7 +534,7 @@ class Main extends React.Component{
             if(detailPaid) {
 
                 permissionPaidInstallment =  detailPaid.paid_status_string === 'Sudah Bayar' || !this.permissionBtnPaid(); 
-                console.log('permission', this.permissionBtnPaid())
+                
                 message = [
                     {
                         id: 'period',
@@ -621,7 +611,7 @@ class Main extends React.Component{
                 
             }
         }
-        console.log(permissionPaidInstallment)
+        
         this.setState({title, message, permissionPaidInstallment: !permissionPaidInstallment})
         
     }
@@ -632,9 +622,7 @@ class Main extends React.Component{
         if(typeof(date) === 'object') {
             newDate = `${date.getFullYear()}-${date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}`: date.getMonth() + 1}-${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`
         } 
-
-        console.log(typeof(date))
-        console.log(newDate)
+        
         return newDate;
     }
 
