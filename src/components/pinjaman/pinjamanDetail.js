@@ -133,7 +133,7 @@ class Main extends React.Component{
                     const pinjamanInfo = this.getPinjamanInfo(rows);
                     const detailInfo = this.getDetailInfo(rows);
                     const feesInfo = this.getFeesInfo(data.dataLender && data.dataLender.fees, rows && rows.loan_amount)
-                    const formInfo = this.getFormInfo(data.dataLender && data.dataLender.form_info && JSON.parse(data.dataLender.form_info))
+                    const formInfo = this.getFormInfo(data.dataLender && data.dataLender.form_info && (typeof(data.dataLender.form_info) !== 'object' ? JSON.parse(data.dataLender.form_info) : data.dataLender.form_info))
                     const borrowerInfo = this.getBorrowerInfo(data.dataLender && data.dataLender.borrower_info);                 
                     const allInstallment = data.dataLender && data.dataLender.installment_details;
 
@@ -141,7 +141,6 @@ class Main extends React.Component{
                         this.getInstallmentInfo(data.dataLender.installment_details);
                     }
                     
-
                     this.setState({
                         pinjamanInfo,
                         formInfo,
@@ -363,7 +362,9 @@ class Main extends React.Component{
         if (endDate === null || (endDate && endDate.toString() === 'Invalid Date')){
             this.setState({errorMessage:"Harap Masukkan Tanggal Pencairan dengan benar"})
         }else{
-            this.setState({dateApprove: endDate, loading: true},()=>{
+            console.log(endDate)
+            console.log(this.constructDate(endDate))
+            this.setState({dateApprove: this.constructDate(endDate), loading: true},()=>{
                 this.refresh('terima')
             });
         }
@@ -399,7 +400,7 @@ class Main extends React.Component{
                 underpayment: dataDetail && dataDetail.paid_amount && dataDetail.loan_payment && dataDetail.interest_payment && dataDetail.penalty &&
                 parseFloat((dataDetail.loan_payment + dataDetail.interest_payment + dataDetail.penalty - dataDetail.paid_amount) || 0),
                 penalty: parseFloat((dataDetail && dataDetail.penalty) || 0),
-                due_date: dataDetail && dataDetail.due_date,
+                due_date: dataDetail && dataDetail.due_date && this.constructDate(dataDetail.due_date),
                 note: dataDetail && dataDetail.note
             }
             
@@ -523,7 +524,7 @@ class Main extends React.Component{
                     function:this.handleEndChange,
                 }
             ]
-
+            permissionPaidInstallment = false;
         } else if(statusPinjaman && statusPinjaman === 'tolak') {
             title = 'Penolakan'
             message = [
@@ -535,7 +536,7 @@ class Main extends React.Component{
                     function: this.onChangeTextField,
                 }
             ]
-            
+            permissionPaidInstallment = false;
         } else if(statusPinjaman && statusPinjaman === 'paidInstallment') {
             title = 'Pembayaran'          
             let detailPaid = this.state.detailPaid;
@@ -623,6 +624,18 @@ class Main extends React.Component{
         console.log(permissionPaidInstallment)
         this.setState({title, message, permissionPaidInstallment: !permissionPaidInstallment})
         
+    }
+
+    constructDate = (date) => {
+        let newDate = date;
+
+        if(typeof(date) === 'object') {
+            newDate = `${date.getFullYear()}-${date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}`: date.getMonth() + 1}-${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`
+        } 
+
+        console.log(typeof(date))
+        console.log(newDate)
+        return newDate;
     }
 
     btnConfirmationDialog = (e, nextStep, statusPinjaman) => {
