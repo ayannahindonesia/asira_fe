@@ -26,6 +26,7 @@ export default function MaterialUIPickers(props) {
               'aria-label': 'change date',
             }}
             style={props.style?props.style:{}}
+            disabled={props.disabled}
           />
 
       </MuiPickersUtilsProvider>
@@ -47,6 +48,7 @@ export default function MaterialUIPickers(props) {
               'aria-label': 'change date',
             }}
             InputProps={props.InputProps}
+            disabled={props.disabled}
             // style={props.style?props.style:{}}
           />
       </MuiPickersUtilsProvider>
@@ -66,7 +68,7 @@ export default function MaterialUIPickers(props) {
             'aria-label': 'change time',
           }}
           style={props.style?props.style:{}}
-
+          disabled={props.disabled}
         />
     
     </MuiPickersUtilsProvider>

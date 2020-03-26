@@ -7,10 +7,10 @@ import { Grid, InputAdornment, FormControlLabel, Checkbox, TextField } from '@ma
 import {  detailProductFunction,detailServiceProductFunction} from './saga';
 import { getAllLayananListFunction } from '../layanan/saga';
 import { getTokenAuth, getTokenClient } from '../index/token';
-import NumberFormatCustom from '../subComponent/NumberFormatCustom';
 import Loading from '../subComponent/Loading';
 import { destructFees, destructSector, destructCollaterals, destructMandatory } from './function';
 import ActionComponent from '../subComponent/ActionComponent';
+import { formatNumber } from '../global/globalFunction';
 
 
 
@@ -293,12 +293,11 @@ class ProductDetail extends React.Component{
                                     <Grid item xs={1} sm={1} style={{paddingTop:'12px', marginRight:'20px'}}>
                                         <TextField
                                             id="interest"
-                                            value={this.state.interest}
+                                            value={formatNumber(parseFloat(this.state.interest).toFixed(2))}
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
                                             InputProps={{
-                                                inputComponent: NumberFormatCustom,
                                                 endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                             }}
                                             disabled
@@ -326,14 +325,11 @@ class ProductDetail extends React.Component{
                                     <Grid item xs={1} sm={1} >
                                         <TextField
                                             id="timeFrom"
-                                            value={this.state.timeFrom}
+                                            value={formatNumber(this.state.timeFrom)}
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
                                             disabled
-                                            InputProps={{
-                                                inputComponent: NumberFormatCustom,
-                                            }}
                                         />
                                     </Grid>
                                     <Grid item sm={1} xs={1} style={{paddingTop:'10px'}}>
@@ -342,14 +338,11 @@ class ProductDetail extends React.Component{
                                     <Grid item xs={1} sm={1} >
                                         <TextField
                                             id="timeTo"
-                                            value={this.state.timeTo}
+                                            value={formatNumber(this.state.timeTo)}
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
                                             disabled
-                                            InputProps={{
-                                                inputComponent: NumberFormatCustom,
-                                            }}
                                         />
                                     </Grid>
                                 </Grid>
@@ -363,12 +356,11 @@ class ProductDetail extends React.Component{
                                     <Grid item xs={2} sm={2} >
                                         <TextField
                                             id="rentangFrom"
-                                            value={this.state.rentangFrom}
+                                            value={formatNumber(this.state.rentangFrom)}
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
                                             InputProps={{
-                                                inputComponent: NumberFormatCustom,
                                                 startAdornment: <InputAdornment position="start"> Rp </InputAdornment>,
                                             }}
                                             disabled
@@ -380,12 +372,11 @@ class ProductDetail extends React.Component{
                                     <Grid item xs={2} sm={2} >
                                         <TextField
                                             id="rentangTo"
-                                            value={this.state.rentangTo}
+                                            value={formatNumber(this.state.rentangTo)}
                                             margin="dense"
                                             variant="outlined"
                                             fullWidth
                                             InputProps={{
-                                                inputComponent: NumberFormatCustom,
                                                 startAdornment: <InputAdornment position="start"> Rp </InputAdornment>,
                                             }}
                                             disabled
@@ -572,7 +563,7 @@ class ProductDetail extends React.Component{
                                 </Grid>
                             </Grid>
                             
-                            {/* Fee */}
+                            {/* Biaya */}
                             <Grid item xs={12} sm={12} style={{fontSize:'20px', padding:'0px 10px 10px'}}>
                                 <Grid container>
                                     <Grid item xs={12} sm={12} >
@@ -613,13 +604,10 @@ class ProductDetail extends React.Component{
                                                                 <TextField 
                                                                     fullWidth
                                                                     placeholder={'Amount'}
-                                                                    value={feePerData.value}
+                                                                    value={feePerData.type === 'percent' ? formatNumber(parseFloat(feePerData.value).toFixed(2)) : formatNumber(feePerData.value)}
                                                                     margin="dense"
                                                                     variant="outlined"
                                                                     disabled
-                                                                    InputProps={{
-                                                                        inputComponent: NumberFormatCustom,
-                                                                    }}
                                                                 />
                                                             </Grid>          
                                                             

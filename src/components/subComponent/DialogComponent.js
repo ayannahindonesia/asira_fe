@@ -14,7 +14,7 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardMedia from '@material-ui/core/CardMedia';
 import BrokenLink from './../../support/img/default.png'
 import DatePicker from './../subComponent/DateTimePicker'
-import { Grid, TextField } from '@material-ui/core';
+import { Grid, TextField, FormControlLabel, Checkbox } from '@material-ui/core';
 
 const styles = theme => ({
   root: {
@@ -123,23 +123,51 @@ class DialogComponent extends React.Component {
                         }
                         {
                           type && type === 'form' && message && message.map((formMessage, index) => {
-                            if(formMessage.type && formMessage.type === 'textfield') {
+                            
+                            if(formMessage.type && formMessage.type === 'checkbox') {
                               return (
                                 <Grid container key={`${formMessage.id}-${index}`} style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
                                   <Grid item xs={4} sm={4} style={{paddingTop:'20px'}}>
                                       <b>{formMessage.title}</b>
                                   </Grid>
-                                  <Grid item xs={4} sm={4} >
+                                  <Grid item xs={6} sm={6} style={{paddingTop:'10px'}}>
+                                    <FormControlLabel
+                                      control={
+                                          <Checkbox
+                                            checked={formMessage.value}
+                                            color={formMessage.value ? "primary":"default"}
+                                            value="default"
+                                            inputProps={{ 'aria-label': 'checkbox with default color' }}
+                                            onClick={(e) => formMessage.function(e, formMessage.id)}
+                                          />
+                                      }
+                                      label={formMessage.label}
+                                      disabled={formMessage.disabled}
+                                    />
+                                  </Grid>
+                                </Grid>
+                                
+                              )
+                            } else if(!formMessage.type || (formMessage.type && formMessage.type === 'textfield')) {
+                              
+                              return (
+                                <Grid container key={`${formMessage.id}-${index}`} style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
+                                  <Grid item xs={4} sm={4} style={{paddingTop:'20px'}}>
+                                      <b>{formMessage.title}</b>
+                                  </Grid>
+                                  <Grid item xs={6} sm={6} >
                                       <TextField
                                           id={formMessage.id}
                                           value={formMessage.value}
-                                          onChange={(e) => formMessage.function(e,formMessage.id)} 
+                                          onChange={(e) => formMessage.function(e, formMessage.id, formMessage.numeric)} 
                                           margin="dense"
                                           variant="outlined"
+                                          disabled={formMessage.disabled}
+                                          multiline
                                           fullWidth
                                       /> 
                                   </Grid>
-                              </Grid>
+                                </Grid>
                               )
                             } else if (formMessage.type && formMessage.type === 'date'){
                               return (
@@ -148,12 +176,13 @@ class DialogComponent extends React.Component {
                                         <b>{formMessage.title}</b>
                                         
                                     </Grid>
-                                    <Grid item xs={4} sm={4} style={{alignItems:"left"}}>
+                                    <Grid item xs={6} sm={6} style={{alignItems:"left"}}>
                                         <DatePicker
                                             id={formMessage.id}
                                             type='dateOnly'
-                                            onChange={formMessage.function}
+                                            onChange={(e) => formMessage.function(e, formMessage.id, false, formMessage.type === 'date')}
                                             value={formMessage.value}
+                                            disabled={formMessage.disabled}
                                             style={{top:"-20px",border:"1px solid grey",borderRadius:"3px", padding:'5px 0px 5px 10px'}}
                                         />
                                         
@@ -172,12 +201,16 @@ class DialogComponent extends React.Component {
                         type && type !== 'image' && 
                         <DialogActions>
                             
-                            <Button color="primary" onClick={(e) => onClose(e,true)} style={{outline:'none'}}>
-                              Ya
-                            </Button>
+                            {
+                              !this.props.noNextStep &&
+                              <Button color="primary" onClick={(e) => onClose(e,true)} style={{outline:'none'}}>
+                                Ya
+                              </Button>
+                            }
+                            
                             
                             <Button color="primary" onClick={onClose} style={{outline:'none'}}>
-                              Tidak
+                              {this.props.noNextStep ? 'Kembali' : 'Tidak'}
                             </Button>
                         </DialogActions>
                     }

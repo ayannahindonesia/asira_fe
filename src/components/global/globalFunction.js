@@ -81,8 +81,19 @@ export function isNumeric(value) {
 }
 
 export function formatNumber(number,money) {
+  console.log(number)
   number = (number && number.toString().trim()) || ''
   number = deleteSeparator(number,",")
+  let floatingNumber = false;
+  console.log(number)
+  if(number.includes('.')) {
+    const numberSplit = number.split('.')
+    floatingNumber = numberSplit[1];
+    number = numberSplit[0];
+    
+    floatingNumber = floatingNumber.substr(0,2);
+  }
+  
   let pjg = number.length
   if(!isNumeric(number)){
     pjg = pjg-1
@@ -106,14 +117,14 @@ export function formatNumber(number,money) {
     tmp += ',00';
   } 
 
-  return tmp.toString().length !== 0 ? tmp : '-'
+  return tmp.toString().length !== 0 ? `${tmp}${floatingNumber ? `,${floatingNumber}` : ''}` : '-'
 }
 
 export function checkPermission(stringPermission) {
   let flag = false;
   
   const listPermission = (getProfileUser() && JSON.parse(getProfileUser()) && JSON.parse(getProfileUser()).permissions) || [];
-
+  
   for(const key in listPermission) {
     if(listPermission[key] && listPermission[key].toString().toLowerCase() === 'all') {
       flag = true;
