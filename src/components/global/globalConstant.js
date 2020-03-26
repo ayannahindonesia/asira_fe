@@ -23,10 +23,17 @@ exports.dataMenu = [
         label: 'Pinjaman',
         logo:'Pinjaman.svg',
         child: [
+            
             {
                 permission: 'lender_loan_request_list',
                 label: 'Permintaan Pinjaman',
                 link: '/permintaanPinjaman',
+                logo:'PinjamanList.svg',
+            },
+            {
+                permission: 'lender_loan_request_list',
+                label: 'Pinjaman List',
+                link: '/pinjamanList',
                 logo:'PinjamanList.svg',
             },
             {
@@ -46,7 +53,7 @@ exports.dataMenu = [
                 label: 'Pinjaman Telah Dicairkan',
                 link: '/pencairanList',
                 logo:'Pencairan.svg',
-            },
+            }
         ]
     },
     {
