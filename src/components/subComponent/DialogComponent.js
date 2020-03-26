@@ -210,7 +210,7 @@ class DialogComponent extends React.Component {
                             
                             
                             <Button color="primary" onClick={onClose} style={{outline:'none'}}>
-                              Tidak
+                              {this.props.noNextStep ? 'Kembali' : 'Tidak'}
                             </Button>
                         </DialogActions>
                     }

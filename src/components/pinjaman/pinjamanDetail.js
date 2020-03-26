@@ -71,6 +71,7 @@ class Main extends React.Component{
         totalData: 0,
         paging: true,
         loadingPage: false,
+        permissionPaidInstallment: false,
     }
 
     componentDidMount(){
@@ -84,6 +85,21 @@ class Main extends React.Component{
 
     getDataDetail =()=>{
         this._isMounted && this.refresh()
+    }
+
+    permissionBtnPaid = () => {
+        let flag = false;
+
+        if(
+            checkPermission('lender_loan_installment_approve') &&
+            this.state.status && this.state.status === 'approved' &&
+            this.state.disburse_status && this.state.disburse_status === 'confirmed' &&
+            this.state.payment_status && this.state.payment_status === 'processing'
+        ) {
+            flag = true;
+        }
+
+        return flag
     }
 
     refresh = async function(status){
@@ -103,7 +119,13 @@ class Main extends React.Component{
 
         if(data){
             if(!data.error){
-                if(!status || (status && status === 'paid')) {
+                if(status && status === 'terima'){
+                    swal("Permintaan Pinjaman","Diterima","success")
+                    this._isMounted && this.setState({errorMessage:'',diterima:true, loading:false})
+                } else if(status && status === 'tolak'){
+                    swal("Permintaan Pinjaman","Ditolak","warning")
+                    this._isMounted && this.setState({errorMessage:'',ditolak:true , loading:false})
+                } else {                 
                     console.log(data.dataLender)
                     const rows = data.dataLender;
 
@@ -135,14 +157,11 @@ class Main extends React.Component{
                     }, () => {
                         if(status && status === 'paid') {
                             swal("Perubahan Detail Cicilan","Berhasil","success")
+                        } else if(status && status === 'paidLoan') {
+                            swal("Status Pinjaman diubah","Berhasil","success")
                         }
                     })
-                } else if(status === 'terima'){
-                    swal("Permintaan Pinjaman","Diterima","success")
-                    this._isMounted && this.setState({errorMessage:'',diterima:true, loading:false})
-                } else if(status === 'tolak'){
-                    swal("Permintaan Pinjaman","Ditolak","warning")
-                    this._isMounted && this.setState({errorMessage:'',ditolak:true , loading:false})
+                    
                 }
                 
             }else{
@@ -152,6 +171,7 @@ class Main extends React.Component{
     }
 
     getInstallmentInfo = (installmentParam) => {
+        console.log(installmentParam)
         const installment = installmentParam || this.state.allInstallment;
         const installmentInfo = [];
         const page = this.state.page;
@@ -489,6 +509,7 @@ class Main extends React.Component{
     settingMessage = (statusPinjamanParam) => {
         let message = this.state.message;
         let title = this.state.title;
+        let permissionPaidInstallment = this.state.permissionPaidInstallment;
         let statusPinjaman = statusPinjamanParam || this.state.statusPinjaman;
 
         if(statusPinjaman && statusPinjaman === 'terima') {
@@ -520,7 +541,9 @@ class Main extends React.Component{
             let detailPaid = this.state.detailPaid;
 
             if(detailPaid) {
-                
+
+                permissionPaidInstallment =  detailPaid.paid_status_string === 'Sudah Bayar' || !this.permissionBtnPaid(); 
+                console.log('permission', this.permissionBtnPaid())
                 message = [
                     {
                         id: 'period',
@@ -535,7 +558,7 @@ class Main extends React.Component{
                         type: 'date',
                         value: detailPaid.due_date || '',
                         function: this.onChangeTextFieldForm,
-                        disabled: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve')
+                        disabled: permissionPaidInstallment
                     },
                     {
                         id: 'loan_payment',
@@ -555,19 +578,19 @@ class Main extends React.Component{
                         id: 'penalty',
                         title: 'Denda',
                         type: 'textfield',
-                        numeric: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve') ? false : true,
-                        value: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve') ? formatNumber(detailPaid.penalty) : detailPaid.penalty,
+                        numeric: permissionPaidInstallment ? false : true,
+                        value: permissionPaidInstallment ? formatNumber(detailPaid.penalty) : detailPaid.penalty,
                         function: this.onChangeTextFieldForm,
-                        disabled: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve')
+                        disabled: permissionPaidInstallment
                     },
                     {
                         id: 'paid_amount',
                         title: 'Total Pembayaran',
                         type: 'textfield',
-                        numeric: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve') ? false : true,
-                        value: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve') ? formatNumber(detailPaid.paid_amount) : detailPaid.paid_amount,
+                        numeric: permissionPaidInstallment ? false : true,
+                        value: permissionPaidInstallment ? formatNumber(detailPaid.paid_amount) : detailPaid.paid_amount,
                         function: this.onChangeTextFieldForm,
-                        disabled: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve')
+                        disabled: permissionPaidInstallment
                     },
                     {
                         id: 'paid_date',
@@ -583,7 +606,7 @@ class Main extends React.Component{
                         type: 'checkbox',
                         value: detailPaid.paid_status || false,
                         function: this.onChangeCheckbox,
-                        disabled: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve')
+                        disabled: permissionPaidInstallment
                     },
                     {
                         id: 'note',
@@ -591,14 +614,14 @@ class Main extends React.Component{
                         type: 'textfield',
                         value: detailPaid.note || '',
                         function: this.onChangeTextFieldForm,
-                        disabled: detailPaid.paid_status_string === 'Sudah Bayar' || !checkPermission('lender_loan_installment_approve')
+                        disabled: permissionPaidInstallment
                     }
                 ]
                 
             }
         }
-
-        this.setState({title, message})
+        console.log(permissionPaidInstallment)
+        this.setState({title, message, permissionPaidInstallment: !permissionPaidInstallment})
         
     }
 
@@ -673,6 +696,7 @@ class Main extends React.Component{
                             message={this.state.message}
                             type='form'
                             onClose={this.btnConfirmationDialog}
+                            noNextStep={!this.state.permissionPaidInstallment}
                         />
 
                         <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
