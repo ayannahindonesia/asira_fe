@@ -81,11 +81,10 @@ export function isNumeric(value) {
 }
 
 export function formatNumber(number,money) {
-  console.log(number)
   number = (number && number.toString().trim()) || ''
   number = deleteSeparator(number,",")
   let floatingNumber = false;
-  console.log(number)
+  
   if(number.includes('.')) {
     const numberSplit = number.split('.')
     floatingNumber = numberSplit[1];
