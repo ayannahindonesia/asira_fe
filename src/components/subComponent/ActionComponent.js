@@ -7,6 +7,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import CancelIcon from '@material-ui/icons/Cancel';
 import BackspaceRoundedIcon from '@material-ui/icons/BackspaceRounded';
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
+import PaymentIcon from '@material-ui/icons/Payment';
 
 const styles = theme => ({
   root: {
@@ -27,6 +28,7 @@ class ActionComponent extends React.Component {
     render() {
         const {
             modifyType,
+            permissionPaid,
             permissionAdd,
             permissionApprove,
             permissionReject,
@@ -38,6 +40,15 @@ class ActionComponent extends React.Component {
         return ( 
             <Grid container style={{display:'flex', justifyContent:'flex-end', padding:'0'}}>
                 <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+
+                    {
+                        permissionPaid &&
+                        <Tooltip title="Ubah Status Pembayaran" style={{outline:'none'}}>
+                            <IconButton aria-label="paid" onClick={permissionPaid} >
+                                <PaymentIcon style={{width:'35px',height:'35px'}}/>
+                            </IconButton>
+                        </Tooltip>
+                    }
 
                     {
                         permissionApprove &&

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Redirect } from 'react-router-dom'
 import swal from 'sweetalert';
-import { getPermintaanPinjamanDetailFunction, patchInstallmentFunction } from './saga';
+import { getPermintaanPinjamanDetailFunction, patchInstallmentFunction, patchLoanFunction } from './saga';
 import Loading from '../subComponent/Loading';
 import { checkPermission, handleFormatDate, findAmount, formatMoney, decryptImage, formatNumber } from '../global/globalFunction'
 import { getTokenAuth, getTokenClient } from '../index/token';
@@ -65,6 +65,8 @@ class Main extends React.Component{
         status:'',
         disburse_status: '',
         payment_status: '',
+        paymentNote: '',
+        paymentStatus: '',
         title:'',
         rowsPerPage: 12,
         page: 1,
@@ -72,6 +74,20 @@ class Main extends React.Component{
         paging: true,
         loadingPage: false,
         permissionPaidInstallment: false,
+        dataListPaid: [
+            {
+                id: 'processing',
+                label: 'Dalam Proses'
+            },
+            {
+                id: 'paid',
+                label: 'Telah Lunas'
+            },
+            {
+                id: 'failed',
+                label: 'Gagal Bayar'
+            },
+        ]
     }
 
     componentDidMount(){
@@ -149,6 +165,8 @@ class Main extends React.Component{
                         status: rows && rows.status,
                         disburse_status: rows && rows.disburse_status,
                         payment_status: rows && rows.payment_status,
+                        paymentStatus: rows && rows.payment_status,
+                        paymentNote: rows && rows.payment_note,
                         loading:false,
                         loadingPage: false,
                     }, () => {
@@ -217,6 +235,13 @@ class Main extends React.Component{
                         `${rows.agent_name?rows.agent_name:"-"} (${rows.agent_provider_name?rows.agent_provider_name:"-"})`
                     ],
                 ],
+            }
+
+            if(rows.status === 'approved' && rows.disburse_status === 'confirmed') {
+                pinjamanInfo.title[0].push('Status Pembayaran')
+                pinjamanInfo.value[0].push(rows.payment_status && (rows.payment_status === 'processing' ? {value:"Dalam Proses", color:'blue'}  : rows.payment_status === 'paid' ? {value:"Telah Lunas", color:'green'}  : rows.payment_status === 'failed' ? {value:"Gagal Bayar", color:'red'} : '-'))
+                pinjamanInfo.title[1].push('Catatan Pembayaran')
+                pinjamanInfo.value[1].push(rows.payment_note)
             }
         }
         
@@ -412,6 +437,33 @@ class Main extends React.Component{
         }
     }
 
+    btnPaidAll = () => {
+        this.setState({loading: true}, () => {
+            this.patchLoan()
+        });
+    }
+
+    patchLoan = async function() {
+        const param = {
+            idLoan: this.props.match.params.idLoan,
+            newData : {
+                payment_status: this.state.paymentStatus,
+                payment_note: this.state.paymentNote,
+            }
+            
+        }
+
+        const data = await patchLoanFunction(param);
+
+        if(data) {
+            if(!data.error) {
+                this.refresh('paidLoan')
+            } else {
+                this.setState({errorMessage:data.error, loading:false, loadingPage: false,})
+            }
+        }
+    }
+
     btnBack = ()=>{
         if(this.state.status === 'processing') {
             this.setState({dipinjam: true})
@@ -476,6 +528,12 @@ class Main extends React.Component{
         })
     }
 
+    onChangeDropDown = (e, labelData) => {
+        this.setState({[labelData]:e.target.value}, () => {
+            this.settingMessage()
+        })
+    }
+
     btnPaidAndDetail = (e, idPaid) => {
         const newPaid = this.state.allInstallment;
             
@@ -497,6 +555,16 @@ class Main extends React.Component{
         })
     }
 
+    constructDate = (date) => {
+        let newDate = date;
+
+        if(typeof(date) === 'object') {
+            newDate = `${date.getFullYear()}-${date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}`: date.getMonth() + 1}-${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`
+        } 
+
+        return newDate;
+    }
+
     settingMessage = (statusPinjamanParam) => {
         let message = this.state.message;
         let title = this.state.title;
@@ -504,7 +572,7 @@ class Main extends React.Component{
         let statusPinjaman = statusPinjamanParam || this.state.statusPinjaman;
 
         if(statusPinjaman && statusPinjaman === 'terima') {
-            title = 'Persetujuan';
+            title = 'Persetujuan Pinjaman';
             message = [
                 {
                     id: 'endDate',
@@ -516,7 +584,7 @@ class Main extends React.Component{
             ]
             permissionPaidInstallment = false;
         } else if(statusPinjaman && statusPinjaman === 'tolak') {
-            title = 'Penolakan'
+            title = 'Penolakan Pinjaman'
             message = [
                 {
                     id: 'reason',
@@ -528,7 +596,7 @@ class Main extends React.Component{
             ]
             permissionPaidInstallment = false;
         } else if(statusPinjaman && statusPinjaman === 'paidInstallment') {
-            title = 'Pembayaran'          
+            title = 'Pembayaran Cicilan'          
             let detailPaid = this.state.detailPaid;
 
             if(detailPaid) {
@@ -575,6 +643,14 @@ class Main extends React.Component{
                         disabled: permissionPaidInstallment
                     },
                     {
+                        id: 'total',
+                        title: 'Total harus Bayar',
+                        type: 'textfield',
+                        value: formatNumber(parseFloat(detailPaid.penalty || 0) + parseFloat(detailPaid.interest_payment) + parseFloat(detailPaid.loan_payment)),
+                        function: this.onChangeTextFieldForm,
+                        disabled: true
+                    },
+                    {
                         id: 'paid_amount',
                         title: 'Total Pembayaran',
                         type: 'textfield',
@@ -610,20 +686,30 @@ class Main extends React.Component{
                 ]
                 
             }
+        } else if(statusPinjaman && statusPinjaman === 'paidAll') {
+            title = 'Perubahan Status Pembayaran'
+            message = [
+                {
+                    id: 'paidStatus',
+                    title: 'Status Pembayaran',
+                    type: 'dropdown',
+                    data: this.state.dataListPaid,
+                    value: this.state.paidStatus,
+                    function: this.onChangeDropDown,
+                },
+                {
+                    id: 'paidNote',
+                    title: 'Catatan Pembayaran',
+                    type: 'textfield',
+                    value: this.state.paidNote,
+                    function: this.onChangeTextField,
+                }
+            ]
+            permissionPaidInstallment = false;
         }
         
         this.setState({title, message, permissionPaidInstallment: !permissionPaidInstallment})
         
-    }
-
-    constructDate = (date) => {
-        let newDate = date;
-
-        if(typeof(date) === 'object') {
-            newDate = `${date.getFullYear()}-${date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}`: date.getMonth() + 1}-${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`
-        } 
-        
-        return newDate;
     }
 
     btnConfirmationDialog = (e, nextStep, statusPinjaman) => {
@@ -638,6 +724,8 @@ class Main extends React.Component{
                 this.btnTolakPinjaman()
             } else if (this.state.statusPinjaman === 'paidInstallment') {
                 this.btnPaidInstallment()
+            } else if (this.state.statusPinjaman === 'paidAll') {
+                this.btnPaidAll()
             }
         }
     }
@@ -657,7 +745,7 @@ class Main extends React.Component{
             )
         } else if(this.state.dipinjam){
             return (
-                <Redirect to='/pencairanList' />
+                <Redirect to='/permintaanPinjaman' />
             )   
         } else if(this.state.dicairkan){
             return (
@@ -704,6 +792,7 @@ class Main extends React.Component{
                             <ActionComponent
                                 permissionApprove={checkPermission("lender_loan_approve_reject") && this.state.status === 'processing' ? (e, nextStep) => this.btnConfirmationDialog(e, nextStep,'terima') : null}
                                 permissionReject={checkPermission("lender_loan_approve_reject") && this.state.status === 'processing' ? (e, nextStep) => this.btnConfirmationDialog(e, nextStep, 'tolak') : null}
+                                permissionPaid={checkPermission("lender_loan_patch_payment_status") && this.state.status === 'approved' && this.state.disburse_status === 'confirmed' && this.state.payment_status !== 'paid' ? (e, nextStep) => this.btnConfirmationDialog(e, nextStep, 'paidAll') : null}
                                 onCancel={this.btnBack}
                             />
                         </Grid> 
@@ -715,7 +804,7 @@ class Main extends React.Component{
                         {/* Detail Pinjaman */}
                         {   this.state.detailInfo && 
                             <GridDetail
-                                gridLabel={[4,4]}
+                                gridLabel={[4,5]}
                                 noTitleLine
                                 background
                                 label={this.state.detailInfo.title}

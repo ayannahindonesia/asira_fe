@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import DropDown from '../subComponent/DropDown';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -187,8 +188,28 @@ class DialogComponent extends React.Component {
                                         />
                                         
                                     </Grid>
-
-
+                                </Grid>
+                              )
+                            } else if (formMessage.type && formMessage.type === 'dropdown'){
+                              return(
+                                <Grid container key={`${formMessage.id}-${index}`} style={{paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
+                                  <Grid item xs={4} sm={4} style={{paddingTop:'25px'}}>
+                                      <b>{formMessage.title}</b>
+                                      
+                                  </Grid>
+                                  <Grid item xs={6} sm={6} style={{alignItems:"left"}}>
+                                    < DropDown
+                                      value={formMessage.value}
+                                      label="label"
+                                      data={formMessage.data}
+                                      id="id"
+                                      labelName={"label"}
+                                      onChange={(e) => formMessage.function(e, formMessage.id)}
+                                      fullWidth
+                                      disabled={formMessage.disabled}
+                                    />
+                                      
+                                  </Grid>                                    
                                 </Grid>
                               )
                             } else {
