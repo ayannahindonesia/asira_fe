@@ -169,3 +169,28 @@ export async function patchLoanFunction (param, next) {
     })
     
 }
+
+export async function patchInstallmentBulkFunction (param, next) {
+    return new Promise(async (resolve)=>{
+        const config = {
+            headers: {'Authorization': "Bearer " + getTokenClient()}
+        };
+
+        let newLink = serverUrl+`lender/loanrequest_list/${param.idLoan}/detail/installment_approve/bulk`;
+
+        axios.patch(newLink, param.newData,config).then((res)=>{
+            param.dataLoan = res.data;
+
+            if(next){
+                resolve(next(param))
+            }
+
+            resolve(param)
+        }).catch((err)=>{
+            const error = err.response && err.response.data && err.response.data.message && `Error : ${err.response.data.message.toString().toUpperCase()}`
+            param.error = error;
+            resolve(param);
+        })
+    })
+    
+}
