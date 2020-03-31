@@ -1,7 +1,7 @@
 import React from 'react'
 import { Redirect } from 'react-router-dom'
 import swal from 'sweetalert';
-import { getPermintaanPinjamanDetailFunction, patchInstallmentFunction, patchLoanFunction } from './saga';
+import { getPermintaanPinjamanDetailFunction, patchInstallmentFunction, patchLoanFunction, patchInstallmentBulkFunction } from './saga';
 import Loading from '../subComponent/Loading';
 import { checkPermission, handleFormatDate, findAmount, formatMoney, decryptImage, formatNumber } from '../global/globalFunction'
 import { getTokenAuth, getTokenClient } from '../index/token';
@@ -464,6 +464,44 @@ class Main extends React.Component{
         }
     }
 
+    patchInstallmentBulk = async function() {
+        this.setState({loading: true})
+        const param = {
+            idLoan: this.props.match.params.idLoan,
+            newData: [],
+        }
+
+        const allInstallment = this.state.allInstallment;
+
+        for(const key in allInstallment) {
+            if(!allInstallment[key].paid_status || (allInstallment[key].paid_status && allInstallment[key].paid_status === false)) {
+                param.newData.push(
+                    {
+                        id: allInstallment[key].id,
+                        paid_status: true,
+                        paid_amount: allInstallment[key].loan_payment + allInstallment[key].interest_payment + allInstallment[key].penalty,
+                        underpayment: allInstallment[key].underpayment,
+                        penalty: allInstallment[key].penalty,
+                        due_date: this.constructDate(allInstallment[key].due_date),
+                        note: allInstallment[key].note,
+                    }
+                )
+            }
+        }
+        
+
+        const data = await patchInstallmentBulkFunction(param);
+
+        if(data) {
+            if(!data.error) {
+                this.patchLoan()
+            } else {
+                this.setState({errorMessage:data.error, loading:false, loadingPage: false})
+            }
+        }
+    }
+
+
     btnBack = ()=>{
         if(this.state.status === 'processing') {
             this.setState({dipinjam: true})
@@ -690,18 +728,18 @@ class Main extends React.Component{
             title = 'Perubahan Status Pembayaran'
             message = [
                 {
-                    id: 'paidStatus',
+                    id: 'paymentStatus',
                     title: 'Status Pembayaran',
                     type: 'dropdown',
                     data: this.state.dataListPaid,
-                    value: this.state.paidStatus,
+                    value: this.state.paymentStatus,
                     function: this.onChangeDropDown,
                 },
                 {
-                    id: 'paidNote',
+                    id: 'paymentNote',
                     title: 'Catatan Pembayaran',
                     type: 'textfield',
-                    value: this.state.paidNote,
+                    value: this.state.paymentNote,
                     function: this.onChangeTextField,
                 }
             ]
@@ -725,7 +763,12 @@ class Main extends React.Component{
             } else if (this.state.statusPinjaman === 'paidInstallment') {
                 this.btnPaidInstallment()
             } else if (this.state.statusPinjaman === 'paidAll') {
-                this.btnPaidAll()
+                if(this.state.paymentStatus && this.state.paymentStatus !== 'paid') {
+                    this.btnPaidAll()
+                } else if(this.state.paymentStatus && this.state.paymentStatus === 'paid') {
+                    this.patchInstallmentBulk()
+                }
+                
             }
         }
     }
