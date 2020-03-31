@@ -27,6 +27,7 @@ import PinjamanRejected from '../pinjaman/pinjamanRejected'
 import PencairanList from '../pinjaman/pencairanList'
 import CalonNasabahList from './../calonNasabah/calonNasabahList';
 import calonNasabahDetail from './../calonNasabah/calonNasabahDetail';
+import PinjamanList from '../pinjaman/pinjamanList'
 import {Route,Switch} from 'react-router-dom'
 import { checkPermission } from './../global/globalFunction';
 import  globalConstant  from './../global/globalConstant';
@@ -299,6 +300,8 @@ function ResponsiveDrawer(props) {
               { checkPermission('lender_loan_request_list') && <Route path='/pinjamanTolak' component={PinjamanRejected}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path='/pencairanList' component={PencairanList}></Route>}
               { checkPermission('lender_borrower_list') && <Route path='/listCalonNasabah' component={CalonNasabahList}></Route>}
+              { checkPermission('lender_borrower_list') && <Route path='/pinjamanList' component={PinjamanList}></Route>}
+
               { checkPermission('lender_borrower_list_detail') && <Route path='/detailCalonNasabah/:id' component={calonNasabahDetail}></Route>}
 
               { getTokenClient() && getProfileUser() ?  <Route path="/login" component={Home}></Route>:  <Route path="/login" component={Login}></Route>} 
