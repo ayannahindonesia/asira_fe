@@ -82,7 +82,11 @@ class CalonNasabahDetail extends React.Component{
 
             dataUser.category = this.isCategoryExist(dataUser.category) ;
             dataUser.idcard_image = decryptImage(dataUser.idcard_image);
-            dataUser.taxid_image = decryptImage(dataUser.taxid_image)
+            dataUser.taxid_image = decryptImage(dataUser.taxid_image);
+
+            if(dataUser && dataUser.image_profile) {
+              dataUser.image_profile = decryptImage(dataUser.image_profile);
+            }
 
 
             if(dataUser && dataUser.bank_accountnumber && dataUser.bank_accountnumber.trim().length !== 0) {
@@ -125,7 +129,7 @@ class CalonNasabahDetail extends React.Component{
         message = this.state.dataUser && this.state.dataUser.taxid_image
       } else if(label.toLowerCase().includes('nasabah')) {
         title = 'Foto Nasabah'
-        message = this.state.dataUser && this.state.dataUser.image
+        message = this.state.dataUser && this.state.dataUser.image_profile
       }
 
       this.setState({
@@ -257,7 +261,6 @@ class CalonNasabahDetail extends React.Component{
                       message={this.state.message}
                       type='image'
                       onClose={this.handleClose}
-                      base64Boolean={this.state.title ==='Foto Nasabah' ? true : false}
                     />
 
                     <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>

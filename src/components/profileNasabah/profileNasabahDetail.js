@@ -49,8 +49,12 @@ class profileNasabahDetail extends React.Component{
              if(!data.error){   
                 let flag = false
                 data.detailProfileNasabah.idcard_image = decryptImage(data.detailProfileNasabah.idcard_image);
-                data.detailProfileNasabah.taxid_image = decryptImage(data.detailProfileNasabah.taxid_image)
+                data.detailProfileNasabah.taxid_image = decryptImage(data.detailProfileNasabah.taxid_image);
 
+                if(data.detailProfileNasabah && data.detailProfileNasabah.image_profile) {
+                    data.detailProfileNasabah.image_profile = decryptImage(data.detailProfileNasabah.image_profile);
+                }
+                
 
                 this._isMounted && this.setState({rows:data.detailProfileNasabah,diKlik:flag, loading:false})
 
@@ -76,7 +80,7 @@ class profileNasabahDetail extends React.Component{
         }
         else if(label.toLowerCase().includes('nasabah')) {
           title = 'Foto Nasabah'
-          message = this.state.rows && this.state.rows.image
+          message = this.state.rows && this.state.rows.image_profile
         }
   
         this.setState({
@@ -296,7 +300,6 @@ class profileNasabahDetail extends React.Component{
                                     message={this.state.message}
                                     type='image'
                                     onClose={this.handleClose}
-                                    base64Boolean={this.state.title ==='Foto Nasabah' ? true : false }
                                 />
                             </div>
 
@@ -321,5 +324,5 @@ const mapStateToProp = (state)=>{
         
     }
     
-  }
+}
 export default connect(mapStateToProp) (profileNasabahDetail);
