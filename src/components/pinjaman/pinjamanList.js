@@ -151,7 +151,13 @@ class PinjamanList extends React.Component {
     const data = await getPermintaanPinjamanFunction(param)
     if(data){
       if(!data.error){
-        this._isMounted && this.setState({loading:false,rows:data.loanRequest.data,rowsPerPage:data.loanRequest.rows,page:data.loanRequest.current_page,last_page:data.loanRequest.last_page,total_data:data.loanRequest.total_data})        
+        const dataLoan = (data.loanRequest && data.loanRequest.data) || [];
+
+        this._isMounted && this.setState({
+          loading:false,
+          rows:dataLoan,
+          total_data:(data.loanRequest && data.loanRequest.total_data) || 0,
+        })        
       }else{
         this._isMounted && this.setState({errorMessage:data.error})
       }

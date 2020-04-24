@@ -65,7 +65,7 @@ class PencairanList extends React.Component{
 
         if(data) {
             if(!data.error) {
-                const listPencairan = data.loanRequest.data;
+                const listPencairan = (data.loanRequest && data.loanRequest.data) || [];
 
                 for(const key in listPencairan) {
                     if(listPencairan[key].status === 'approved') {
@@ -76,8 +76,8 @@ class PencairanList extends React.Component{
                 }
 
                 this._isMounted && this.setState({
-                    listPencairan: data.loanRequest.data ,
-                    totalData: data.loanRequest.total_data,
+                    listPencairan,
+                    totalData: (data.loanRequest && data.loanRequest.total_data) || 0,
                     loading: false,
                 })
             } else {

@@ -157,7 +157,7 @@ export function checkPermission(stringPermission) {
 }
 
 export function decryptImage(textImage) {
-
+  
   if(textImage) {
     let crypto = require("crypto");
     const algorithm = 'aes-256-cfb';
@@ -171,7 +171,7 @@ export function decryptImage(textImage) {
     let imageUrl = decipher.update(textBytes, '', 'utf8');
     imageUrl += decipher.final('utf8');
 
-    return imageUrl;
+    return imageUrl.includes('http') ? imageUrl : textImage;
   }
 
   return '';

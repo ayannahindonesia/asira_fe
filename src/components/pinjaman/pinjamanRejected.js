@@ -88,7 +88,7 @@ class PinjamanRejected extends React.Component {
     }
 
     const data = await getPermintaanPinjamanFunction(params)
-    const pinjamanList = data.loanRequest && data.loanRequest.data
+    const pinjamanList = (data.loanRequest && data.loanRequest.data) || [];
 
     for (const key in pinjamanList){
       pinjamanList[key].category = pinjamanList[key].category==="account_executive"?"Account Executive" :pinjamanList[key].category === "agent"?"Agent":"Personal"
@@ -99,7 +99,11 @@ class PinjamanRejected extends React.Component {
     }
     if(data){
       if(!data.error){
-        this._isMounted && this.setState({loading:false,rows:data.loanRequest.data,rowsPerPage:data.loanRequest.rows,total_data:data.loanRequest.total_data,last_page:data.loanRequest.last_page,page:data.loanRequest.current_page})
+        this._isMounted && this.setState({
+          loading:false,
+          rows:pinjamanList,
+          total_data:(data.loanRequest && data.loanRequest.total_data) || 0,
+        })
       }else{
         this._isMounted && this.setState({errorMessage:data.error})
       }

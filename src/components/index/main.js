@@ -44,7 +44,7 @@ class Main extends React.Component{
                         <Grid container>
                             { this.state.bankImage &&
                             <Grid item sm={12} xs={12} style={{textAlign:'center'}}> 
-                                <img src={`${this.state.bankImage}`} alt={require(`./../../icons/asira.png`)} width='30%' height='auto'/>
+                                <img src={`${this.state.bankImage}`} alt={''} width='30%' height='auto'/>
                             </Grid>
                             }
                             <Grid item sm={12} xs={12} style={{textAlign:'center', letterSpacing:'0.72px', color:'#2076B8', fontSize:'2.25em'}}>

@@ -100,7 +100,7 @@ class PinjamanSetuju extends React.Component {
   state = {
     checkedData:[],
     rows: [],
-    page: 1,last_page:1,
+    page: 1,
     rowsPerPage: 10,
     isEdit: false,
     editIndex:Number,
@@ -150,7 +150,13 @@ class PinjamanSetuju extends React.Component {
 
     if(data){
       if(!data.error){
-        this._isMounted && this.setState({loading:false,rows:data.loanRequest.data,rowsPerPage:data.loanRequest.rows,page:data.loanRequest.current_page,last_page:data.loanRequest.last_page,total_data:data.loanRequest.total_data})        
+        const dataLoan = (data.loanRequest && data.loanRequest.data) || []
+
+        this._isMounted && this.setState({
+          loading:false,
+          rows:dataLoan,
+          total_data:(data.loanRequest && data.loanRequest.total_data) || 0,
+        })        
       }else{
         this._isMounted && this.setState({errorMessage:data.error})
       }
