@@ -99,7 +99,11 @@ class PinjamanRejected extends React.Component {
     }
     if(data){
       if(!data.error){
-        this._isMounted && this.setState({loading:false,rows:pinjamanList.data,rowsPerPage:pinjamanList.rows,total_data:pinjamanList.total_data,last_page:pinjamanList.last_page,page:pinjamanList.current_page})
+        this._isMounted && this.setState({
+          loading:false,
+          rows:pinjamanList,
+          total_data:(data.loanRequest && data.loanRequest.total_data) || 0,
+        })
       }else{
         this._isMounted && this.setState({errorMessage:data.error})
       }

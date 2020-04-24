@@ -80,7 +80,7 @@ class PermintaanPinjaman extends React.Component {
       rows:this.state.rowsPerPage,
       page:this.state.page
     }
-    
+
     let hasil = this.state.searchRows
 
     if(hasil){
@@ -99,7 +99,12 @@ class PermintaanPinjaman extends React.Component {
     }
     if(data){
       if(!data.error){
-        this._isMounted && this.setState({loading:false,rows:data.loanRequest.data,rowsPerPage:data.loanRequest.rows,total_data:data.loanRequest.total_data,last_page:data.loanRequest.last_page,page:data.loanRequest.current_page})
+        this._isMounted && this.setState({
+          loading:false,
+          rows:pinjamanList,
+          total_data:(data.loanRequest && data.loanRequest.total_data) || 0,
+          page:data.loanRequest.current_page
+        })
       }else{
         this._isMounted && this.setState({errorMessage:data.error})
       }

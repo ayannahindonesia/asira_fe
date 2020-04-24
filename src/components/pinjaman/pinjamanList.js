@@ -152,8 +152,12 @@ class PinjamanList extends React.Component {
     if(data){
       if(!data.error){
         const dataLoan = (data.loanRequest && data.loanRequest.data) || [];
-        
-        this._isMounted && this.setState({loading:false,rows:dataLoan.data,rowsPerPage:dataLoan.rows,page:dataLoan.current_page,last_page:dataLoan.last_page,total_data:dataLoan.total_data})        
+
+        this._isMounted && this.setState({
+          loading:false,
+          rows:dataLoan,
+          total_data:(data.loanRequest && data.loanRequest.total_data) || 0,
+        })        
       }else{
         this._isMounted && this.setState({errorMessage:data.error})
       }
