@@ -80,14 +80,16 @@ class PermintaanPinjaman extends React.Component {
       rows:this.state.rowsPerPage,
       page:this.state.page
     }
+    
     let hasil = this.state.searchRows
+
     if(hasil){
       //search function
       params.search_all = hasil
     }
 
     const data = await getPermintaanPinjamanFunction(params)
-    const pinjamanList = data.loanRequest && data.loanRequest.data
+    const pinjamanList = (data.loanRequest && data.loanRequest.data) || [];
 
     for (const key in pinjamanList){
       pinjamanList[key].category = pinjamanList[key].category==="account_executive"?"Account Executive" :pinjamanList[key].category === "agent"?"Agent":"Personal"

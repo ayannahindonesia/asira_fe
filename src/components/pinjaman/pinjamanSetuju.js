@@ -150,7 +150,16 @@ class PinjamanSetuju extends React.Component {
 
     if(data){
       if(!data.error){
-        this._isMounted && this.setState({loading:false,rows:data.loanRequest.data,rowsPerPage:data.loanRequest.rows,page:data.loanRequest.current_page,last_page:data.loanRequest.last_page,total_data:data.loanRequest.total_data})        
+        const dataLoan = (data.loanRequest && data.loanRequest.data) || []
+
+        this._isMounted && this.setState({
+          loading:false,
+          rows:dataLoan.data,
+          rowsPerPage:dataLoan.rows,
+          page:dataLoan.current_page,
+          last_page:dataLoan.last_page,
+          total_data:dataLoan.total_data
+        })        
       }else{
         this._isMounted && this.setState({errorMessage:data.error})
       }
