@@ -235,7 +235,6 @@ class PinjamanList extends React.Component {
 
       const param = {
         id: id.toString(),
-        status: 'approved',
       }
 
       if(param.id === 'all') {
