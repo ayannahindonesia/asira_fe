@@ -11,9 +11,9 @@ import './../../support/css/pagination.css'
 import { getPermintaanPinjamanFunction, CSVDownloadFunction, confirmDisburseFunction, changeDisburseDateFunction } from './saga';
 import 'moment/locale/id'
 import { getTokenClient, getTokenAuth } from '../index/token';
-import {checkPermission, formatNumber} from './../global/globalFunction'
+import {checkPermission, formatNumber} from '../global/globalFunction'
 import './../../support/css/table.css'
-import TableComponent from './../subComponent/TableComponent'
+import TableComponent from '../subComponent/TableComponent'
 import { Button } from '@material-ui/core';
 
 const columnDataUser = [
@@ -49,28 +49,32 @@ const columnDataUser = [
     type:'datetime'
   },
   {
-    id: 'Konfirmasi',
-    type: 'button',
-    conditions: {
-      disburse_status : 'processing',
-      status : 'approved',
-      disburse_date: '<date',
-    },
-    function: '',
-    permission: '',
-    label: 'Telah Dicairkan',
-  },
-  {
-    id: 'Ubah',
-    type: 'button',
-    conditions: {
-      disburse_date_changed : false,
-      disburse_status : 'processing',
-    },
-    label: 'Ubah Tanggal Pencairan',
-    permission: '',
-    function: '',
-  },
+    id: 'status',
+    label: 'Status Pinjaman',
+   },
+  // {
+  //   id: 'Konfirmasi',
+  //   type: 'button',
+  //   conditions: {
+  //     disburse_status : 'processing',
+  //     status : 'approved',
+  //     disburse_date: '<date',
+  //   },
+  //   function: '',
+  //   permission: '',
+  //   label: 'Telah Dicairkan',
+  // },
+  // {
+  //   id: 'Ubah',
+  //   type: 'button',
+  //   conditions: {
+  //     disburse_date_changed : false,
+  //     disburse_status : 'processing',
+  //   },
+  //   label: 'Ubah Tanggal Pencairan',
+  //   permission: '',
+  //   function: '',
+  // },
 
 ]
 
@@ -94,13 +98,13 @@ const headerCsv = [
   { label:'Rekening Bank', key:'bank_account'},
 ]
 
-class PinjamanSetuju extends React.Component {
+class PinjamanList extends React.Component {
   _isMounted = false;
 
   state = {
     checkedData:[],
     rows: [],
-    page: 1,
+    page: 1,last_page:1,
     rowsPerPage: 10,
     isEdit: false,
     editIndex:Number,
@@ -118,15 +122,15 @@ class PinjamanSetuju extends React.Component {
     this._isMounted=true;
     this._isMounted && this.getAllData();
 
-    columnDataUser[7].function = this.btnKonfirmasi;
-    if(checkPermission('lender_loan_confirm_disburse')) {
-      columnDataUser[7].permission = true;
-    }
+    // columnDataUser[7].function = this.btnKonfirmasi;
+    // if(checkPermission('lender_loan_confirm_disburse')) {
+    //   columnDataUser[7].permission = true;
+    // }
     
-    columnDataUser[8].function = this.toggleChangeDisburseDate;
-    if(checkPermission('lender_loan_change_disburse_date')) {
-      columnDataUser[8].permission = true;
-    }
+    // columnDataUser[8].function = this.toggleChangeDisburseDate;
+    // if(checkPermission('lender_loan_change_disburse_date')) {
+    //   columnDataUser[8].permission = true;
+    // }
   }
 
   componentWillUnmount(){
@@ -135,8 +139,6 @@ class PinjamanSetuju extends React.Component {
 
   getAllData = async function (){
     const param ={
-      status:"approved",
-      disburse_status:'processing',
       rows:"10",
       page: this.state.page,
     }
@@ -147,10 +149,9 @@ class PinjamanSetuju extends React.Component {
 
 
     const data = await getPermintaanPinjamanFunction(param)
-
     if(data){
       if(!data.error){
-        const dataLoan = (data.loanRequest && data.loanRequest.data) || []
+        const dataLoan = (data.loanRequest && data.loanRequest.data) || [];
 
         this._isMounted && this.setState({
           loading:false,
@@ -234,7 +235,6 @@ class PinjamanSetuju extends React.Component {
 
       const param = {
         id: id.toString(),
-        status: 'approved',
       }
 
       if(param.id === 'all') {
@@ -486,7 +486,7 @@ class PinjamanSetuju extends React.Component {
        
           < TableComponent
             id={"id"}
-            title={'Pinjaman Disetujui - List'}
+            title={'Pinjaman - List'}
             errorMessage={this.state.errorMessage}
             checkBoxAction={this.handleCheckBox}
             searchDate={
@@ -543,4 +543,4 @@ const mapStateToProp = (state)=>{
       id: state.user.id
   }
 }
-export default connect (mapStateToProp)(PinjamanSetuju) ;
+export default connect (mapStateToProp)(PinjamanList) ;
