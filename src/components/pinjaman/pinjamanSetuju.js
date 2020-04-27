@@ -234,7 +234,8 @@ class PinjamanSetuju extends React.Component {
 
       const param = {
         id: id.toString(),
-        status: 'approved',
+        status:"approved",
+        disburse_status:'processing',
       }
 
       if(param.id === 'all') {
