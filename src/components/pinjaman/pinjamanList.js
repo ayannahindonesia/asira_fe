@@ -1,14 +1,12 @@
 import React from 'react';
-import DatePicker from "react-date-picker";
 import swal from 'sweetalert'
 import { CSVLink } from "react-csv";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import Loader from 'react-loader-spinner'
 import "react-datepicker/dist/react-datepicker.css";
 import {connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import './../../support/css/pagination.css'
-import { getPermintaanPinjamanFunction, CSVDownloadFunction, confirmDisburseFunction, changeDisburseDateFunction } from './saga';
+import { getPermintaanPinjamanFunction, CSVDownloadFunction } from './saga';
 import 'moment/locale/id'
 import { getTokenClient, getTokenAuth } from '../index/token';
 import {checkPermission, formatNumber} from '../global/globalFunction'
@@ -52,29 +50,6 @@ const columnDataUser = [
     id: 'status',
     label: 'Status Pinjaman',
    },
-  // {
-  //   id: 'Konfirmasi',
-  //   type: 'button',
-  //   conditions: {
-  //     disburse_status : 'processing',
-  //     status : 'approved',
-  //     disburse_date: '<date',
-  //   },
-  //   function: '',
-  //   permission: '',
-  //   label: 'Telah Dicairkan',
-  // },
-  // {
-  //   id: 'Ubah',
-  //   type: 'button',
-  //   conditions: {
-  //     disburse_date_changed : false,
-  //     disburse_status : 'processing',
-  //   },
-  //   label: 'Ubah Tanggal Pencairan',
-  //   permission: '',
-  //   function: '',
-  // },
 
 ]
 
@@ -104,33 +79,22 @@ class PinjamanList extends React.Component {
   state = {
     checkedData:[],
     rows: [],
-    page: 1,last_page:1,
+    page: 1,
     rowsPerPage: 10,
-    isEdit: false,
-    editIndex:Number,
-    udahdiklik : false,
     startDate: new Date() ,
     endDate: new Date(),
-    downloadDataCSV: [],downloadModal:false,
+    downloadDataCSV: [],
+    downloadModal:false,
     total_data:0,
-    loading:true,loadingBtn:false,
-    searching:false,errorMessage:'',
-    modal:false,idPinjaman:null,ubahTanggalPencairan:new Date(),disburse:false,telahDicairkan:'Dikonfirmasi',statusTanggalDisburse:'Diubah'
+    loading:true,
+    loadingBtn:false,
+    searching:false,
+    errorMessage:'',
   };
 
   componentDidMount(){
     this._isMounted=true;
     this._isMounted && this.getAllData();
-
-    // columnDataUser[7].function = this.btnKonfirmasi;
-    // if(checkPermission('lender_loan_confirm_disburse')) {
-    //   columnDataUser[7].permission = true;
-    // }
-    
-    // columnDataUser[8].function = this.toggleChangeDisburseDate;
-    // if(checkPermission('lender_loan_change_disburse_date')) {
-    //   columnDataUser[8].permission = true;
-    // }
   }
 
   componentWillUnmount(){
@@ -143,8 +107,8 @@ class PinjamanList extends React.Component {
       page: this.state.page,
     }
     if(this.state.searching){
-      param.start_approval_date = this.formatSearchingDate(this.state.startDate);
-      param.end_approval_date = this.formatSearchingDate(this.state.endDate, true);
+      param.start_date = this.formatSearchingDate(this.state.startDate);
+      param.end_date = this.formatSearchingDate(this.state.endDate, true);
     }
 
 
@@ -215,9 +179,7 @@ class PinjamanList extends React.Component {
 
   }
 
-//BUAT DOWNLOAD CSV
-  
-
+  //BUAT DOWNLOAD CSV
   btnDownloadCsv = ()=>{
     this.setState({loadingBtn:true})
 
@@ -242,8 +204,8 @@ class PinjamanList extends React.Component {
       }
 
       if(this.state.searching) {
-        param.start_approval_date = this.formatSearchingDate(this.state.startDate);
-        param.end_approval_date = this.formatSearchingDate(this.state.endDate, true);
+        param.start_date = this.formatSearchingDate(this.state.startDate);
+        param.end_date = this.formatSearchingDate(this.state.endDate, true);
       }
 
       this.btnCSVDownload(param)
@@ -310,33 +272,8 @@ class PinjamanList extends React.Component {
     this.setState({loading:true,page:current},()=>{
         this.getAllData()
     })
-  }
-
-  btnKonfirmasi = (e ,id)=>{
-    this.confirmDisburse({id})
   } 
-
-  confirmDisburse = async function (param){
-    const data = await confirmDisburseFunction (param)
-
-    if(data){
-      if(!data.error){
-          this.setState({telahDicairkan:'Dikonfirmasi'}, () => { this.getAllData()})
-          swal("Success","Dana telah dicairkan","success")
-      }else{
-          swal("Fail","Konfirmasi Gagal","error")
-      }
-    }
-  }
-
-  handleTanggalPencairan =(e)=>{
-    this.setState({ubahTanggalPencairan:e})
-  }
   
-  toggleChangeDisburseDate = (e, id) => {
-    
-    this.setState({modal: true, idPinjaman: id});
-  }
   
   handleCheckBox =(e)=>{
     let checkedData = this.state.checkedData;
@@ -354,45 +291,7 @@ class PinjamanList extends React.Component {
     
   }
 
-  ubahTanggalPencairanBtn = ()=>{
-    this.setState({disburse:true})
-    const {ubahTanggalPencairan,idPinjaman} = this.state
-
-    let startMonth =''+ (ubahTanggalPencairan.getMonth()+1),
-    startDay = '' + ubahTanggalPencairan.getDate(),
-    startYear = ubahTanggalPencairan.getFullYear();
-
-    if (startMonth.length < 2) startMonth = '0' + startMonth;
-    if (startDay.length < 2) startDay = '0' + startDay;
-
-    const changeDate = startYear+"-"+startMonth+"-"+startDay
-    const param ={
-      id:idPinjaman,
-      date:changeDate
-    }
-    
-    this.disburseDate(param)
-  }
-
-  disburseDate = async function (param){
-    const data = await changeDisburseDateFunction(param)
-
-    if(data){
-      if(!data.error){
-        swal("Success","Tanggal pencairan berhasil diubah","success")
-        this.setState({modal:false,disburse:false,statusTanggalDisburse:'Diubah'},()=>{
-          this.getAllData()
-        })
-      }else{
-        swal("Fail","Tanggal pencairan gagal diubah","error")
-        this.setState({disburse:false})
-
-      }
-    }
-  } 
-
   //FUNCTION BUAT MODAL
- 
   btnCancelModalDownload = ()=>{
     this.setState({downloadModal:false,downloadDataCSV:[],searchModal:false})
     var checkboxes = document.querySelectorAll('input[type=checkbox]:checked')
@@ -401,43 +300,6 @@ class PinjamanList extends React.Component {
     }
       this.setState({checkedData: []})
   }
-
-  renderBtnOrLoading =()=>{
-    if (this.state.loadingBtn){
-        return  <Loader 
-        type="ThreeDots"
-        color="#00BFFF"
-        height="30"	
-        width="30"
-        
-     />   
-    }
-    else{
-        return(
-          <input type="button" className="btn btn-primary ml-3" onClick={this.btnDownloadCsv} value="CSV Download"></input>
-        )
-    }
-  }
-
-  renderBtnDisburseDate =()=>{
-    if(this.state.disburse){
-      return(
-      <Button disableElevation color="primary" onClick={this.ubahTanggalPencairanBtn}>   
-        <Loader 
-          type="ThreeDots"
-          color="#00BFFF"
-          height="30"	
-          width="30"
-        />       
-      </Button>  
-      )
-    }else{
-      return(
-        <Button disableElevation color="primary" onClick={this.ubahTanggalPencairanBtn}><b>Simpan</b></Button>    
-
-      )
-    }
-  }
     
   render() {
     if(getTokenClient() && getTokenAuth()){
@@ -445,43 +307,21 @@ class PinjamanList extends React.Component {
       return (
         <div style={{padding:0}}>
 
-        <Modal isOpen={this.state.downloadModal} className={this.props.className}>
-          <ModalHeader toggle={this.toggle}>Jumlah Download CSV: {this.state.checkedData && this.state.checkedData[0] && this.state.checkedData[0] === 'all' ? this.state.total_data : this.state.checkedData.length} item(s)</ModalHeader>
-          <ModalBody>
-          <CSVLink 
-            headers={headerCsv}
-            data={this.state.downloadDataCSV} 
-            filename={`Report Loan Telah Disetujui_${this.formatSearchingDate(new Date()).substring(0,10)}.csv`}
-          > 
-            Click Here to Download CSV 
-          </CSVLink>
-          </ModalBody>
-          <ModalFooter>
-            <Button disableElevation color="secondary" onClick={this.btnCancelModalDownload}><b>Close</b></Button>
-          </ModalFooter>
-        </Modal>
-      
-        <Modal isOpen={this.state.modal} className={this.props.className}>
-          <ModalHeader toggle={this.toggle}>Ubah Tanggal Pencairan</ModalHeader>
-          <ModalBody>
-
-            <DatePicker
-              className="ml-3"
-              format="yyyy-MM-dd"
-              onChange={this.handleTanggalPencairan}
-              value={this.state.ubahTanggalPencairan}
-              clearIcon={null}
-            /> 
-            
-                  
-            
-          </ModalBody>
-          <ModalFooter>
-
-            { this.renderBtnDisburseDate()}
-            <Button disableElevation color="secondary" onClick={()=>this.setState({modal:false})}><b>Tutup</b></Button>
-          </ModalFooter>
-        </Modal>
+          <Modal isOpen={this.state.downloadModal} className={this.props.className}>
+            <ModalHeader toggle={this.toggle}>Jumlah Download CSV: {this.state.checkedData && this.state.checkedData[0] && this.state.checkedData[0] === 'all' ? this.state.total_data : this.state.checkedData.length} item(s)</ModalHeader>
+            <ModalBody>
+              <CSVLink 
+                headers={headerCsv}
+                data={this.state.downloadDataCSV} 
+                filename={`Report Loan Telah Disetujui_${this.formatSearchingDate(new Date()).substring(0,10)}.csv`}
+              > 
+                Click Here to Download CSV 
+              </CSVLink>
+            </ModalBody>
+            <ModalFooter>
+              <Button disableElevation color="secondary" onClick={this.btnCancelModalDownload}><b>Close</b></Button>
+            </ModalFooter>
+          </Modal>
 
        
           < TableComponent
@@ -492,7 +332,7 @@ class PinjamanList extends React.Component {
             searchDate={
               {
                 value:[this.state.startDate, this.state.endDate],
-                label: 'Tanggal Approval',
+                label: 'Tanggal Pengajuan',
                 function: [this.handleStartChange, this.handleEndChange],
                 button: [
                   {
