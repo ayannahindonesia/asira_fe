@@ -40,7 +40,7 @@ const columnDataUser = [
   },
   {
     id: 'approval_date',
-    label: 'Tanggal Approval',
+    label: 'Tanggal Penerimaan',
     type:'datetime'
   },
   {
@@ -492,7 +492,7 @@ class PinjamanList extends React.Component {
             searchDate={
               {
                 value:[this.state.startDate, this.state.endDate],
-                label: 'Tanggal Approval',
+                label: 'Tanggal Penerimaan',
                 function: [this.handleStartChange, this.handleEndChange],
                 button: [
                   {
