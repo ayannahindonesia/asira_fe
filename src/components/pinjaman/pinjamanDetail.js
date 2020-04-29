@@ -154,7 +154,7 @@ class Main extends React.Component{
                     if(checkPermission('lender_loan_request_list_installment_list')) {
                         this.getInstallmentInfo(data.dataLender.installment_details);
                     }
-                    console.log(formInfo)
+                    
                     this.setState({
                         pinjamanInfo,
                         formInfo,
@@ -339,7 +339,7 @@ class Main extends React.Component{
 
     getFormInfo = (form) => {
         let formInfo = null;
-        console.log(form)
+        
         if(form) { 
             formInfo = {
                 title: [],
