@@ -40,7 +40,7 @@ const columnDataUser = [
   },
   {
     id: 'approval_date',
-    label: 'Tanggal Approval',
+    label: 'Tanggal Penerimaan',
     type:'datetime'
   },
   {
@@ -52,29 +52,29 @@ const columnDataUser = [
     id: 'status',
     label: 'Status Pinjaman',
    },
-  // {
-  //   id: 'Konfirmasi',
-  //   type: 'button',
-  //   conditions: {
-  //     disburse_status : 'processing',
-  //     status : 'approved',
-  //     disburse_date: '<date',
-  //   },
-  //   function: '',
-  //   permission: '',
-  //   label: 'Telah Dicairkan',
-  // },
-  // {
-  //   id: 'Ubah',
-  //   type: 'button',
-  //   conditions: {
-  //     disburse_date_changed : false,
-  //     disburse_status : 'processing',
-  //   },
-  //   label: 'Ubah Tanggal Pencairan',
-  //   permission: '',
-  //   function: '',
-  // },
+  {
+    id: 'Konfirmasi',
+    type: 'button',
+    conditions: {
+      disburse_status : 'processing',
+      status : 'approved',
+      disburse_date: '<date',
+    },
+    function: '',
+    permission: '',
+    label: 'Telah Dicairkan',
+  },
+  {
+    id: 'Ubah',
+    type: 'button',
+    conditions: {
+      disburse_date_changed : false,
+      disburse_status : 'processing',
+    },
+    label: 'Ubah Tanggal Pencairan',
+    permission: '',
+    function: '',
+  },
 
 ]
 
@@ -140,6 +140,7 @@ class PinjamanList extends React.Component {
   getAllData = async function (){
     const param ={
       rows:"10",
+      status:'approved',
       page: this.state.page,
     }
     if(this.state.searching){
@@ -152,6 +153,10 @@ class PinjamanList extends React.Component {
     if(data){
       if(!data.error){
         const dataLoan = (data.loanRequest && data.loanRequest.data) || [];
+
+        for(const key in dataLoan) {
+          dataLoan[key].status = dataLoan[key].status ==="approved"?"Diterima": dataLoan[key].status==="rejected"?"Ditolak":"Dalam Proses"
+        }
 
         this._isMounted && this.setState({
           loading:false,
@@ -486,13 +491,13 @@ class PinjamanList extends React.Component {
        
           < TableComponent
             id={"id"}
-            title={'Pinjaman - List'}
+            title={'Pinjaman Disetujui - List'}
             errorMessage={this.state.errorMessage}
             checkBoxAction={this.handleCheckBox}
             searchDate={
               {
                 value:[this.state.startDate, this.state.endDate],
-                label: 'Tanggal Approval',
+                label: 'Tanggal Penerimaan',
                 function: [this.handleStartChange, this.handleEndChange],
                 button: [
                   {

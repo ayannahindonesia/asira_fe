@@ -38,7 +38,7 @@ const columnDataUser = [
   },
   {
     id: 'approval_date',
-    label: 'Tanggal Approval',
+    label: 'Tanggal Penerimaan',
     type:'datetime'
   },
   {
@@ -73,7 +73,7 @@ const headerCsv = [
   { label:'Rekening Bank', key:'bank_account'},
 ]
 
-class PinjamanList extends React.Component {
+class dataLoan extends React.Component {
   _isMounted = false;
 
   state = {
@@ -116,6 +116,10 @@ class PinjamanList extends React.Component {
     if(data){
       if(!data.error){
         const dataLoan = (data.loanRequest && data.loanRequest.data) || [];
+
+        for(const key in dataLoan) {
+          dataLoan[key].status = dataLoan[key].status ==="approved"?"Diterima": dataLoan[key].status==="rejected"?"Ditolak":"Dalam Proses"
+        }
 
         this._isMounted && this.setState({
           loading:false,
@@ -383,4 +387,4 @@ const mapStateToProp = (state)=>{
       id: state.user.id
   }
 }
-export default connect (mapStateToProp)(PinjamanList) ;
+export default connect (mapStateToProp)(dataLoan) ;
