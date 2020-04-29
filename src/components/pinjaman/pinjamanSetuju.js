@@ -122,15 +122,15 @@ class PinjamanList extends React.Component {
     this._isMounted=true;
     this._isMounted && this.getAllData();
 
-    // columnDataUser[7].function = this.btnKonfirmasi;
-    // if(checkPermission('lender_loan_confirm_disburse')) {
-    //   columnDataUser[7].permission = true;
-    // }
+    columnDataUser[7].function = this.btnKonfirmasi;
+    if(checkPermission('lender_loan_confirm_disburse')) {
+      columnDataUser[7].permission = true;
+    }
     
-    // columnDataUser[8].function = this.toggleChangeDisburseDate;
-    // if(checkPermission('lender_loan_change_disburse_date')) {
-    //   columnDataUser[8].permission = true;
-    // }
+    columnDataUser[8].function = this.toggleChangeDisburseDate;
+    if(checkPermission('lender_loan_change_disburse_date')) {
+      columnDataUser[8].permission = true;
+    }
   }
 
   componentWillUnmount(){
