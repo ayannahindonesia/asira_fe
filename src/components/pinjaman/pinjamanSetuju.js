@@ -49,10 +49,6 @@ const columnDataUser = [
     type:'datetime'
   },
   {
-    id: 'status',
-    label: 'Status Pinjaman',
-   },
-  {
     id: 'Konfirmasi',
     type: 'button',
     conditions: {
@@ -153,10 +149,6 @@ class PinjamanList extends React.Component {
     if(data){
       if(!data.error){
         const dataLoan = (data.loanRequest && data.loanRequest.data) || [];
-
-        for(const key in dataLoan) {
-          dataLoan[key].status = dataLoan[key].status ==="approved"?"Diterima": dataLoan[key].status==="rejected"?"Ditolak":"Dalam Proses"
-        }
 
         this._isMounted && this.setState({
           loading:false,
