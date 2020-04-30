@@ -47,7 +47,7 @@ const columnDataUser = [
     type:'datetime'
   },
   {
-    id: 'status',
+    id: 'status_string',
     label: 'Status Pinjaman',
    },
 
@@ -57,6 +57,7 @@ const headerCsv = [
   { label:'ID Pinjaman', key:'id'},
   { label:'Nama Nasabah', key:'borrower_name'},
   { label:'Bank', key:'bank_name'},
+  { label:'Status', key:'status_string'},
   { label:'Pinjaman Pokok', key:'loan_amount'},
   { label:'Lama Cicilan', key:'installment'},
   { label:'Admin Fee', key:'fees.admin_fee'},
@@ -118,7 +119,11 @@ class dataLoan extends React.Component {
         const dataLoan = (data.loanRequest && data.loanRequest.data) || [];
 
         for(const key in dataLoan) {
-          dataLoan[key].status = dataLoan[key].status ==="approved"?"Diterima": dataLoan[key].status==="rejected"?"Ditolak":"Dalam Proses"
+          dataLoan[key].status_string = 
+          dataLoan[key].status ==="approved" && dataLoan[key].disburse_status === 'confirmed' ? 'Telah Cair' :
+          dataLoan[key].status ==="approved" ? "Diterima" : 
+          dataLoan[key].status==="rejected" ? "Ditolak" : 
+          "Dalam Proses"
         }
 
         this._isMounted && this.setState({

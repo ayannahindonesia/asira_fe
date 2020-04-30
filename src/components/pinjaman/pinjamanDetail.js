@@ -503,7 +503,10 @@ class Main extends React.Component{
 
 
     btnBack = ()=>{
-        if(this.state.status === 'processing') {
+        
+        if(this.props.history && this.props.history.action && this.props.history.action !== 'POP') {
+            this.props.history.goBack()
+        } else if(this.state.status === 'processing') {
             this.setState({dipinjam: true})
         } else if(this.state.status === 'approved' && this.state.disburse_status === 'confirmed') {
             this.setState({dicairkan: true})

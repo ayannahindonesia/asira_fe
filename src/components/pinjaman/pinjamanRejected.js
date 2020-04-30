@@ -39,12 +39,6 @@ const columnDataUser = [
     numeric: false,
     label: 'Tanggal Pengajuan',
     },
-    {
-      id: 'status',
-      numeric: false,
-      label: 'Status Pinjaman',
-    },
-
 ]
 class PinjamanRejected extends React.Component {
   _isMounted = false
@@ -81,9 +75,10 @@ class PinjamanRejected extends React.Component {
       rows:"10",
       page:this.state.page
     }
+
     let hasil = this.state.searchRows
+
     if(hasil){
-      //search function
       params.search_all = hasil
     }
 
@@ -92,11 +87,12 @@ class PinjamanRejected extends React.Component {
 
     for (const key in pinjamanList){
       pinjamanList[key].category = pinjamanList[key].category==="account_executive"?"Account Executive" :pinjamanList[key].category === "agent"?"Agent":"Personal"
-      pinjamanList[key].status = pinjamanList[key].status ==="approved"?"Diterima": pinjamanList[key].status==="rejected"?"Ditolak":"Dalam Proses"
+      pinjamanList[key].status_string = pinjamanList[key].status ==="approved"?"Diterima": pinjamanList[key].status==="rejected"?"Ditolak":"Dalam Proses"
       pinjamanList[key].service =  pinjamanList[key].service.toString()
       pinjamanList[key].product =  pinjamanList[key].product.toString()
       pinjamanList[key].created_at =<Moment date={pinjamanList[key].created_at } format=" DD  MMMM  YYYY" />
     }
+
     if(data){
       if(!data.error){
         this._isMounted && this.setState({
@@ -131,46 +127,46 @@ class PinjamanRejected extends React.Component {
 
   render() {
    
-  if(getTokenClient() && getTokenAuth()){
-      
-    return (
-        <div style={{padding:0}}>
-             
-        < TableComponent
-            title={'Pinjaman Ditolak - List'}
-            search={
-              {
-                value: this.state.searchRows,
-                label: 'Search ID Nasabah, Nama Nasabah',
-                function: this.onBtnSearch,
-              }
-            }
-            errorMessage={this.state.errorMessage}
-            id={"id"}
-            paging={this.state.paging}
-            loading={this.state.loading}
-            columnData={columnDataUser}
-            data={this.state.rows}
-            page={this.state.page}
-            rowsPerPage={this.state.rowsPerPage}
-            totalData={this.state.total_data}
-            onChangePage={this.onChangePage}             
-            permissionDetail={ checkPermission('lender_loan_request_detail') ? '/pinjamanDetail/' : null}
-        /> 
-
+    if(getTokenClient() && getTokenAuth()){
         
-        </div>
-      
+      return (
+          <div style={{padding:0}}>
+              
+          < TableComponent
+              title={'Pinjaman Ditolak - List'}
+              search={
+                {
+                  value: this.state.searchRows,
+                  label: 'Search ID Nasabah, Nama Nasabah',
+                  function: this.onBtnSearch,
+                }
+              }
+              errorMessage={this.state.errorMessage}
+              id={"id"}
+              paging={this.state.paging}
+              loading={this.state.loading}
+              columnData={columnDataUser}
+              data={this.state.rows}
+              page={this.state.page}
+              rowsPerPage={this.state.rowsPerPage}
+              totalData={this.state.total_data}
+              onChangePage={this.onChangePage}             
+              permissionDetail={ checkPermission('lender_loan_request_detail') ? '/pinjamanDetail/' : null}
+          /> 
 
-    );
-  
-  
+          
+          </div>
+        
 
-}
-else if(getTokenAuth()){
-  return  <Redirect to='/login' />
-}
+      );
     
+    
+
+    }
+    else if(getTokenAuth()){
+      return  <Redirect to='/login' />
+    }
+      
   }
 }
 
