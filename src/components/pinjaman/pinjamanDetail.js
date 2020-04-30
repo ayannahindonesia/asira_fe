@@ -532,11 +532,8 @@ class Main extends React.Component{
             dataText = this.state[labelData];          
         }
         
-        this.setState({[labelData]:dataText}, () => {
-            if(labelData === 'reason') {
-                this.settingMessage()
-            } 
-            
+        this.setState({[labelData]:dataText}, () => {          
+            this.settingMessage()            
         })
     }
 
