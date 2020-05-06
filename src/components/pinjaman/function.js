@@ -1,8 +1,22 @@
 import { formatNumber } from "../global/globalFunction";
 
-export function constructReportNameLoan (dataFees, feeMethod) {
+export function constructReportNameLoan (dataLoanNew, status, filter) {
 
-    return true;
+    let newReportName = 'Report Loan '
+
+    if(status) {
+        newReportName += `-${status} `
+    }
+
+    if(dataLoanNew && dataLoanNew[0] && dataLoanNew[0].bank_name) {
+        newReportName += `(${dataLoanNew[0].bank_name})`
+    }
+
+    if(filter) {
+        newReportName += ` ${filter}`
+    }
+
+    return `${newReportName}.csv`;
 }
 
 export function constructHeaderDataLoan (dataLoanNew) {
@@ -54,7 +68,7 @@ export function constructHeaderDataLoan (dataLoanNew) {
     return headerCsv;
 }
 
-export function constructDataLoan (dataLoan) {
+export function constructDataLoan (dataLoan, status) {
 
     const dataCsv = dataLoan;
     const csvNew = {};
@@ -102,6 +116,7 @@ export function constructDataLoan (dataLoan) {
 
     csvNew.data = dataCsv;
     csvNew.header = constructHeaderDataLoan(dataCsv);
+    csvNew.name = constructReportNameLoan(dataCsv, status)
 
     return csvNew;
 }

@@ -81,13 +81,14 @@ class PinjamanList extends React.Component {
   state = {
     checkedData:[],
     rows: [],
-    page: 1,last_page:1,
+    page: 1,
     rowsPerPage: 10,
     startDate: new Date() ,
     endDate: new Date(),
     downloadDataCSV: [],
     downloadModal:false,
     headerCsv: [],
+    reportNameCsv: '',
     total_data:0,
     loading:true,
     loadingBtn:false,
@@ -181,7 +182,6 @@ class PinjamanList extends React.Component {
   onBtnSearch = ()=>{
     this.setState({loading:true,searchModal:true,searching:true, checkedData:[]})
     
-    
       if(this.state.endDate.getTime() < this.state.startDate.getTime() ){
         alert("Please input correct month range")
         this.setState({loading:false})
@@ -246,9 +246,9 @@ class PinjamanList extends React.Component {
     if(data){
       
       if(!data.error){
-        let dataCsv = constructDataLoan(data.data) || [];
+        let dataCsv = constructDataLoan(data.data, 'Disetujui') || [];
 
-        this.setState({loading:false,loadingBtn:false,downloadModal:true,downloadDataCSV:dataCsv && dataCsv.data, headerCsv: dataCsv && dataCsv.header})
+        this.setState({loading:false,loadingBtn:false,downloadModal:true,downloadDataCSV:dataCsv && dataCsv.data, headerCsv: dataCsv && dataCsv.header, reportNameCsv: dataCsv && dataCsv.name})
       } else{
         this.setState({loading:false,loadingBtn:false,downloadModal:false,errorMessage:data.error})
       }
@@ -400,7 +400,7 @@ class PinjamanList extends React.Component {
           <CSVLink 
             headers={this.state.headerCsv}
             data={this.state.downloadDataCSV} 
-            filename={`Report Loan Telah Disetujui_${this.formatSearchingDate(new Date()).substring(0,10)}.csv`}
+            filename={this.state.reportNameCsv}
           > 
             Click Here to Download CSV 
           </CSVLink>
