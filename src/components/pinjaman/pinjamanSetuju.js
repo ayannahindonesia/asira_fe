@@ -11,10 +11,11 @@ import './../../support/css/pagination.css'
 import { getPermintaanPinjamanFunction, CSVDownloadFunction, confirmDisburseFunction, changeDisburseDateFunction } from './saga';
 import 'moment/locale/id'
 import { getTokenClient, getTokenAuth } from '../index/token';
-import {checkPermission, formatNumber} from '../global/globalFunction'
+import {checkPermission} from '../global/globalFunction'
 import './../../support/css/table.css'
 import TableComponent from '../subComponent/TableComponent'
 import { Button } from '@material-ui/core';
+import { constructDataLoan } from './function';
 
 const columnDataUser = [
   {
@@ -74,26 +75,6 @@ const columnDataUser = [
 
 ]
 
-const headerCsv = [
-  { label:'ID Pinjaman', key:'id'},
-  { label:'Nama Nasabah', key:'borrower_name'},
-  { label:'Bank', key:'bank_name'},
-  { label:'Pinjaman Pokok', key:'loan_amount'},
-  { label:'Lama Cicilan', key:'installment'},
-  { label:'Admin Fee', key:'fees.admin_fee'},
-  { label:'Convenience Fee', key:'fees.convenience_fee'},
-  { label:'Bunga (%)', key:'interest'},
-  { label:'Total Pinjaman', key:'total_loan'},
-  { label:'Due Date', key:'due_date'},
-  { label:'Cicilan', key:'layaway_plan'},
-  { label:'Tujuan Pinjaman', key:'loan_intention'},
-  { label:'Tujuan Pinjaman Detail', key:'intention_details'},
-  { label:'Penghasilan Bulanan', key:'monthly_income'},
-  { label:'Penghasilan Lain-lain', key:'other_income'},
-  { label:'Sumber Penghasilan Lain-lain', key:'other_incomesource'},
-  { label:'Rekening Bank', key:'bank_account'},
-]
-
 class PinjamanList extends React.Component {
   _isMounted = false;
 
@@ -102,16 +83,22 @@ class PinjamanList extends React.Component {
     rows: [],
     page: 1,last_page:1,
     rowsPerPage: 10,
-    isEdit: false,
-    editIndex:Number,
-    udahdiklik : false,
     startDate: new Date() ,
     endDate: new Date(),
-    downloadDataCSV: [],downloadModal:false,
+    downloadDataCSV: [],
+    downloadModal:false,
+    headerCsv: [],
     total_data:0,
-    loading:true,loadingBtn:false,
-    searching:false,errorMessage:'',
-    modal:false,idPinjaman:null,ubahTanggalPencairan:new Date(),disburse:false,telahDicairkan:'Dikonfirmasi',statusTanggalDisburse:'Diubah'
+    loading:true,
+    loadingBtn:false,
+    searching:false,
+    errorMessage:'',
+    modal:false,
+    idPinjaman:null,
+    ubahTanggalPencairan:new Date(),
+    disburse:false,
+    telahDicairkan:'Dikonfirmasi',
+    statusTanggalDisburse:'Diubah'
   };
 
   componentDidMount(){
@@ -137,6 +124,7 @@ class PinjamanList extends React.Component {
     const param ={
       rows:"10",
       status:'approved',
+      disburse_status: 'processing',
       page: this.state.page,
     }
     if(this.state.searching){
@@ -232,6 +220,8 @@ class PinjamanList extends React.Component {
 
       const param = {
         id: id.toString(),
+        status:'approved',
+        disburse_status: 'processing',
       }
 
       if(param.id === 'all') {
@@ -256,47 +246,9 @@ class PinjamanList extends React.Component {
     if(data){
       
       if(!data.error){
-        let dataCsv = data.data || [];
-      
-        if(dataCsv) {
+        let dataCsv = constructDataLoan(data.data) || [];
 
-          for(const key in dataCsv) {
-
-            let feesData = {};
-
-            dataCsv[key].bank_account = `'${dataCsv[key].bank_account.toString()}`;
-            const loan_amount_float = dataCsv[key].loan_amount.toString().split('.')[1] && dataCsv[key].loan_amount.toString().split('.')[1].substring(0,2);
-            dataCsv[key].loan_amount = `${formatNumber(parseInt(dataCsv[key].loan_amount))},${loan_amount_float || '00'}`;
-            const total_loan_float = dataCsv[key].total_loan.toString().split('.')[1] && dataCsv[key].total_loan.toString().split('.')[1].substring(0,2);
-            dataCsv[key].total_loan = `${formatNumber(parseInt(dataCsv[key].total_loan))},${total_loan_float || '00'}`;
-            const monthly_income_float = dataCsv[key].monthly_income.toString().split('.')[1] && dataCsv[key].monthly_income.toString().split('.')[1].substring(0,2);
-            dataCsv[key].monthly_income = `${formatNumber(parseInt(dataCsv[key].monthly_income))},${monthly_income_float || '00'}`;
-            const layaway_plan_float = dataCsv[key].layaway_plan.toString().split('.')[1] && dataCsv[key].layaway_plan.toString().split('.')[1].substring(0,2);
-            dataCsv[key].layaway_plan = `${formatNumber(parseInt(dataCsv[key].layaway_plan))},${layaway_plan_float || '00'}`;
-
-            const fees = dataCsv[key].fees;
-
-            for(const keyFee in fees) {
-              let desc = fees[keyFee] && fees[keyFee].description && fees[keyFee].description.toString().toLowerCase();
-
-              while(desc && desc.includes(' ')) {
-                desc = desc.replace(' ','_')
-              }
-              
-              if(!feesData[desc] && fees[keyFee] && fees[keyFee].amount) {
-                feesData[desc] = '';
-                const fees_float = fees[keyFee] && fees[keyFee].amount && fees[keyFee].amount.toString().split('.')[1] && fees[keyFee].amount.toString().split('.')[1].substring(0,2);        
-                feesData[desc] = desc && fees[keyFee] && fees[keyFee].amount && `${formatNumber(parseInt(fees[keyFee].amount))},${fees_float || '00'}`
-                
-              }
-            }
-            
-            dataCsv[key].fees = feesData;
-          }
-
-        }
-
-        this.setState({loading:false,loadingBtn:false,downloadModal:true,downloadDataCSV:dataCsv})
+        this.setState({loading:false,loadingBtn:false,downloadModal:true,downloadDataCSV:dataCsv && dataCsv.data, headerCsv: dataCsv && dataCsv.header})
       } else{
         this.setState({loading:false,loadingBtn:false,downloadModal:false,errorMessage:data.error})
       }
@@ -446,7 +398,7 @@ class PinjamanList extends React.Component {
           <ModalHeader toggle={this.toggle}>Jumlah Download CSV: {this.state.checkedData && this.state.checkedData[0] && this.state.checkedData[0] === 'all' ? this.state.total_data : this.state.checkedData.length} item(s)</ModalHeader>
           <ModalBody>
           <CSVLink 
-            headers={headerCsv}
+            headers={this.state.headerCsv}
             data={this.state.downloadDataCSV} 
             filename={`Report Loan Telah Disetujui_${this.formatSearchingDate(new Date()).substring(0,10)}.csv`}
           > 
