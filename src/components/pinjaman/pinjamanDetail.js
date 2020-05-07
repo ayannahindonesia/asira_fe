@@ -199,7 +199,7 @@ class Main extends React.Component{
 
                     newInstallment.paid_status_string = newInstallment.paid_status ? 'Sudah Bayar' : 'Belum Bayar';
                     newInstallment.paid_amount_string = formatMoney(parseInt(newInstallment.paid_amount || 0))
-                    newInstallment.total = formatMoney(parseInt(newInstallment.loan_payment + newInstallment.interest_payment + newInstallment.penalty))
+                    newInstallment.total = formatMoney(Math.ceil(parseFloat(newInstallment.loan_payment + newInstallment.interest_payment + newInstallment.penalty)))
                     installmentInfo.push(installment[key])
                 }
                 totalData += 1;
