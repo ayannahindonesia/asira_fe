@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom'
 import swal from 'sweetalert';
 import { getPermintaanPinjamanDetailFunction, patchInstallmentFunction, patchLoanFunction, patchInstallmentBulkFunction } from './saga';
 import Loading from '../subComponent/Loading';
-import { checkPermission, handleFormatDate, findAmount, formatMoney, decryptImage, formatNumber } from '../global/globalFunction'
+import { checkPermission, handleFormatDate, findAmount, formatMoney, decryptImage } from '../global/globalFunction'
 import { getTokenAuth, getTokenClient } from '../index/token';
 import GridDetail from '../subComponent/GridDetail'
 import TitleBar from '../subComponent/TitleBar';
@@ -661,14 +661,14 @@ class Main extends React.Component{
                         id: 'loan_payment',
                         title: 'Cicilan Pokok',
                         type: 'textfield',
-                        value: formatNumber(detailPaid.loan_payment) || 0,
+                        value: formatMoney(detailPaid.loan_payment || 0) ,
                         disabled: true,
                     },
                     {
                         id: 'interest_payment',
                         title: 'Cicilan Bunga',
                         type: 'textfield',
-                        value: formatNumber(detailPaid.interest_payment) || 0,
+                        value: formatMoney(detailPaid.interest_payment || 0) ,
                         disabled: true,
                     },
                     {
@@ -676,7 +676,7 @@ class Main extends React.Component{
                         title: 'Denda',
                         type: 'textfield',
                         numeric: permissionPaidInstallment ? false : true,
-                        value: permissionPaidInstallment ? formatNumber(detailPaid.penalty) : detailPaid.penalty,
+                        value: permissionPaidInstallment ? formatMoney(parseFloat(detailPaid.penalty || 0)) : detailPaid.penalty,
                         function: this.onChangeTextFieldForm,
                         disabled: permissionPaidInstallment
                     },
@@ -684,7 +684,7 @@ class Main extends React.Component{
                         id: 'total',
                         title: 'Total harus Bayar',
                         type: 'textfield',
-                        value: formatNumber(parseFloat(detailPaid.penalty || 0) + parseFloat(detailPaid.interest_payment) + parseFloat(detailPaid.loan_payment)),
+                        value: formatMoney(Math.ceil(parseFloat(detailPaid.penalty || 0) + parseFloat(detailPaid.interest_payment) + parseFloat(detailPaid.loan_payment))),
                         function: this.onChangeTextFieldForm,
                         disabled: true
                     },
@@ -693,7 +693,7 @@ class Main extends React.Component{
                         title: 'Total Pembayaran',
                         type: 'textfield',
                         numeric: permissionPaidInstallment ? false : true,
-                        value: permissionPaidInstallment ? formatNumber(detailPaid.paid_amount) : detailPaid.paid_amount,
+                        value: permissionPaidInstallment ? formatMoney(Math.ceil(parseFloat(detailPaid.paid_amount || 0))) : detailPaid.paid_amount,
                         function: this.onChangeTextFieldForm,
                         disabled: permissionPaidInstallment
                     },

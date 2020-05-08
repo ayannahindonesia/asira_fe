@@ -310,10 +310,38 @@ class TableComponent extends React.Component {
               {this.props.errorMessage}
             </Grid>
 
+            {
+              this.props.advancedSearch &&
+              <Grid item sm={12} xs={12} style={{marginBottom:'5px'}}>
+                <Grid container style={{display:'flex', justifyContent:'flex-start'}}>
+                {
+                  this.props.advancedSearch.map((advancedSearchChild) => {
+                    return (
+                      <Grid item 
+                        key={advancedSearchChild.id}
+                        style={{marginRight:'5px', maxWidth:'185px'}}
+                      >
+                        <SearchBar
+                          id={advancedSearchChild.id}
+                          value={advancedSearchChild.value}
+                          placeholder={advancedSearchChild.label || 'Cari...'}
+                          onChange={(e) => advancedSearchChild.function(e, advancedSearchChild.id) || null} 
+                          disabled
+                          float={'left'}
+                        />
+                      </Grid>
+                      
+                    )
+                  }, this) 
+                }
+                </Grid>
+              
+              </Grid>
+            }
 
             {
               this.props.searchDate &&
-              <Grid item sm={12} xs={12} style={{marginBottom:'10px'}}>
+              <Grid item sm={this.props.advancedButton ? 6 : 12} xs={this.props.advancedButton ? 6 : 12} style={{marginBottom:'10px'}}>
                 <Grid container>
                   <Grid item sm={2} xs={12} style={{color:'#2076B8', fontSize:'16px'}}>
                     <b> {this.props.searchDate.label} </b>
