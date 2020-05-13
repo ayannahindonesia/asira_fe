@@ -55,13 +55,14 @@ const columnDataUser = [
 ]
 
 
-class dataLoan extends React.Component {
+class ClassDataLoan extends React.Component {
   _isMounted = false;
 
   state = {
     checkedData:[],
-    rows: [],
+    dataLoan: [],
     page: 1,
+    paging:true,
     rowsPerPage: 10,
     startDate: new Date() ,
     endDate: new Date(),
@@ -99,19 +100,22 @@ class dataLoan extends React.Component {
     const data = await getPermintaanPinjamanFunction(param)
     if(data){
       if(!data.error){
+        
         const dataLoan = (data.loanRequest && data.loanRequest.data) || [];
 
         for(const key in dataLoan) {
           dataLoan[key].status_string = 
+          dataLoan[key].payment_status === "failed"  ? 'Gagal Bayar' :
+          dataLoan[key].payment_status === "paid"  ? 'Telah Bayar' :
           dataLoan[key].status ==="approved" && dataLoan[key].disburse_status === 'confirmed' ? 'Telah Cair' :
           dataLoan[key].status ==="approved" ? "Diterima" : 
           dataLoan[key].status==="rejected" ? "Ditolak" : 
-          "Dalam Proses"
+          "Proses Pengajuan"
         }
-
+        
         this._isMounted && this.setState({
           loading:false,
-          rows:dataLoan,
+          dataLoan,
           total_data:(data.loanRequest && data.loanRequest.total_data) || 0,
         })        
       }else{
@@ -306,7 +310,7 @@ class dataLoan extends React.Component {
             paging={this.state.paging}
             loading={this.state.loading}
             columnData={columnDataUser}
-            data={this.state.rows}
+            data={this.state.dataLoan}
             page={this.state.page}
             rowsPerPage={this.state.rowsPerPage}
             totalData={this.state.total_data}
@@ -337,4 +341,4 @@ const mapStateToProp = (state)=>{
       id: state.user.id
   }
 }
-export default connect (mapStateToProp)(dataLoan) ;
+export default connect (mapStateToProp)(ClassDataLoan) ;
