@@ -143,7 +143,6 @@ class Main extends React.Component{
                 } else {                 
                     const rows = data.dataLender;
 
-                    
                     const pinjamanInfo = this.getPinjamanInfo(rows);
                     const detailInfo = this.getDetailInfo(rows);
                     const feesInfo = this.getFeesInfo(data.dataLender && data.dataLender.fees, rows && rows.loan_amount)

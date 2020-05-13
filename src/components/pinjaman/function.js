@@ -1,4 +1,4 @@
-import { formatNumber } from "../global/globalFunction";
+import {  handleFormatDate } from "../global/globalFunction";
 
 export function constructReportNameLoan (dataLoanNew, status, filter) {
 
@@ -23,6 +23,10 @@ export function constructHeaderDataLoan (dataLoanNew) {
     
     const headerCsv = [
         { label:'ID Pinjaman', key:'id'},
+        { label:'ID Agen', key:'borroweagent_idr_id'},
+        { label:'Nama Agen', key:'agent_name'},
+        { label:'Nama Kantor Agen', key:'agent_provider'},
+        { label:'ID Nasabah', key:'borrower_id'},
         { label:'Nama Nasabah', key:'borrower_name'},
         { label:'Rekening Bank', key:'bank_account'},
         { label:'Tujuan Pinjaman', key:'loan_intention'},
@@ -31,9 +35,18 @@ export function constructHeaderDataLoan (dataLoanNew) {
         { label:'Penghasilan Lain-lain', key:'other_income'},
         { label:'Sumber Penghasilan Lain-lain', key:'other_incomesource'},
         { label:'Lama Cicilan', key:'installment'},
+        { label:'ID Produk', key: 'product_id'},
+        { label:'Produk', key: 'product_name'},
+        { label:'Tipe Bunga', key: 'interest_type'},
         { label:'Bunga (%)', key:'interest'},
         { label:'Pinjaman Pokok', key:'loan_amount'},
         { label:'Cicilan', key:'layaway_plan'},
+        { label:'Status Pinjaman', key:'status'},
+        { label:'Catatan Pembayaran', key:'payment_note'},
+        { label:'Alasan Penolakan', key:'reject_reason'},
+        { label:'Tanggal Pengajuan', key:'created_at'},
+        { label:'Tanggal Penerimaan', key:'approval_date'},
+        { label:'Tanggal Pencairan', key:'disburse_date'},
     ]
 
     if(dataLoanNew) {
@@ -77,38 +90,43 @@ export function constructDataLoan (dataLoan, status) {
         
         for(const key in dataCsv) {
 
-          let feesData = {};
+            let feesData = {};
 
-          dataCsv[key].bank_account = `'${dataCsv[key].bank_account.toString()}`;
-          const loan_amount_float = parseInt(dataCsv[key].layaway_plan) !== 0 ? dataCsv[key].loan_amount.toString().split('.')[1] && dataCsv[key].loan_amount.toString().split('.')[1].substring(0,2) : '-';
-          dataCsv[key].loan_amount = parseInt(dataCsv[key].layaway_plan) !== 0 ? `${formatNumber(parseInt(dataCsv[key].loan_amount))},${loan_amount_float || '00'}` : '-';
-          const total_loan_float = dataCsv[key].total_loan.toString().split('.')[1] && dataCsv[key].total_loan.toString().split('.')[1].substring(0,2);
-          dataCsv[key].total_loan = parseInt(dataCsv[key].layaway_plan) !== 0 ? `${formatNumber(parseInt(dataCsv[key].total_loan))},${total_loan_float || '00'}` : '-';
-          const monthly_income_float = dataCsv[key].monthly_income.toString().split('.')[1] && dataCsv[key].monthly_income.toString().split('.')[1].substring(0,2);
-          dataCsv[key].monthly_income = parseInt(dataCsv[key].layaway_plan) !== 0 ? `${formatNumber(parseInt(dataCsv[key].monthly_income))},${monthly_income_float || '00'}` : '-';
-          const other_income_float = dataCsv[key].other_income.toString().split('.')[1] && dataCsv[key].other_income.toString().split('.')[1].substring(0,2);
-          dataCsv[key].other_income = parseInt(dataCsv[key].layaway_plan) !== 0 ? `${formatNumber(parseInt(dataCsv[key].other_income))},${other_income_float || '00'}` : '-';
-          const layaway_plan_float = dataCsv[key].layaway_plan.toString().split('.')[1] && dataCsv[key].layaway_plan.toString().split('.')[1].substring(0,2);
-          dataCsv[key].layaway_plan = parseInt(dataCsv[key].layaway_plan) !== 0 ? `${formatNumber(parseInt(dataCsv[key].layaway_plan))},${layaway_plan_float || '00'}` : '-';
+            dataCsv[key].status = 
+            dataCsv[key].payment_status === "failed"  ? 'Gagal Bayar' :
+            dataCsv[key].payment_status === "paid"  ? 'Telah Bayar' :
+            dataCsv[key].status ==="approved" && dataCsv[key].disburse_status === 'confirmed' ? 'Telah Cair' :
+            dataCsv[key].status ==="approved" ? "Diterima" : 
+            dataCsv[key].status==="rejected" ? "Ditolak" : 
+            "Proses Pengajuan"
 
-          const fees = dataCsv[key].fees;
+            dataCsv[key].created_at = `-${handleFormatDate(dataCsv[key].created_at)}-`;
+            dataCsv[key].approval_date = `-${handleFormatDate(dataCsv[key].approval_date)}-`;
+            dataCsv[key].disburse_date = `-${handleFormatDate(dataCsv[key].disburse_date)}-`;
 
-          for(const keyFee in fees) {
-            let desc = fees[keyFee] && fees[keyFee].description && fees[keyFee].description.toString().toLowerCase();
+            dataCsv[key].bank_account = `'${dataCsv[key].bank_account.toString()}`;
+            dataCsv[key].loan_amount = parseInt(dataCsv[key].loan_amount) !== 0 ? parseFloat(dataCsv[key].loan_amount) : 0;          
+            dataCsv[key].total_loan = parseInt(dataCsv[key].total_loan) !== 0 ? parseFloat(dataCsv[key].total_loan) : 0;
+            dataCsv[key].monthly_income = parseInt(dataCsv[key].monthly_income) !== 0 ? parseFloat(dataCsv[key].monthly_income) : 0; 
+            dataCsv[key].other_income = parseInt(dataCsv[key].other_income) !== 0 ? parseFloat(dataCsv[key].other_income) : 0;   
+            dataCsv[key].layaway_plan = parseInt(dataCsv[key].layaway_plan) !== 0 ? parseFloat(dataCsv[key].layaway_plan).toFixed(2) : 0;
 
-            while(desc && desc.includes(' ')) {
-              desc = desc.replace(' ','_')
+            const fees = dataCsv[key].fees;
+
+            for(const keyFee in fees) {
+                let desc = fees[keyFee] && fees[keyFee].description && fees[keyFee].description.toString().toLowerCase();
+
+                while(desc && desc.includes(' ')) {
+                desc = desc.replace(' ','_')
+                }
+                
+                if(!feesData[desc] && fees[keyFee] && fees[keyFee].amount) {
+                feesData[desc] = '';
+                feesData[desc] = desc && fees[keyFee] && fees[keyFee].amount && parseFloat(fees[keyFee].amount).toFixed(2)
+                }
             }
             
-            if(!feesData[desc] && fees[keyFee] && fees[keyFee].amount) {
-              feesData[desc] = '';
-              const fees_float = fees[keyFee] && fees[keyFee].amount && fees[keyFee].amount.toString().split('.')[1] && fees[keyFee].amount.toString().split('.')[1].substring(0,2);        
-              feesData[desc] = desc && fees[keyFee] && fees[keyFee].amount && `${formatNumber(parseInt(fees[keyFee].amount))},${fees_float || '00'}`
-              
-            }
-          }
-          
-          dataCsv[key].fees = feesData;
+            dataCsv[key].fees = feesData;
         }
 
         

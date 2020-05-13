@@ -48,6 +48,7 @@ class PinjamanList extends React.Component {
     checkedData:[],
     rows: [],
     page: 1,
+    paging:true,
     rowsPerPage: 10,
     startDate: new Date() ,
     endDate: new Date(),

@@ -30,7 +30,7 @@ export function handleFormatDate (dateBefore){
 
   let dateAfter = new Date(dateBeforeNow);
 
-  return dateAfter.getFullYear() > 1700 ? `${dateAfter.getDate()} ${getMonthNow(dateAfter.getMonth().toString())} ${dateAfter.getFullYear()}` : '-';
+  return dateAfter.getFullYear() > 1700 ? `${dateAfter.getDate()} ${getMonthNow(dateAfter.getMonth().toString())} ${dateAfter.getFullYear()}` : '';
 };
 
 export function getMonthNow(bulanNow) {
@@ -125,23 +125,27 @@ export function checkPermission(stringPermission) {
   const listPermission = (getProfileUser() && JSON.parse(getProfileUser()) && JSON.parse(getProfileUser()).permissions) || [];
   
   for(const key in listPermission) {
-    if(listPermission[key] && listPermission[key].toString().toLowerCase() === 'all') {
-      flag = true;
-      break;
-    }
-
-    if(typeof(stringPermission) === 'object') {
-      for(const keyPermit in stringPermission) {
-        if(stringPermission[keyPermit] && listPermission[key] && listPermission[key].toString().toLowerCase() === stringPermission[keyPermit].toString().toLowerCase()) {
-          flag = true;
-          break;
-        }
-      }
-    } else {
-      if(stringPermission && listPermission[key] && listPermission[key].toString().toLowerCase() === stringPermission.toString().toLowerCase()) {
+    const listPermissionChild = listPermission[key] && listPermission[key].toString().toLowerCase().split(' ');
+    
+    for(const keyChild in listPermissionChild) {
+      if(listPermissionChild[keyChild] && listPermissionChild[keyChild].toString().toLowerCase() === 'all') {
         flag = true;
         break;
-      } 
+      }
+
+      if(typeof(stringPermission) === 'object') {
+        for(const keyPermit in stringPermission) {
+          if(stringPermission[keyPermit] && listPermissionChild[keyChild] && listPermissionChild[keyChild].toString().toLowerCase() === stringPermission[keyPermit].toString().toLowerCase()) {
+            flag = true;
+            break;
+          }
+        }
+      } else {
+        if(stringPermission && listPermissionChild[keyChild] && listPermissionChild[keyChild].toString().toLowerCase() === stringPermission.toString().toLowerCase()) {
+          flag = true;
+          break;
+        } 
+      }
     }
     
     if(flag) {
