@@ -3,6 +3,7 @@ import { Redirect } from 'react-router-dom'
 import { getTokenClient, getProfileUser } from './token';
 import { Grid } from '@material-ui/core';
 import TitleBar from '../subComponent/TitleBar';
+import CookiesNotification from './cookiesCard';
 
 class Main extends React.Component{
     constructor(props) {
@@ -28,6 +29,7 @@ class Main extends React.Component{
         if(getTokenClient()){
             return(
                 <Grid container className="containerDetail">
+                    <CookiesNotification/>
 
                     <Grid item sm={12} xs={12} style={{maxHeight:50}}>
                         

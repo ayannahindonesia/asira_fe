@@ -11,6 +11,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import CookiesNotification from './cookiesCard'
 
  
 class Login extends React.Component{
@@ -156,12 +157,10 @@ class Login extends React.Component{
        
 
         return (
-            <Grid container>
-                <Grid item xs={12} sm={4}>
-                    
-                </Grid>
+            <Grid container style={{ display:'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <CookiesNotification />
 
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={4} sm={4}>
                     <Grid container className='loginContainer'>
                         <Grid item xs={12} sm={12} style={{textAlign:'center'}}>
                             <img src={require('./../../icons/LogoAsira.png')} alt='' style={{width:'60%'}} />
@@ -236,7 +235,7 @@ class Login extends React.Component{
                     
                 </Grid>
                 
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={12}>
                     
                 </Grid>
 
