@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/styles';
-import NativeSelect from '@material-ui/core/NativeSelect';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 import Input from '@material-ui/core/Input';
@@ -9,7 +8,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 
-const ITEM_HEIGHT = 48;
+const ITEM_HEIGHT = 40;
 const ITEM_PADDING_TOP = 8;
 
 const MenuProps = {
@@ -27,11 +26,11 @@ const styles = (theme) => ({
     display: 'flex',
     flexWrap: 'wrap', 
     marginTop: '1em',
+    padding:'none',
   },
 
   formControl: {
     minWidth: 120,
-    maxWidth: 300,
     display: 'flex',
     flexWrap: 'wrap',
     marginTop: '1em',
@@ -39,7 +38,17 @@ const styles = (theme) => ({
   chips: {
     display: 'flex',
     flexWrap: 'wrap',
+    marginRight: '10px',
   },
+
+  multipleDropDown: {
+    '&:hover': {
+      border:'1px solid rgba(0, 0, 0, 1)',
+    },
+    border:'1px solid rgba(0, 0, 0, .3)', 
+    borderRadius:'5px', 
+    padding:'8px 0px 8px 10px', 
+  }
 });
 
 class DropDown extends React.Component {
@@ -56,6 +65,19 @@ class DropDown extends React.Component {
         error: nextProps.error,
       });
     }
+  }
+
+  getColor = (id, dataValue) => {
+    let flag = false;
+
+    for(const key in dataValue) {
+      if(dataValue[key][this.props.id].toString().toLowerCase() === id.toString().toLowerCase() ) {
+        flag = true;
+        break;
+      }
+    }
+    
+    return flag ? '#d3d3d3' : 'white';
   }
 
 
@@ -75,25 +97,37 @@ class DropDown extends React.Component {
     
     if(multiple) {
       return (
-        <FormControl className={classes.formControl} error={!!this.state.error}>
+        <FormControl variant="outlined" className={classes.formControl} error={!!this.state.error}>
           <Select
-            style={{border: '1px solid #ced4da', paddingLeft:'5px'}}
+            variant='outlined'
             multiple
             fullWidth
             value={value}
             onChange={onChange}
-            input={<Input id="select-multiple-chip" />}
+            input={
+              <Input 
+                className={classes.multipleDropDown}
+                disableUnderline 
+                multiline
+                id="select-multiple-chip" 
+              />
+            }
             renderValue={value => (
               <div className={classes.chips}>
                 {value.map(dataChip => (
-                  <Chip key={dataChip[id]} label={dataChip[labelName]} className={classes.chip} />
+                  <Chip 
+                    key={dataChip[id]} 
+                    label={dataChip[labelName]} 
+                    className={classes.chip} 
+                    style={{marginRight: '10px', marginBottom: '5px'}}
+                  />
                 ))}
               </div>
             )}
             MenuProps={MenuProps}
           >
             {data.map(data => (
-              <MenuItem key={data[id]} value={data[id]} >
+              <MenuItem key={data[id]} value={data[id]} style={{backgroundColor: this.getColor(data[id], value)}}>
                 {data[labelName]}
               </MenuItem>
             ))}
@@ -104,17 +138,18 @@ class DropDown extends React.Component {
         </FormControl>
       ); 
     } else {
-      
       return (
-        <FormControl className={classes.selectField} error={!!this.state.error}>
-          <NativeSelect
+        <FormControl variant="outlined" className={classes.selectField} error={!!this.state.error}>
+          <Select
+            native
             value={value}
             onChange={onChange}
             fullWidth={fullWidth}
-            style={{border: '1px solid #ced4da', paddingLeft:'5px'}}
+            // labelWidth={labelWidth}
             inputProps={{
               name: label,
-              id: label,
+              id: 'outlined-age-native-simple',
+              style:{padding:'10px'}
             }}
             disabled={disabled}
           >
@@ -139,7 +174,7 @@ class DropDown extends React.Component {
                   </option>
                 );
               })} 
-          </NativeSelect>
+          </Select>
           {this.state.error && (
             <FormHelperText>{this.state.error}</FormHelperText>
           )}

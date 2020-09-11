@@ -20,10 +20,13 @@ export default function MaterialUIPickers(props) {
             format={props.format ? props.format :"MM/dd/yyyy HH:mm"}
             value={props.value}
             onChange={props.onChange}
+            fullWidth
+            inputVariant='outlined'
             KeyboardButtonProps={{
               'aria-label': 'change date',
             }}
             style={props.style?props.style:{}}
+            disabled={props.disabled}
           />
 
       </MuiPickersUtilsProvider>
@@ -38,11 +41,15 @@ export default function MaterialUIPickers(props) {
             format={props.format ? props.format :"MM/dd/yyyy"}
             value={props.value}
             onChange={props.onChange}
+            maxDate={'2200-01-01'}
+            fullWidth
+            inputVariant='outlined'
             KeyboardButtonProps={{
               'aria-label': 'change date',
             }}
             InputProps={props.InputProps}
-            style={props.style?props.style:{}}
+            disabled={props.disabled}
+            // style={props.style?props.style:{}}
           />
       </MuiPickersUtilsProvider>
     );
@@ -56,11 +63,12 @@ export default function MaterialUIPickers(props) {
           label={props.label ? props.label:""}
           value={props.value}
           onChange={props.onChange}
+          inputVariant='outlined'
           KeyboardButtonProps={{
             'aria-label': 'change time',
           }}
           style={props.style?props.style:{}}
-
+          disabled={props.disabled}
         />
     
     </MuiPickersUtilsProvider>

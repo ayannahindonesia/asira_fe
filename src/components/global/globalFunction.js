@@ -30,7 +30,7 @@ export function handleFormatDate (dateBefore){
 
   let dateAfter = new Date(dateBeforeNow);
 
-  return `${dateAfter.getDate()} ${getMonthNow(dateAfter.getMonth().toString())} ${dateAfter.getFullYear()}`;
+  return dateAfter.getFullYear() > 1700 ? `${dateAfter.getDate()} ${getMonthNow(dateAfter.getMonth().toString())} ${dateAfter.getFullYear()}` : '';
 };
 
 export function getMonthNow(bulanNow) {
@@ -83,6 +83,16 @@ export function isNumeric(value) {
 export function formatNumber(number,money) {
   number = (number && number.toString().trim()) || ''
   number = deleteSeparator(number,",")
+  let floatingNumber = false;
+  
+  if(number.includes('.')) {
+    const numberSplit = number.split('.')
+    floatingNumber = numberSplit[1];
+    number = numberSplit[0];
+    
+    floatingNumber = floatingNumber.substr(0,2);
+  }
+  
   let pjg = number.length
   if(!isNumeric(number)){
     pjg = pjg-1
@@ -106,23 +116,39 @@ export function formatNumber(number,money) {
     tmp += ',00';
   } 
 
-  return tmp.toString().length !== 0 ? tmp : '-'
+  return tmp.toString().length !== 0 ? `${tmp}${floatingNumber ? `,${floatingNumber}` : ''}` : '-'
 }
 
-export function checkPermission(stringPermission, stringPermissionSecond) {
+export function checkPermission(stringPermission) {
   let flag = false;
   
   const listPermission = (getProfileUser() && JSON.parse(getProfileUser()) && JSON.parse(getProfileUser()).permissions) || [];
-
+  
   for(const key in listPermission) {
-    if(stringPermission && listPermission[key] && listPermission[key].toString().toLowerCase() === stringPermission.toString().toLowerCase()) {
-      flag = true;
-      break;
-    } else if(stringPermissionSecond && listPermission[key] && listPermission[key].toString().toLowerCase() === stringPermissionSecond.toString().toLowerCase()) {
-      flag = true;
-      break;
-    } else if(listPermission[key] && listPermission[key].toString().toLowerCase() === 'all') {
-      flag = true;
+    const listPermissionChild = listPermission[key] && listPermission[key].toString().toLowerCase().split(' ');
+    
+    for(const keyChild in listPermissionChild) {
+      if(listPermissionChild[keyChild] && listPermissionChild[keyChild].toString().toLowerCase() === 'all') {
+        flag = true;
+        break;
+      }
+
+      if(typeof(stringPermission) === 'object') {
+        for(const keyPermit in stringPermission) {
+          if(stringPermission[keyPermit] && listPermissionChild[keyChild] && listPermissionChild[keyChild].toString().toLowerCase() === stringPermission[keyPermit].toString().toLowerCase()) {
+            flag = true;
+            break;
+          }
+        }
+      } else {
+        if(stringPermission && listPermissionChild[keyChild] && listPermissionChild[keyChild].toString().toLowerCase() === stringPermission.toString().toLowerCase()) {
+          flag = true;
+          break;
+        } 
+      }
+    }
+    
+    if(flag) {
       break;
     }
   }
@@ -135,7 +161,7 @@ export function checkPermission(stringPermission, stringPermissionSecond) {
 }
 
 export function decryptImage(textImage) {
-
+  
   if(textImage) {
     let crypto = require("crypto");
     const algorithm = 'aes-256-cfb';
@@ -149,35 +175,72 @@ export function decryptImage(textImage) {
     let imageUrl = decipher.update(textBytes, '', 'utf8');
     imageUrl += decipher.final('utf8');
 
-    return imageUrl;
+    return imageUrl.includes('http') ? imageUrl : textImage;
   }
 
   return '';
   
 }
 
-export function findAmount (dataFees, stringFee, amountPinjamanPokok, charPersen){
+export function formatMoney(number){ 
+  return number.toLocaleString('in-RP', {style : 'currency', currency: 'IDR'})
+}
+
+export function findAmount (dataFees, amountPinjamanPokok){
   let feeNew = '';
   
-  if(dataFees && stringFee && amountPinjamanPokok) {
-    for(const key in dataFees) {
-      if(dataFees[key].description.toString().toLowerCase() === stringFee.toString().toLowerCase()) {
-        if(dataFees[key].amount.toString().toLowerCase().includes('%')) {
-          if(charPersen) {
-            feeNew = parseFloat(dataFees[key].amount).toFixed(2);
-          } else {
-            feeNew = parseInt(dataFees[key].amount) * amountPinjamanPokok / 100;
-          }
-        } else {
-          if(charPersen) {
-            feeNew = parseFloat(parseInt(dataFees[key].amount)  * 100 / amountPinjamanPokok).toFixed(2);
-          } else {
-            feeNew = parseInt(dataFees[key].amount);
-          }
-        }
-      }
+  if(dataFees && amountPinjamanPokok) {
+    if(dataFees.toString().toLowerCase().includes('%')) {
+      feeNew = `${parseFloat(dataFees).toFixed(2)}%`;
+      feeNew += ` atau ${formatMoney(parseInt(dataFees) * amountPinjamanPokok / 100)}`;
+    } else {
+      feeNew = `${parseFloat(parseInt(dataFees)  * 100 / amountPinjamanPokok).toFixed(2)}%`;
+      feeNew += ` atau ${formatMoney(parseInt(dataFees))}`;
     }
   }
 
   return feeNew;
+}
+
+export function destructErrorMessage(objError) {
+  let errorMessage = 'Error : ';
+  let integerError = 0;
+
+  if(objError && objError.details) {
+    const errDetail = objError.details
+
+    for(const key in errDetail) {
+
+      if(errDetail[key] && errDetail[key].toString() && errDetail[key].toString().trim().length !== 0) {
+        if(integerError !== 0) {
+          errorMessage += ', ';
+        } 
+
+        errorMessage += `${key} ${errDetail[key]}`;
+
+        integerError += 1
+      }
+
+    }
+
+    if(integerError < 1) {
+      errorMessage += ` ${objError.message}`
+    }
+
+  } else if (objError && !objError.details && objError.message) {
+    errorMessage += ` ${objError.message}`
+  }
+
+  return errorMessage
+}
+
+export async function changeFileToBase64(file) { 
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = function(e) { 
+        resolve(e.target.result)
+    };
+    reader.onerror = error => resolve({error});
+  });
 }

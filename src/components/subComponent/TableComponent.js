@@ -7,10 +7,11 @@ import Loader from 'react-loader-spinner';
 import { formatNumber, handleFormatDate } from '../global/globalFunction';
 import CheckBox from '@material-ui/core/Checkbox';
 import './../../support/css/table.css'
-import { Grid, Button } from '@material-ui/core';
+import { Grid, Button, IconButton, Tooltip } from '@material-ui/core';
 import TitleBar from './TitleBar';
 import SearchBar from './SearchBar';
 import DatePicker from "react-date-picker";
+import PaymentIcon from '@material-ui/icons/Payment';
 import "react-datepicker/dist/react-datepicker.css";
 
 class TableComponent extends React.Component {
@@ -99,7 +100,7 @@ class TableComponent extends React.Component {
           <thead className="theadCustom">
             <tr >
               {
-                this.props.checkBoxAction &&
+                this.props.checkBoxAction && this.props.data && this.props.data.length !== 0 &&
                 <th className="text-center" scope="col" key={'CheckBox'} style={{padding:0}}>
                   <CheckBox
                     checked={this.onChecked('all', this.props.arrayCheckBox)}
@@ -109,15 +110,21 @@ class TableComponent extends React.Component {
                   />
                 </th>
               }
-              <th className="text-center" scope="col" key={'#'}>#</th>
+              
               {
                 this.props.columnData.map((data,index) => {
-                  return (
-                    <th className="text-center" scope="col" key={index}>{data.label}</th>
-                  );
+                  if(!data.hidden) {
+                    return (
+                      <th className="text-center" scope="col" key={index}>{data.label}</th>
+                    );
+                  }
+
+                  return null
+                  
                 },this) 
               }
-              <th className="text-center" scope="col">Action</th>
+              
+              { (this.props.permissionDetail || this.props.permissionEdit || this.props.permissionPaid) && <th className="text-center" scope="col">Action</th>}
             </tr>     
           </thead>
           <tbody>
@@ -125,7 +132,7 @@ class TableComponent extends React.Component {
               
               this.props.loading &&
               <tr  key="zz"  className="tBodycustom">
-                <td align="center" colSpan={this.props.columnData.length + 2}>
+                <td align="center" colSpan={12}>
                   <Loader 
                     type="Circles"
                     color="#00BFFF"
@@ -159,42 +166,57 @@ class TableComponent extends React.Component {
                         </td>
                       }
                     
-                      <td align="center">{this.props.paging ? (index+1 + this.props.rowsPerPage*(this.props.page-1)) : index+1}</td>
                       {
-                        this.props.columnData.map((dataRow, indexRow) => {                         
-                          return(
-                            <td align={dataRow.numeric ? "right" : "center"} key={indexRow}>
-                              {
-                                dataRow.type && dataRow.type === 'datetime' && handleFormatDate(dataTable[dataRow.id])
-                              }
-                              {
-                                dataRow.type && dataRow.type === 'button'  && this.checkConditionButton(dataTable, dataRow.conditions) &&
-                                <Button disableElevation
-                                  variant='contained'
-                                  style={{backgroundColor: '#2076B8', color:'white'}}
-                                  onClick={(e) => {dataRow.function(e, dataTable[this.props.id])}}
-                                  value={dataTable[this.props.id]}
-                                  disabled={!dataRow.permission}
-                                >
-                                  <b>{dataRow.id}</b>
-                                </Button>
-                              }
-                              {
-                                dataRow.type && dataRow.type === 'button' && !this.checkConditionButton(dataTable, dataRow.conditions) &&
-                                this.checkWordCondition(dataRow.id, dataTable)
-                              }
-                              {
-                                !dataRow.type &&  dataRow.numeric === true && formatNumber(dataTable[dataRow.id]) 
-                              }
-                              {
-                                !dataRow.type &&  !dataRow.numeric && dataTable[dataRow.id]
-                              }
-                              {
-                                !dataRow.type &&  !dataRow.numeric && !dataTable[dataRow.id] && '-'
-                              }
+                        this.props.columnData.map((dataRow, indexRow) => {   
+                          if(!dataRow.hidden) {
+                            
+                            if(!dataTable[dataRow.id] && (!dataRow.type || dataRow.type !== 'button')) {
+                              return <td align={dataRow.numeric ? "right" : "center"} key={indexRow}> {'-'} </td>
+                            } else if(dataRow.type && dataRow.type === 'datetime'){
+                              return <td align={dataRow.numeric ? "right" : "center"} key={indexRow}> {handleFormatDate(dataTable[dataRow.id])} </td>
+                            } else if(dataRow.type && dataRow.type === 'button'){ 
+                              return (
+                                <td align={dataRow.numeric ? "right" : "center"} key={indexRow}>
+                                  {
+                                    this.checkConditionButton(dataTable, dataRow.conditions) && dataRow.permission &&
+                                    <Button disableElevation
+                                      variant='contained'
+                                      style={{backgroundColor: '#2076B8', color:'white'}}
+                                      onClick={(e) => {dataRow.function(e, dataTable[this.props.id])}}
+                                      value={dataTable[this.props.id]}
+                                      disabled={!dataRow.permission}
+                                    >
+                                      <b>{dataRow.id}</b>
+                                    </Button>
+                                  }
+                                  {
+                                    this.checkConditionButton(dataTable, dataRow.conditions) && !dataRow.permission &&
+                                    '-'
+                                  }
+                                  {
+                                    !this.checkConditionButton(dataTable, dataRow.conditions) &&
+                                    this.checkWordCondition(dataRow.id, dataTable)
+                                  }
+                                </td>
+                              )
                               
-                            </td>
-                          );               
+                            }
+                              return(
+                                <td align={dataRow.numeric ? "right" : "center"} key={indexRow}>
+                                  
+                                  {
+                                    !dataRow.type &&  dataRow.numeric === true && formatNumber(dataTable[dataRow.id]) 
+                                  }
+                                  {
+                                    !dataRow.type &&  !dataRow.numeric ? dataTable[dataRow.id] : '-'
+                                  }
+                                  
+                                </td>
+                              ); 
+                            
+                             
+                          }                      
+                          return null      
                         }, this)
                       }
                       <td align="center">
@@ -208,6 +230,15 @@ class TableComponent extends React.Component {
                             <img src={require('./../../icons/mata.svg')} alt={<i className="fas fa-eye" style={{color:"#2076B8",fontSize:"18px"}}/>} style={{maxWidth:'30%'}}/>
                             
                           </Link>
+                        }
+
+                        {
+                          this.props.permissionPaid &&
+                          <Tooltip title="Detail & Bayar" style={{outline:'none'}}>
+                            <IconButton aria-label="paid" style={{color:'#2076B8', outline:'none', padding:'unset'}} onClick={(e) => this.props.permissionPaid(e, dataTable[this.props.id])} >
+                              <PaymentIcon />
+                            </IconButton>
+                          </Tooltip>
                         }
                       </td>
                     
@@ -257,16 +288,21 @@ class TableComponent extends React.Component {
   render() {
     return (
       <Grid container >
-        <Grid item sm={12} xs={12}>
-          <TitleBar
-            title={this.props.title}
-          />
-        </Grid>
+        {
+          this.props.title &&
+          <Grid item sm={12} xs={12}>
+
+            <TitleBar
+              title={this.props.title}
+            />
+          </Grid>
+        }
+        
 
         <Grid 
           item 
           sm={12} xs={12}
-          style={{padding:20, marginBottom:20, boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)', borderRadius:'15px'}}                                     
+          style={this.props.title && {padding:20, marginBottom:20, boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)', borderRadius:'15px'}}                                     
         >
           
           <Grid container>
@@ -274,10 +310,38 @@ class TableComponent extends React.Component {
               {this.props.errorMessage}
             </Grid>
 
+            {
+              this.props.advancedSearch &&
+              <Grid item sm={12} xs={12} style={{marginBottom:'5px'}}>
+                <Grid container style={{display:'flex', justifyContent:'flex-start'}}>
+                {
+                  this.props.advancedSearch.map((advancedSearchChild) => {
+                    return (
+                      <Grid item 
+                        key={advancedSearchChild.id}
+                        style={{marginRight:'5px', maxWidth:'185px'}}
+                      >
+                        <SearchBar
+                          id={advancedSearchChild.id}
+                          value={advancedSearchChild.value}
+                          placeholder={advancedSearchChild.label || 'Cari...'}
+                          onChange={(e) => advancedSearchChild.function(e, advancedSearchChild.id) || null} 
+                          disabled
+                          float={'left'}
+                        />
+                      </Grid>
+                      
+                    )
+                  }, this) 
+                }
+                </Grid>
+              
+              </Grid>
+            }
 
             {
               this.props.searchDate &&
-              <Grid item sm={12} xs={12} style={{marginBottom:'10px'}}>
+              <Grid item sm={this.props.advancedButton ? 6 : 12} xs={this.props.advancedButton ? 6 : 12} style={{marginBottom:'10px'}}>
                 <Grid container>
                   <Grid item sm={2} xs={12} style={{color:'#2076B8', fontSize:'16px'}}>
                     <b> {this.props.searchDate.label} </b>

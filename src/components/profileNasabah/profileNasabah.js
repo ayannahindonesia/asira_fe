@@ -33,7 +33,7 @@ const columnDataUser = [
   {
     id: 'loan_status',
     numeric: false,
-    label: 'Status Nasabah',
+    label: 'Status Pinjaman Nasabah',
   },
 ]
 
@@ -73,14 +73,16 @@ class profileNasabah extends React.Component {
       param.search_all = hasil
     }
     const data = await getAllProfileNasabahFunction(param)
-    const dataNasabah = data.borrowerList.data;
     
-    for (const key in dataNasabah){
-      dataNasabah[key].category = dataNasabah[key].category && dataNasabah[key].category==="account_executive"?"Account Executive" :dataNasabah[key].category === "agent"?"Agent":"Personal"
-      dataNasabah[key].loan_status = dataNasabah[key].loan_status && dataNasabah[key].loan_status==="active"?"Aktif" :"Tidak Aktif"
-   }
     if(data){
-      if(!data.error){
+      if(!data.error && data.borrowerList){
+        const dataNasabah = data.borrowerList && data.borrowerList.data;
+    
+        for (const key in dataNasabah){
+          dataNasabah[key].category = dataNasabah[key].category && dataNasabah[key].category==="account_executive"?"Account Executive" :dataNasabah[key].category === "agent"?"Agent":"Personal"
+          dataNasabah[key].loan_status = dataNasabah[key].loan_status && dataNasabah[key].loan_status==="active"?"Aktif" :"Tidak Aktif"
+        }
+
         this._isMounted && this.setState({loading:false,
           rows:dataNasabah,
           rowsPerPage:data.borrowerList.rows,
@@ -88,7 +90,7 @@ class profileNasabah extends React.Component {
           last_page:data.borrowerList.last_page,
           page:data.borrowerList.current_page})
       }else{
-        this._isMounted && this.setState({errorMessage:data.error})
+        this._isMounted && this.setState({errorMessage:data.error, loading:false})
       }
     }
   }

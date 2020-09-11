@@ -1,20 +1,34 @@
 import React from 'react'
 import './../../support/css/profilenasabahdetail.css'
+import Loading from '../subComponent/Loading';
 import { Redirect } from 'react-router-dom'
 import {connect} from 'react-redux'
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { getProfileNasabahDetailFunction } from './saga';
+import { getProfileNasabahDetailFunction, deleteProfileNasabahFunction } from './saga';
 import { getProfileUser,getTokenClient,getTokenAuth } from '../index/token'
-import BrokenLink from './../../support/img/default.png'
 import GridDetail from './../subComponent/GridDetail'
-import { handleFormatDate, decryptImage } from '../global/globalFunction';
-import Grid from '@material-ui/core/Grid';
+import { handleFormatDate, decryptImage, formatMoney } from '../global/globalFunction';
 import TitleBar from '../subComponent/TitleBar';
-
+import DialogComponent from './../subComponent/DialogComponent'
+import { Grid } from '@material-ui/core';
+import ActionComponent from '../subComponent/ActionComponent';
+import swal from 'sweetalert';
 
 class profileNasabahDetail extends React.Component{
     _isMounted = false
-    state={bankName:'',rows:[],modalKTP:false,modalNPWP:false,npwp:null,ktp:null,gambarKTP:null,gambarNPWP:null}
+    state={
+        bankName:'',
+        title:'',
+        message:'',
+        diKlik:false,
+        rows:[],
+        modalKTP:false,
+        modalNPWP:false,
+        npwp:null,
+        ktp:null,
+        gambarKTP:null,
+        gambarNPWP:null,
+        loading: true,
+    }
     
     componentDidMount(){
         this._isMounted=true
@@ -27,79 +41,107 @@ class profileNasabahDetail extends React.Component{
     componentWillUnmount(){
         this._isMounted=false
     }
-    formatMoney=(number)=>
-    { return number.toLocaleString('in-RP', {style : 'currency', currency: 'IDR'})}
 
     getDataDetail = async function (){
          const param = {id:this.props.match.params.id}
          const data = await getProfileNasabahDetailFunction(param)
-
+         
          if(data){
-
              if(!data.error){   
+                let flag = false
                 data.detailProfileNasabah.idcard_image = decryptImage(data.detailProfileNasabah.idcard_image);
-                data.detailProfileNasabah.taxid_image = decryptImage(data.detailProfileNasabah.taxid_image)
+                data.detailProfileNasabah.taxid_image = decryptImage(data.detailProfileNasabah.taxid_image);
 
-                this._isMounted && this.setState({rows:data.detailProfileNasabah,ktp:data.detailProfileNasabah.idcard_image.Int64,npwp:data.detailProfileNasabah.taxid_image.Int64})
+                if(data.detailProfileNasabah && data.detailProfileNasabah.image_profile) {
+                    data.detailProfileNasabah.image_profile = decryptImage(data.detailProfileNasabah.image_profile);
+                }
+                
+
+                this._isMounted && this.setState({rows:data.detailProfileNasabah,diKlik:flag, loading:false})
 
              }else{
-                this._isMounted && this.setState({errorMessage:data.error})
+                this._isMounted && this.setState({errorMessage:data.error, loading:false})
              }
          }  
     }
 
-    btnModalKTP =()=>{
-        this.setState({modalKTP:true})
+    handleDialog = (e) => {
+        let label = e.target.value
+        let title = '';
+        let message='';
+  
+        if(label.toLowerCase().includes('ktp')) {
+          title = 'KTP'
+          message = this.state.rows && this.state.rows.idcard_image
+  
+        } else if(label.toLowerCase().includes('npwp')) {
+          title = 'NPWP'
+          message = this.state.rows && this.state.rows.taxid_image
+  
+        }
+        else if(label.toLowerCase().includes('nasabah')) {
+          title = 'Foto Nasabah'
+          message = this.state.rows && this.state.rows.image_profile
+        }
+  
+        this.setState({
+          dialog: true,
+          message,
+          title,
+        })
     }
-    btnModalNPWP =()=>{
-        this.setState({modalNPWP:true})
-    
+
+    handleClose = () => {
+        this.setState({dialog: false})
     }
-    btnModalCancelKTP=()=>{
-        this.setState({modalKTP:false})
+
+    btnCancel = ()=>{
+        this.setState({diKlik:true})
     }
-    btnModalCancelNPWP=()=>{
-        this.setState({modalNPWP:false})
+
+    permissionApprove = () => {
+        if(this.state.rows && this.state.rows.status && this.state.rows.status === 'deleted') {
+            return true;
+        }
+        return false;
+    }
+
+    btnApproveReject = async function(e, status) {
+        this.setState({loading: true});
+        let param = {
+            id:this.props.match.params.id,
+            status 
+        };
+        const response = await deleteProfileNasabahFunction(param);
+
+        if(response && !response.error) {
+            swal("Success",`Data Nasabah dengan id ${this.props.match.params.id} Berhasil Dihapus`,"success")
+            this.setState({diKlik: true, loading: false})
+        } else {
+            this._isMounted && this.setState({errorMessage:response.error, loading:false})
+        }
     }
   
     render(){
-        if(getTokenAuth() && getTokenClient()){
+        if(this.state.diKlik){
+            if(this.permissionApprove()) {
+                return(
+                    <Redirect to='/profileDeleteNasabah'/>
+                )
+            }
+            return(
+                <Redirect to='/profileNasabah'/>
+            )
+        } else if (this.state.loading){
+            return(
+                <Loading
+                  title={'Nasabah - Detail'}
+                />
+            )
+        }else if(getTokenAuth() && getTokenClient()){
             return(
                 <Grid container className="containerDetail">
-                    {/* ------------------------------------------------------FOTO KTP------------------------------------------------------ */}
-
-                    <Modal isOpen={this.state.modalKTP} className={this.props.className}>
-                        <ModalHeader toggle={this.toggle}>KTP Detail</ModalHeader>
-                        <ModalBody>
-                            {this.state.ktp ===0 || this.state.gambarKTP === '' ?"Gambar KTP Tidak ada":
-                            <img width="100%" height="300px" alt="KTP" onError={(e)=>{
-                            e.target.attributes.getNamedItem("src").value = BrokenLink
-                            }} src={`${this.state.rows.idcard_image}`}></img>
-                        }
-                        </ModalBody>
-                        <ModalFooter>
-                        <Button disableElevation color="secondary" onClick={this.btnModalCancelKTP}><b>Close</b></Button>
-                        </ModalFooter>
-                    </Modal>
-
-
-                    {/* ------------------------------------------------------FOTO NPWP------------------------------------------------------ */}
-
-                    <Modal isOpen={this.state.modalNPWP} className={this.props.className}>
-                        <ModalHeader toggle={this.toggle}>NPWP Detail</ModalHeader>
-                        <ModalBody>
-                            {this.state.npwp ===0 || this.state.gambarNPWP === '' ?"Gambar NPWP Tidak ada":
-                            <img width="100%" height="300px" alt="NPWP" onError={(e)=>{
-                                e.target.attributes.getNamedItem("src").value = BrokenLink
-                            }} src={`${this.state.rows.taxid_image}`}></img>}
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button disableElevation color="secondary" onClick={this.btnModalCancelNPWP}><b>Close</b></Button>
-                        </ModalFooter>
-                    </Modal>
-                      
                     <Grid item sm={12} xs={12} style={{maxHeight:50}}>
-                        
                         <TitleBar
                             title={'Nasabah - Detail'}
                         />
@@ -112,6 +154,14 @@ class profileNasabahDetail extends React.Component{
                         style={{padding:10, marginBottom:20, boxShadow:'0px -3px 25px rgba(99,167,181,0.24)', WebkitBoxShadow:'0px -3px 25px rgba(99,167,181,0.24)', borderRadius:'15px'}}                  
                     >
                         <Grid container>
+                            <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                                <ActionComponent
+                                    permissionApprove={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'terima') : null}
+                                    permissionReject={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'tolak') : null}
+                                    onCancel={this.btnCancel}
+                                />
+                            </Grid> 
+
                             <Grid item sm={12} xs={12} style={{color:'red'}}>
                                 {this.state.errorMessage}
                             </Grid>
@@ -119,12 +169,17 @@ class profileNasabahDetail extends React.Component{
                             <Grid item sm={12} xs={12} style={{marginBottom:"10px"}}>
                                 <Grid container spacing={2}>
                                     <Grid item sm={2} xs={12} style={{marginBottom:'10px'}}>
-                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="KTP Detail" onClick={this.btnModalKTP}></input>                               
+                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto KTP" onClick={this.handleDialog}></input>                               
+                                    </Grid>
+                                    <Grid item sm={2} xs={12} style={{marginBottom:'10px'}}>
+                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto NPWP" onClick={this.handleDialog}></input>
                                     </Grid>
                                     <Grid item sm={2} xs={12} >
-                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="NPWP Detail" onClick={this.btnModalNPWP}></input>
+                                        <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto Nasabah" onClick={this.handleDialog}></input>
                                     </Grid>
-                                </Grid>                        
+                                   
+                                </Grid> 
+                                              
                             </Grid>
 
                             {/* =========================================FIRST================================ */}
@@ -241,8 +296,8 @@ class profileNasabahDetail extends React.Component{
                                     this.state.rows.employer_number 
                                     ],
                                     [
-                                        this.state.rows.monthly_income ? this.formatMoney(parseInt(this.state.rows.monthly_income)):0,
-                                        this.state.rows.other_income ? this.formatMoney(parseInt(this.state.rows.other_income)):0,
+                                        this.state.rows.monthly_income && parseInt(this.state.rows.monthly_income) !== 0 ? formatMoney(parseInt(this.state.rows.monthly_income)):'-',
+                                        this.state.rows.other_income && parseInt(this.state.rows.other_income) !== 0 ? formatMoney(parseInt(this.state.rows.other_income)):'-',
                                         this.state.rows.other_incomesource,
                                     ]
                                 ]}                 
@@ -268,14 +323,16 @@ class profileNasabahDetail extends React.Component{
                                 ]}                 
                             />
 
-                            <Button disableElevation
-                                variant='contained'
-                                style={{fontSize:'calc(10px + 0.3vw)', marginLeft: '10px', padding: '2px', width:'100px',backgroundColor:'#2076B8', color:'white', marginBottom:'2vh'}}
-                                onClick={()=> window.history.back()}
-                            >
-                                <b>KEMBALI</b>
-                            </Button>
-
+                          
+                            <div className="col-sm-12">
+                                <DialogComponent
+                                    title={this.state.title}
+                                    openDialog={this.state.dialog}
+                                    message={this.state.message}
+                                    type='image'
+                                    onClose={this.handleClose}
+                                />
+                            </div>
 
                         </Grid>
                         
@@ -284,8 +341,7 @@ class profileNasabahDetail extends React.Component{
                 </Grid>
             )
         
-        }
-        if(getTokenAuth()){
+        } else if(getTokenAuth()){
             return (
                 <Redirect to='/login' />
             )    
@@ -299,5 +355,5 @@ const mapStateToProp = (state)=>{
         
     }
     
-  }
+}
 export default connect(mapStateToProp) (profileNasabahDetail);

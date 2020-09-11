@@ -1,6 +1,6 @@
 import React from 'react'
 import { Redirect } from 'react-router-dom'
-import Loader from 'react-loader-spinner'
+import Loading from '../subComponent/Loading';
 import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
@@ -11,11 +11,11 @@ import { getTokenClient } from '../index/token';
 import GridDetail from '../subComponent/GridDetail';
 import { formatNumber, handleFormatDate, checkPermission, decryptImage } from '../global/globalFunction';
 import DialogComponent from './../subComponent/DialogComponent'
-import { TextField, Grid, Button } from '@material-ui/core';
+import { TextField, Grid } from '@material-ui/core';
 import swal from 'sweetalert';
 import TitleBar from '../subComponent/TitleBar';
 import './../../support/css/profilenasabahdetail.css'
-
+import ActionComponent from '../subComponent/ActionComponent';
 
 const styles = (theme) => ({
     container: {
@@ -82,7 +82,12 @@ class CalonNasabahDetail extends React.Component{
 
             dataUser.category = this.isCategoryExist(dataUser.category) ;
             dataUser.idcard_image = decryptImage(dataUser.idcard_image);
-            dataUser.taxid_image = decryptImage(dataUser.taxid_image)
+            dataUser.taxid_image = decryptImage(dataUser.taxid_image);
+
+            if(dataUser && dataUser.image_profile) {
+              dataUser.image_profile = decryptImage(dataUser.image_profile);
+            }
+
 
             if(dataUser && dataUser.bank_accountnumber && dataUser.bank_accountnumber.trim().length !== 0) {
               flag = true
@@ -122,6 +127,9 @@ class CalonNasabahDetail extends React.Component{
       } else if(label.toLowerCase().includes('npwp')) {
         title = 'NPWP'
         message = this.state.dataUser && this.state.dataUser.taxid_image
+      } else if(label.toLowerCase().includes('nasabah')) {
+        title = 'Foto Nasabah'
+        message = this.state.dataUser && this.state.dataUser.image_profile
       }
 
       this.setState({
@@ -151,7 +159,7 @@ class CalonNasabahDetail extends React.Component{
       } 
     }
 
-    permissionApproval = () => {
+    permissionApprove = () => {
       let flag = true;
 
       if(this.state.dataUser && this.state.dataUser.status && this.state.dataUser.status === 'reject') {
@@ -227,17 +235,10 @@ class CalonNasabahDetail extends React.Component{
         if(this.state.diKlik){
             return <Redirect to='/listCalonNasabah'/>            
         } else if (this.state.loading){
-          return  (
-            <div  key="zz">
-              <div align="center" colSpan={6}>
-                <Loader 
-                  type="Circles"
-                  color="#00BFFF"
-                  height="40"	
-                  width="40"
-                />   
-              </div>
-            </div>
+          return(
+            <Loading
+                title={'Calon Nasabah - Detail'}
+            />
           )
         } else if(getTokenClient()){
             return(
@@ -254,19 +255,38 @@ class CalonNasabahDetail extends React.Component{
                 >
 
                   <Grid container>
+                    <DialogComponent
+                      title={this.state.title}
+                      openDialog={this.state.dialog}
+                      message={this.state.message}
+                      type='image'
+                      onClose={this.handleClose}
+                    />
+
+                    <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
+                        <ActionComponent
+                          permissionApprove={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'terima') : null}
+                          permissionReject={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'tolak') : null}
+                          onCancel={this.btnCancel}
+                        />
+                    </Grid> 
 
                     <Grid item sm={12} xs={12} style={{color:'red'}}>
                       {this.state.errorMessage}
                     </Grid>
 
                     <Grid item sm={12} xs={12} style={{marginBottom:"10px"}}>
+                    
                       <Grid container spacing={2}>
                           <Grid item sm={2} xs={12} style={{marginBottom:'10px'}}>
-                              <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="KTP Detail" onClick={this.handleDialog}></input>                               
+                              <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto KTP" onClick={this.handleDialog}></input>                               
                           </Grid>
                           <Grid item sm={2} xs={12} >
-                              <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="NPWP Detail" onClick={this.handleDialog}></input>
+                              <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto NPWP" onClick={this.handleDialog}></input>
                           </Grid>
+                          <Grid item sm={2} xs={12} >
+                            <input className='buttonCustomAsira' type="button" style={{width:"100%"}} value="Foto Nasabah" onClick={this.handleDialog}></input>
+                        </Grid>
                       </Grid>                        
                     </Grid>
 
@@ -312,7 +332,7 @@ class CalonNasabahDetail extends React.Component{
                           this.state.dataUser.email
                         ],
                         [
-                          this.state.dataUser.birthday && handleFormatDate(this.state.dataUser.birthday),
+                          this.state.dataUser.birthday && new Date(this.state.dataUser.birthday).getFullYear() !== 1 ? handleFormatDate(this.state.dataUser.birthday) : '-',
                           this.state.dataUser.birthplace,
                           this.state.dataUser.last_education,
                           this.state.dataUser.mother_name,
@@ -421,56 +441,6 @@ class CalonNasabahDetail extends React.Component{
                     </Grid>
 
 
-                    <div className="col-sm-12">
-                      <DialogComponent
-                        title={this.state.title}
-                        openDialog={this.state.dialog}
-                        message={this.state.message}
-                        type='image'
-                        onClose={this.handleClose}
-                      />
-                    </div>
-
-                        
-                    <Grid container style={{marginBottom:'10px', marginTop:'10px', paddingLeft:'10px', fontSize:'calc(10px + 0.3vw)'}}>
-                        <Grid item xs={12} sm={12}>
-                            {
-                                this.permissionApproval() &&
-                                <Button disableElevation
-                                  variant='contained'
-                                  style={{marginRight:'10px',padding: '2px', width:'100px',backgroundColor:'rgb(32, 184, 137)', color:'white'}}
-                                  onClick={(e) => this.btnApproveReject(e, 'terima')}
-                                >
-                                  <b>Terima</b>
-                                </Button>
-                            }
-
-                            {
-                                this.permissionApproval() &&
-                                <Button disableElevation
-                                  variant='contained'
-                                  style={{marginRight:'10px',padding: '2px', width:'100px',backgroundColor:'rgb(238, 105, 105)', color:'white'}}
-                                  onClick={(e) => this.btnApproveReject(e, 'tolak')}
-                                >
-                                  <b>Tolak</b>
-                                </Button>
-                            }
-
-                            
-                            <Button disableElevation
-                                variant='contained'
-                                style={{padding: '2px', width:'100px',backgroundColor:'#2076B8', color:'white'}}
-                                onClick={this.btnCancel}
-                            >
-                                <b>Kembali</b>
-                            </Button>
-                            
-                            
-                        </Grid>
-
-                        
-                    </Grid>
-                    
                     
                  </Grid>
                 </Grid>
