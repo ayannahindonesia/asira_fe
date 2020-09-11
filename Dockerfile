@@ -13,9 +13,10 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
 RUN chown -R 1001:1001 /usr/src/app/ &&  chmod -R ug+rwx /usr/src/app/
 #RUN chown -R 1001:1001 /.config
-RUN chown -R 1001:1001 /usr/src/app/node_modules/
-RUN cd /usr/src/app/
-RUN ls -lrth
+#RUN chown -R 1001:1001 /usr/src/app/node_modules/
+#RUN cd /usr/src/app/src/
+#RUN ls -lrth
+
 
 USER 1001
 
@@ -23,9 +24,9 @@ USER 1001
 #RUN yarn
 
 # start app
-#CMD npm install\
-#&& npm start
-CMD npm start
+CMD npm install -g npm-check-updates\
+&& npm start
+
 
 EXPOSE 3000
 EXPOSE 35729
