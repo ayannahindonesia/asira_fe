@@ -39,6 +39,7 @@ WORKDIR /usr/src/app
 
 # add `/usr/src/app/node_modules/.bin` to $PATH
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
+RUN chmod -R 777 /usr/src/app
 
 # install and cache app dependencies
 #RUN yarn
