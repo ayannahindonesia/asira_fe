@@ -46,6 +46,7 @@ RUN yarn
 
 # start app
 CMD npm install\
-&& npm start
+&& npm audit fix
+CMD npm start
 
 EXPOSE 3001
