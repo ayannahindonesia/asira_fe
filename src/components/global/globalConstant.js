@@ -15,7 +15,13 @@ exports.dataMenu = [
                 label: 'Calon Nasabah List',
                 link: '/listCalonNasabah',
                 logo:'NasabahCalon.svg',
-            }
+            },
+            {
+                permission: 'lender_borrower_list',
+                label: 'Hapus Nasabah List',
+                link: '/profileDeleteNasabah',
+                logo:'NasabahList.svg',
+            },
         ]
     },
     {

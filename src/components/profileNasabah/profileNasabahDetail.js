@@ -3,7 +3,7 @@ import './../../support/css/profilenasabahdetail.css'
 import Loading from '../subComponent/Loading';
 import { Redirect } from 'react-router-dom'
 import {connect} from 'react-redux'
-import { getProfileNasabahDetailFunction } from './saga';
+import { getProfileNasabahDetailFunction, deleteProfileNasabahFunction } from './saga';
 import { getProfileUser,getTokenClient,getTokenAuth } from '../index/token'
 import GridDetail from './../subComponent/GridDetail'
 import { handleFormatDate, decryptImage, formatMoney } from '../global/globalFunction';
@@ -11,6 +11,7 @@ import TitleBar from '../subComponent/TitleBar';
 import DialogComponent from './../subComponent/DialogComponent'
 import { Grid } from '@material-ui/core';
 import ActionComponent from '../subComponent/ActionComponent';
+import swal from 'sweetalert';
 
 class profileNasabahDetail extends React.Component{
     _isMounted = false
@@ -97,17 +98,45 @@ class profileNasabahDetail extends React.Component{
     btnCancel = ()=>{
         this.setState({diKlik:true})
     }
+
+    permissionApprove = () => {
+        if(this.state.rows && this.state.rows.status && this.state.rows.status === 'deleted') {
+            return true;
+        }
+        return false;
+    }
+
+    btnApproveReject = async function(e, status) {
+        this.setState({loading: true});
+        let param = {
+            id:this.props.match.params.id,
+            status 
+        };
+        const response = await deleteProfileNasabahFunction(param);
+
+        if(response && !response.error) {
+            swal("Success",`Data Nasabah dengan id ${this.props.match.params.id} Berhasil Dihapus`,"success")
+            this.setState({diKlik: true, loading: false})
+        } else {
+            this._isMounted && this.setState({errorMessage:response.error, loading:false})
+        }
+    }
   
     render(){
         if(this.state.diKlik){
+            if(this.permissionApprove()) {
+                return(
+                    <Redirect to='/profileDeleteNasabah'/>
+                )
+            }
             return(
                 <Redirect to='/profileNasabah'/>
             )
         } else if (this.state.loading){
             return(
-              <Loading
-                  title={'Calon Nasabah - Detail'}
-              />
+                <Loading
+                  title={'Nasabah - Detail'}
+                />
             )
         }else if(getTokenAuth() && getTokenClient()){
             return(
@@ -127,6 +156,8 @@ class profileNasabahDetail extends React.Component{
                         <Grid container>
                             <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
                                 <ActionComponent
+                                    permissionApprove={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'terima') : null}
+                                    permissionReject={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'tolak') : null}
                                     onCancel={this.btnCancel}
                                 />
                             </Grid> 

@@ -5,7 +5,7 @@ import './../../support/css/pagination.css'
 import {getAllProfileNasabahFunction} from './saga'
 import 'moment/locale/id';
 import { getTokenClient,getTokenAuth } from '../index/token'
-import TableComponent from './../subComponent/TableComponent'
+import TableComponent from '../subComponent/TableComponent'
 import { checkPermission } from '../global/globalFunction';
 
 const columnDataUser = [
@@ -37,9 +37,9 @@ const columnDataUser = [
   },
 ]
 
-class profileNasabah extends React.Component {
-  
+class ProfileNasabahDelete extends React.Component {
   _isMounted = false
+
   state = {
     rows: [], 
     searchRows:'',
@@ -65,7 +65,8 @@ class profileNasabah extends React.Component {
   getProfileNasabah = async function(){
     const param ={
       rows:this.state.rowsPerPage,
-      page:this.state.page
+      page:this.state.page,
+      status:'deleted'
     }
     let hasil = this.state.searchRows
 
@@ -75,6 +76,7 @@ class profileNasabah extends React.Component {
     const data = await getAllProfileNasabahFunction(param)
     
     if(data){
+      
       if(!data.error && data.borrowerList){
         const dataNasabah = data.borrowerList && data.borrowerList.data;
     
@@ -89,7 +91,7 @@ class profileNasabah extends React.Component {
           total_data:data.borrowerList.total_data,
           last_page:data.borrowerList.last_page,
           page:data.borrowerList.current_page})
-      }else{
+      } else{
         this._isMounted && this.setState({errorMessage:data.error, loading:false})
       }
     }
@@ -120,7 +122,7 @@ class profileNasabah extends React.Component {
 
           < TableComponent
             id={"id"}
-            title={'Nasabah - List'}
+            title={'Permintaan Delete Nasabah - List'}
             search={
               {
                 value: this.state.searchRows,
@@ -151,7 +153,7 @@ class profileNasabah extends React.Component {
 
 const mapStateToProp = (state)=>{
   return{     
-      id: state.user.id
+    id: state.user.id
   }
 }
-export default connect (mapStateToProp)(profileNasabah) ;
+export default connect (mapStateToProp)(ProfileNasabahDelete) ;

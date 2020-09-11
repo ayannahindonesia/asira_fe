@@ -18,7 +18,8 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import PageNotFound from './../404'
 import Login from './../index/login'
 import Home from './../index/main'
-import Nasabah from './../profileNasabah/profileNasabah'
+import Nasabah from './../profileNasabah/profileNasabah';
+import DeleteNasabah from './../profileNasabah/profileNasabahDelete';
 import profileNasabahDetail from './../profileNasabah/profileNasabahDetail'
 import PermintaanPinjaman from '../pinjaman/permintaanPinjaman'
 import PermintaanPinjamanDetail from '../pinjaman/pinjamanDetail'
@@ -293,6 +294,7 @@ function ResponsiveDrawer(props) {
           <Switch> 
               <Route path='/' component={Home} exact></Route>
               { checkPermission('lender_borrower_list') && <Route path='/profileNasabah' component={Nasabah}></Route>}
+              { checkPermission('lender_borrower_list') && <Route path='/profileDeleteNasabah' component={DeleteNasabah}></Route>}
               { checkPermission('lender_borrower_list_detail') && <Route path="/profileNasabahDetail/:id" component={profileNasabahDetail}></Route>}
               { checkPermission('lender_loan_request_list') && <Route path="/permintaanPinjaman" component={PermintaanPinjaman}></Route>}
               { checkPermission('lender_loan_request_detail') && <Route path="/pinjamanDetail/:idLoan" component={PermintaanPinjamanDetail}></Route>}
