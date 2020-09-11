@@ -42,10 +42,10 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 RUN chmod -R 777 /usr/src/app
 
 # install and cache app dependencies
-#RUN yarn
+RUN yarn
 
 # start app
-#CMD npm install\
+CMD npm install\
 CMD npm start
 
 EXPOSE 3001
