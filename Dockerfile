@@ -16,7 +16,7 @@ RUN chown -R 1001:1001 /usr/src/app/ &&  chmod -R ug+rwx /usr/src/app/
 #RUN chown -R 1001:1001 /usr/src/app/node_modules/
 #RUN cd /usr/src/app/src/
 #RUN ls -lrth
-
+RUN chown -R 1001:0 /.npm
 
 USER 1001
 
@@ -24,8 +24,9 @@ USER 1001
 #RUN yarn
 
 # start app
-CMD npm install -g npm-check-updates\
-&& npm start
+CMD npm install -g npm-check-updates
+RUN chown -R 1001:0 /.npm
+CMD npm start
 
 
 EXPOSE 3000
