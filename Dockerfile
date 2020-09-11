@@ -12,6 +12,8 @@ WORKDIR /usr/src/app
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
 RUN chown -R 1001:1001 /usr/src/app/ &&  chmod -R ug+rwx /usr/src/app/
+RUN chown -R 1001:1001 /.config
+RUN chown -R 1001:1001 /usr/src/app/node_modules/
 
 USER 1001
 
