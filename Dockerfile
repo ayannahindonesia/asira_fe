@@ -16,7 +16,7 @@ RUN chown -R 1001:1001 /usr/src/app/ &&  chmod -R ug+rwx /usr/src/app/
 #RUN chown -R 1001:1001 /usr/src/app/node_modules/
 #RUN cd /usr/src/app/src/
 #RUN ls -lrth
-RUN chown -R 1001:0 /.npm
+#RUN chown -R 1001:0 /.npm
 
 USER 1001
 
