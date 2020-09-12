@@ -13,6 +13,7 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
 # install and cache app dependencies
 #RUN yarn
+RUN CI=true //NOTE
 RUN npm install
 RUN chmod -R 777 /usr/src/app/
 
