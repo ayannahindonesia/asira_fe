@@ -102,7 +102,7 @@ class profileNasabahDetail extends React.Component{
     permissionApprove = () => {
         if(
             this.state.rows && this.state.rows.status && this.state.rows.status === 'delete_request' &&
-            checkPermission('lender_delete_request_borrower')
+            checkPermission('lender_approve_reject_borrower_delete_request')
         ) {
             return true;
         }
