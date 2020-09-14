@@ -66,7 +66,7 @@ class ProfileNasabahDelete extends React.Component {
     const param ={
       rows:this.state.rowsPerPage,
       page:this.state.page,
-      status:'deleted'
+      status:'delete_request'
     }
     let hasil = this.state.searchRows
 

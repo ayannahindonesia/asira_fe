@@ -6,7 +6,7 @@ import {connect} from 'react-redux'
 import { getProfileNasabahDetailFunction, deleteProfileNasabahFunction } from './saga';
 import { getProfileUser,getTokenClient,getTokenAuth } from '../index/token'
 import GridDetail from './../subComponent/GridDetail'
-import { handleFormatDate, decryptImage, formatMoney } from '../global/globalFunction';
+import { handleFormatDate, decryptImage, formatMoney, checkPermission } from '../global/globalFunction';
 import TitleBar from '../subComponent/TitleBar';
 import DialogComponent from './../subComponent/DialogComponent'
 import { Grid } from '@material-ui/core';
@@ -100,7 +100,10 @@ class profileNasabahDetail extends React.Component{
     }
 
     permissionApprove = () => {
-        if(this.state.rows && this.state.rows.status && this.state.rows.status === 'deleted') {
+        if(
+            this.state.rows && this.state.rows.status && this.state.rows.status === 'delete_request' &&
+            checkPermission('lender_delete_request_borrower')
+        ) {
             return true;
         }
         return false;
@@ -124,7 +127,7 @@ class profileNasabahDetail extends React.Component{
   
     render(){
         if(this.state.diKlik){
-            if(this.permissionApprove()) {
+            if(this.state.rows.status && this.state.rows.status === 'delete_request') {
                 return(
                     <Redirect to='/profileDeleteNasabah'/>
                 )
@@ -156,8 +159,8 @@ class profileNasabahDetail extends React.Component{
                         <Grid container>
                             <Grid item xs={12} sm={12} style={{display:'flex', justifyContent:'flex-end'}}>
                                 <ActionComponent
-                                    permissionApprove={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'terima') : null}
-                                    permissionReject={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'tolak') : null}
+                                    permissionApprove={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'approve') : null}
+                                    permissionReject={this.permissionApprove() ? (e) => this.btnApproveReject(e, 'reject') : null}
                                     onCancel={this.btnCancel}
                                 />
                             </Grid> 

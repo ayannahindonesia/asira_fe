@@ -55,10 +55,9 @@ export async function deleteProfileNasabahFunction (param,next){
         const config = {
             headers: {'Authorization': "Bearer " + getTokenClient()}
           };
-          axios.patch(serverUrl+`lender/borrower_list/${param.id}/detail/${param.status}`,config)
+          axios.get(serverUrl+`lender/borrower_list/delete_request/${param.id}/${param.status}`,config)
           .then((res)=>{
-              param.detailProfileNasabah = res.data;
-              param.configUrl = res.data.config.url
+              param.detailProfileNasabah = res;
               if(next){
                   resolve(next(param))
               }else{
