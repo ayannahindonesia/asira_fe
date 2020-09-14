@@ -138,7 +138,11 @@ class profileNasabahDetail extends React.Component{
         } else if (this.state.loading){
             return(
                 <Loading
-                  title={'Nasabah - Detail'}
+                    title={
+                        this.state.rows && this.state.rows.status &&
+                        this.state.rows.status === 'delete_request' ? 
+                        'Request Delete Nasabah - Detail' : 'Nasabah - Detail'
+                    }
                 />
             )
         }else if(getTokenAuth() && getTokenClient()){
@@ -146,7 +150,11 @@ class profileNasabahDetail extends React.Component{
                 <Grid container className="containerDetail">
                     <Grid item sm={12} xs={12} style={{maxHeight:50}}>
                         <TitleBar
-                            title={'Nasabah - Detail'}
+                            title={
+                                this.state.rows && this.state.rows.status &&
+                                this.state.rows.status === 'delete_request' ? 
+                                'Request Delete Nasabah - Detail' : 'Nasabah - Detail'
+                            }
                         />
 
                     </Grid>
