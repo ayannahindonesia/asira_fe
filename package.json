@@ -11,7 +11,7 @@
     "axios": "^0.19.0",
     "base-64": "^0.1.0",
     "cors": "^2.8.5",
-    "date-and-time": "^0.8.1",
+    "date-and-time": "^0.14.2",
     "date-fns": "^2.0.0-beta.5",
     "es6-promise": "^4.2.8",
     "isomorphic-fetch": "^2.2.1",
